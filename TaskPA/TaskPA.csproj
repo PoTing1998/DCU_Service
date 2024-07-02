@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C014874F-8B4F-45C5-BA77-2BD01EEC9B7A}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>TaskPA</RootNamespace>
+    <AssemblyName>TaskPA</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Helper.cs" />
+    <Compile Include="ProcTaskPA.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ASILib\ASILib.csproj">
+      <Project>{5b6fc193-a36d-409e-8e9b-2c45fe574189}</Project>
+      <Name>ASILib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DCU_DB\DCU_DB.csproj">
+      <Project>{a6951f86-d11c-427e-b294-f3d4d34dffb3}</Project>
+      <Name>DCU_DB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DCU_Frame\DCU_Frame.csproj">
+      <Project>{0f2e5e11-5e76-4b5a-9a00-5d82dd33918b}</Project>
+      <Name>DCU_Frame</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DMD_DB\DMD_DB.csproj">
+      <Project>{26b445f9-2971-44b6-953a-8b9bf8205408}</Project>
+      <Name>DMD_DB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DMD_Frame\DMD_Frame.csproj">
+      <Project>{a169f312-d665-4361-9a74-edd9d2e807f8}</Project>
+      <Name>DMD_Frame</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PA_Frame\PA_Frame.csproj">
+      <Project>{a55f3208-0803-474d-b13d-c93abc96854e}</Project>
+      <Name>PA_Frame</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /y "$(ProjectDir)$(OutDir)*.*" "D:\ASI.Wanda.DMD.DCUService"</PostBuildEvent>
+  </PropertyGroup>
+</Project>
