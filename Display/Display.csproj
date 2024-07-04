@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataConversion.cs" />
     <Compile Include="DisplayMode\fullWindow.cs" />
     <Compile Include="DisplayMode\leftPlatformRightTime.cs" />
     <Compile Include="DisplayMode\leftPlatform.cs" />

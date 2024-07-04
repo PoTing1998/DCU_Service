@@ -53,15 +53,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataConversion.cs" />
     <Compile Include="Interface\IMessageFormatter.cs" />
-    <Compile Include="MessageFactory.cs" />
     <Compile Include="MSGHelper\MessageHelper.cs" />
     <Compile Include="MSGHelper\PacketHelper.cs" />
     <Compile Include="MSGHelper\SequenceHelper.cs" />
     <Compile Include="MSGHelper\StringModeHelper.cs" />
     <Compile Include="MSG\Packet.cs" />
-    <Compile Include="DUEnum.cs" />
     <Compile Include="MSG\Sequence.cs" />
     <Compile Include="MSG\Message.cs" />
     <Compile Include="MSG\StringMode.cs" />

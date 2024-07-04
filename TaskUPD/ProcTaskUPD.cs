@@ -213,19 +213,20 @@ namespace ASI.Wanda.DCU.TaskUPD
         private void ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
+            var taskUPDHelper = new ASI.Wanda.DMD.TaskUPD.TaskUPDHelper(mProcName, serial);
             switch (dataByteAtIndex8)
             {
                 case 0x81:
-                    SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
+                    taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
                     break;
                 case 0x82:
-                    SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
+                    taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
                     break; 
                 case 0x83:
-                    SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
+                    taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
                     break;
                 case 0x84:
-                    SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
+                    taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
                     break;
                 default:
                     ASI.Lib.Log.DebugLog.Log(mProcName + " ", $"{mProcName} unknown byte value at index 9: {dataByteAtIndex8.ToString("X2")}");
@@ -377,8 +378,6 @@ namespace ASI.Wanda.DCU.TaskUPD
             ASI.Lib.Log.ErrorLog.Log(mProcName, "從顯示器收到的訊息" + sHexString.ToString());//log紀錄 
         }
         #endregion
-
-
         /// <summary>
         /// 回傳給廣播
         /// </summary>
@@ -397,9 +396,7 @@ namespace ASI.Wanda.DCU.TaskUPD
             string sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(arrPacketByte, " ");
             //MSMQ 回傳給TaskPA
             SendToTaskPA(2, 10, sHexString);
-            
         }
-
         /// <summary> 
         /// 回傳給TaskPA  
         /// </summary>
@@ -430,190 +427,6 @@ namespace ASI.Wanda.DCU.TaskUPD
                 ASI.Lib.Log.ErrorLog.Log("TaskPA", ex);
             }
         }
-        /// <summary>
-        /// 一般訊息
-        /// </summary>
-        void SendMessageToDisplay()
-        {
-            //從資料庫撈取相對應的參數
-           var number =  Guid.NewGuid();
-            //取的 dmd_target 跟 dmd_pre_record_message
-
-
-
-            //取得各項參數
-            var processor = new PacketProcessor();
-
-            var textStringBody = new TextStringBody
-            {
-                RedColor = 0xFF,
-                GreenColor = 0xFF,
-                BlueColor = 0xFF,
-                StringText = "萬大線測試訊息"
-            };
-            var stringMessage = new StringMessage
-            {
-                StringMode = 0x2A, // TextMode (Static)   
-                StringBody = textStringBody
-            };
-            var fullWindowMessage = new FullWindow //Display version
-            {
-                MessageType = 0x71, // FullWindow message
-                MessageLevel = 0x04, //  level
-                MessageScroll = new ScrollInfo { ScrollMode = 0x61, ScrollSpeed = 05, PauseTime = 10 },
-                MessageContent = new List<StringMessage> { stringMessage }
-            };
-            var sequence1 = new Display.Sequence
-            {
-                SequenceNo = 1, 
-                Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
-                Messages = new List<IMessage> { fullWindowMessage }
-            };
-
-            var startCode = new byte[] { 0x55, 0xAA };
-            var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
-            var packet = processor.CreatePacket(startCode, new List<byte> { 0x23, 0x24 }, function.FunctionCode, new List<Sequence> { sequence1 });
-            var serializedData = processor.SerializePacket(packet);
-            ASI.Lib.Log.DebugLog.Log(mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
-
-            serial.Send(serializedData);
-        }
-        /// <summary>
-        /// 左測月台碼
-        /// </summary>
-        void SendMessageToDisplay2()
-        {
-            var processor = new PacketProcessor();
-
-            var textStringBody = new TextStringBody
-            {
-                RedColor = 0xFF,  
-                GreenColor = 0xFF,
-                BlueColor = 0xFF,
-                StringText = "萬大線"
-            };
-            var stringMessage = new StringMessage
-            {
-                StringMode = 0x2A, // TextMode (Static)
-                StringBody = textStringBody
-            };
-            var leftPlatform = new LeftPlatform //Display version
-            {
-                MessageType = 0x72, // FullWindow message
-                MessageLevel = 0x04, //  level 
-                MessageScroll = new ScrollInfo { ScrollMode = 0x61, ScrollSpeed = 07, PauseTime = 10 },
-                RedColor = 0xFF,
-                GreenColor = 0xFF,
-                BlueColor = 0xFF,
-                PhotoIndex = 1,
-
-                MessageContent = new List<StringMessage> { stringMessage }
-            };  
-            var sequence1 = new Display.Sequence
-            {
-                SequenceNo = 1, 
-                Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
-                Messages = new List<IMessage> { leftPlatform } 
-            };
-
-            var startCode = new byte[] { 0x55, 0xAA };
-            var function = new PassengerInfoHandler(); // Use PassengerInfoHandler  
-            var packet = processor.CreatePacket(startCode, new List<byte> { 0x01 }, function.FunctionCode, new List<Sequence> { sequence1 });
-            var serializedData = processor.SerializePacket(packet);
-            ASI.Lib.Log.DebugLog.Log(mProcName + "送到看板上", "Serialized display packet: " + BitConverter.ToString(serializedData)); 
-            serial.Send(serializedData); 
-        }
-
-        /// <summary>
-        /// 緊急訊息  
-        /// </summary> 
-        async void SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation) 
-        {
-            try
-            {
-                // 設定警示的視為固定內容  
-                var processor = new PacketProcessor();
-                var startCode = new byte[] { 0x55, 0xAA };  
-                var function = new EmergencyMessagePlaybackHandler(); 
-
-                // Send Chinese Message   
-                var sequence1 = CreateSequence(FireContentChinese, 1);  
-                var packet1 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
-                var serializedData1 = processor.SerializePacket(packet1);
-                ASI.Lib.Log.DebugLog.Log(mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData1));
-                
-                var  temp  =   serial.Send(serializedData1);
-                ASI.Lib.Log.DebugLog.Log( " 是否傳送成功 " + mProcName, temp.ToString());
-                // Send English Message 
-                var sequence2 = CreateSequence(FireContentEnglish, 2);
-                var packet2 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
-                var serializedData2 = processor.SerializePacket(packet2);
-                ASI.Lib.Log.DebugLog.Log(mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData2));
-
-                serial.Send(serializedData2);
-                // Optional delay and turn off if situation is 84  
-                if (situation == 84)
-                {                          
-                    await Task.Delay(10000); // 延遲五秒   
-                    var OffMode = new byte[] { 0x02 };
-                    var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
-                    var serializedDataOff = processor.SerializePacket(packetOff);
-                    ASI.Lib.Log.DebugLog.Log(mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
-                    serial.Send(serializedDataOff);
-                }
-                
-                // Optional delay and turn off if situation is 84 
-                if (situation == 84)
-                {
-                    await Task.Delay(10000); // 延遲十秒 
-                    var OffMode = new byte[] { 0x02 };
-                    var packetOff2 = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
-                    var serializedDataOff2 = processor.SerializePacket(packetOff2);
-                    ASI.Lib.Log.DebugLog.Log(mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff2));
-                    serial.Send(serializedDataOff2);   
-                }  
-            }
-            catch (Exception ex)
-            {
-                ASI.Lib.Log.ErrorLog.Log("SendMessageToUrgnt", ex);
-            }
-        }
-
-            Display.Sequence CreateSequence(string messageContent, int sequenceNo)
-            {
-                //緊急訊息為紅色
-                var textStringBody = new TextStringBody
-                {   
-                    RedColor = 0xFF,
-                    GreenColor = 0x00,
-                    BlueColor = 0x00,
-                    StringText = messageContent
-                };
-                var stringMessage = new StringMessage
-                {
-                    StringMode = 0x2A, // TextMode (Static)  
-                    StringBody = textStringBody
-                };
-                var urgentMessage = new Urgent // Display version
-                {
-                    UrgntMessageType = 0x79, // message    
-                    MessageType = 0x71, 
-                    MessageLevel = 0x01, // level
-                    MessageScroll = new ScrollInfo { ScrollMode = 0x64, ScrollSpeed = 07, PauseTime = 10 },
-                    Font = new FontSetting { Size = FontSize.Font16x16, Style = FontStyle.Ming }, 
-                    MessageContent = new List<StringMessage> { stringMessage }
-                };
-                return new Display.Sequence  
-                {
-                    SequenceNo = (byte)sequenceNo, 
-                    IsUrgent = true,
-                    UrgentCommand = 0x01,
-                    Font = new FontSetting { Size = FontSize.Font16x16, Style = FontStyle.Ming },
-                    Messages = new List<IMessage> { urgentMessage }
-                };
-            }
-
-
         #region Prviate Method 
         /// <summary>
         /// 計算LRC 
@@ -632,6 +445,5 @@ namespace ASI.Wanda.DCU.TaskUPD
             return xor;
         }
         #endregion
-
     }
 }

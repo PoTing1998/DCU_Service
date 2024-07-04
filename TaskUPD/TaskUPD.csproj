@@ -69,10 +69,6 @@
       <Project>{A169F312-D665-4361-9A74-EDD9D2E807F8}</Project>
       <Name>DMD_Frame</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DU_Frame\DU_Frame.csproj">
-      <Project>{8f4072cc-9311-4456-ae38-a8b41d9fb180}</Project>
-      <Name>DU_Frame</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PA_Frame\PA_Frame.csproj">
       <Project>{A55F3208-0803-474D-B13D-C93ABC96854E}</Project>
       <Name>PA_Frame</Name>

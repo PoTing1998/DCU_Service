@@ -46,6 +46,7 @@
     <Compile Include="ProcTaskSDU.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaskSduHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -60,8 +61,12 @@
       <Name>DCU_DB</Name>
     </ProjectReference>
     <ProjectReference Include="..\DCU_Frame\DCU_Frame.csproj">
-      <Project>{0F2E5E11-5E76-4B5A-9A00-5D82DD33918B}</Project>
+      <Project>{0f2e5e11-5e76-4b5a-9a00-5d82dd33918b}</Project>
       <Name>DCU_Frame</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Display\Display.csproj">
+      <Project>{fd5a072f-115d-4896-91d3-996ed55cdae3}</Project>
+      <Name>Display</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

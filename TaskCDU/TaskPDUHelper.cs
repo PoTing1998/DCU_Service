@@ -1,27 +1,31 @@
-﻿using ASI.Wanda.DCU.DB.Models.DMD;
-using ASI.Wanda.DCU.DB.Tables.DMD;
-
-using Display;
+﻿
 using Display.DisplayMode;
 using Display.Function;
+using Display;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using ASI.Wanda.DCU.DB.Models.DMD;
+using ASI.Wanda.DCU.DB.Tables.DMD;
 
-namespace ASI.Wanda.DMD.TaskUPD
+namespace ASI.Wanda.DCU.TaskPDU
 {
+
     class DeviceInfo
     {
         public string StationID { get; set; }
         public string AreaID { get; set; }
         public string DeviceID { get; set; }
     }
-    public class TaskUPDHelper
+    public  class TaskPDUHelper
     {
+
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
-        public TaskUPDHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
+        public TaskPDUHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
         {
             _mProcName = mProcName;
             _mSerial = serial;
@@ -59,15 +63,15 @@ namespace ASI.Wanda.DMD.TaskUPD
 
                 var textStringBody = new TextStringBody
                 {
-                    RedColor = fontColor[0],   
+                    RedColor = fontColor[0],
                     GreenColor = fontColor[1],
                     BlueColor = fontColor[2],
                     StringText = message_layout.message_content
-                }; 
+                };
                 var stringMessage = new StringMessage
                 {
                     StringMode = 0x2A, // TextMode (Static) 
-                    StringBody = textStringBody  
+                    StringBody = textStringBody
                 };
 
                 var fullWindowMessage = new FullWindow //Display version
@@ -145,8 +149,8 @@ namespace ASI.Wanda.DMD.TaskUPD
             _mSerial.Send(serializedData);
         }
         /// <summary>
-        /// 緊急訊息  
-        /// </summary> 
+        /// 緊急訊息   
+        /// </summary>    指定ID   0703 
         public async void SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
         {
             try
@@ -234,7 +238,9 @@ namespace ASI.Wanda.DMD.TaskUPD
             };
         }
 
-        #region  資料庫的操作
+
+        #region 資料庫的method
+
         /// <summary>
         /// 更新DMDPreRecordMessage資料表  
         /// </summary>
@@ -244,14 +250,18 @@ namespace ASI.Wanda.DMD.TaskUPD
             try
             {
                 return dmdPreRecordMessage.SelectMSGSetting(messageID);
+
             }
             catch (Exception ex)
             {
                 ASI.Lib.Log.ErrorLog.Log("Error ProcessMessage ProcessMessage", ex);
                 return null;
             }
-            #endregion
+ 
         }
+
+
+
         /// <summary>
         /// 色碼轉換成byte
         /// </summary>
@@ -261,7 +271,7 @@ namespace ASI.Wanda.DMD.TaskUPD
         {
             try
             {
-                return DataConversion.FromHex(ASI.Wanda.DCU.DB.Tables.System.sysConfig.PickColor(colorName));
+                return Display.DataConversion.FromHex(ASI.Wanda.DCU.DB.Tables.System.sysConfig.PickColor(colorName));
             }
             catch (Exception ex)
             {
@@ -270,9 +280,6 @@ namespace ASI.Wanda.DMD.TaskUPD
             }
         }
 
-
-
-
+        #endregion
     }
 }
-

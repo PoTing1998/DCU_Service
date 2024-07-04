@@ -67,10 +67,6 @@
       <Project>{fd5a072f-115d-4896-91d3-996ed55cdae3}</Project>
       <Name>Display</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DU_Frame\DU_Frame.csproj">
-      <Project>{8f4072cc-9311-4456-ae38-a8b41d9fb180}</Project>
-      <Name>DU_Frame</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

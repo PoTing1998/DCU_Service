@@ -4,9 +4,10 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-namespace DataConversion
+
+namespace Display
 {
-   static public class ByteConverter
+    static public class DataConversion
     {
 
         /// <summary>
@@ -487,5 +488,4 @@ namespace DataConversion
         #endregion
     }
     #endregion
-
 }

@@ -13,9 +13,6 @@ namespace ASI.Wanda.DCU.TaskSDU
 {
     public class ProcTaskSDU : ProcBase
     {
-
-
-
         #region constructor
         private DateTime LastHeartbeatTime = DateTime.Now; //最後連線時間
 
@@ -81,7 +78,7 @@ namespace ASI.Wanda.DCU.TaskSDU
             var iComPort = ConfigApp.Instance.GetConfigSetting("SDUComPort"); ;
             var iBaudrate = ConfigApp.Instance.GetConfigSetting("SDUBaudrate"); ;
             string connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
-            serial.ConnectionString = connectionString;
+            serial.ConnectionString = connectionString;    
             var result = serial.Open();
 
             try

@@ -1,31 +1,28 @@
 ﻿using ASI.Wanda.DCU.DB.Models.DMD;
 using ASI.Wanda.DCU.DB.Tables.DMD;
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Display;
 using Display.DisplayMode;
 using Display.Function;
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace ASI.Wanda.DMD.TaskUPD
+namespace ASI.Wanda.DMD.TaskSDU
 {
-    class DeviceInfo
-    {
-        public string StationID { get; set; }
-        public string AreaID { get; set; }
-        public string DeviceID { get; set; }
-    }
-    public class TaskUPDHelper
+    public class TaskSduHelper
     {
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
-        public TaskUPDHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
+
+        public TaskSduHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
         {
             _mProcName = mProcName;
             _mSerial = serial;
         }
+
         static DeviceInfo SplitStringToDeviceInfo(string input)
         {
             if (string.IsNullOrEmpty(input)) return null;
@@ -42,6 +39,7 @@ namespace ASI.Wanda.DMD.TaskUPD
             }
             return null;
         }
+
         #region  版型的操作
         public void SendMessageToDisplay(string target_du, string dbName1, string dbName2)
         {
@@ -59,15 +57,15 @@ namespace ASI.Wanda.DMD.TaskUPD
 
                 var textStringBody = new TextStringBody
                 {
-                    RedColor = fontColor[0],   
+                    RedColor = fontColor[0],
                     GreenColor = fontColor[1],
                     BlueColor = fontColor[2],
                     StringText = message_layout.message_content
-                }; 
+                };
                 var stringMessage = new StringMessage
                 {
                     StringMode = 0x2A, // TextMode (Static) 
-                    StringBody = textStringBody  
+                    StringBody = textStringBody
                 };
 
                 var fullWindowMessage = new FullWindow //Display version
@@ -244,6 +242,7 @@ namespace ASI.Wanda.DMD.TaskUPD
             try
             {
                 return dmdPreRecordMessage.SelectMSGSetting(messageID);
+
             }
             catch (Exception ex)
             {
@@ -271,8 +270,11 @@ namespace ASI.Wanda.DMD.TaskUPD
         }
 
 
-
-
+    }
+    class DeviceInfo
+    {
+        public string StationID { get; set; }
+        public string AreaID { get; set; }
+        public string DeviceID { get; set; }
     }
 }
-
