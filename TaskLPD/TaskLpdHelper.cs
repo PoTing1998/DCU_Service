@@ -1,4 +1,6 @@
 ﻿
+using ASI.Lib.Comm.SerialPort;
+
 using Display.DisplayMode;
 using Display.Function;
 using Display;
@@ -11,25 +13,30 @@ using System.Threading.Tasks;
 using ASI.Wanda.DCU.DB.Models.DMD;
 using ASI.Wanda.DCU.DB.Tables.DMD;
 
-namespace ASI.Wanda.DCU.TaskPDU
+namespace ASI.Wanda.DCU.TaskLPD
 {
-
     class DeviceInfo
     {
         public string StationID { get; set; }
         public string AreaID { get; set; }
         public string DeviceID { get; set; }
     }
-    public  class TaskPDUHelper 
+    public class TaskLpdHelper
     {
-
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
-        public TaskPDUHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
+
+        public TaskLpdHelper(string mProcName, SerialPortLib mSerial )
         {
             _mProcName = mProcName;
-            _mSerial = serial;
+            _mSerial = mSerial;
         }
+
+        /// <summary>
+        /// 將字串拆解
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         static DeviceInfo SplitStringToDeviceInfo(string input)
         {
             if (string.IsNullOrEmpty(input)) return null;
@@ -38,27 +45,28 @@ namespace ASI.Wanda.DCU.TaskPDU
             if (parts.Length == 3)
             {
                 return new DeviceInfo
-                { 
-                    StationID = parts[0],  
+                {
+                    StationID = parts[0],
                     AreaID = parts[1],
                     DeviceID = parts[2]
                 };
             }
             return null;
         }
-        #region  版型的操作    
+
+        #region 版型的操作
         public void SendMessageToDisplay(string target_du, string dbName1, string dbName2)
         {
-            var deviceInfo = SplitStringToDeviceInfo(target_du); 
+            var deviceInfo = SplitStringToDeviceInfo(target_du);
             if (deviceInfo != null)
             {
                 var message_id = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(deviceInfo.StationID, deviceInfo.AreaID, deviceInfo.DeviceID);
                 // Add your code here to use message_id   
-                var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id); 
+                var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id);
 
-                var fontColor = ProcessMEssageColor(message_layout.font_color); 
+                var fontColor = ProcessMEssageColor(message_layout.font_color);
                 //取得各項參數   
-                var processor = new PacketProcessor();   
+                var processor = new PacketProcessor();
 
                 var textStringBody = new TextStringBody
                 {
@@ -102,54 +110,8 @@ namespace ASI.Wanda.DCU.TaskPDU
             }
         }
         /// <summary>
-        /// 左測月台碼
-        /// </summary>
-        void SendMessageToDisplay2(string target_du, string dbName1, string dbName2)
-        {
-            var deviceInfo = SplitStringToDeviceInfo(target_du);
-            var processor = new PacketProcessor();
-
-            var textStringBody = new TextStringBody
-            {
-                RedColor = 0xFF,
-                GreenColor = 0xFF,
-                BlueColor = 0xFF,
-                StringText = "萬大線"
-            };
-            var stringMessage = new StringMessage
-            {
-                StringMode = 0x2A, // TextMode (Static)
-                StringBody = textStringBody
-            };
-            var leftPlatform = new LeftPlatform //Display version
-            {
-                MessageType = 0x72, // FullWindow message
-                MessageLevel = 0x04, //  level 
-                MessageScroll = new ScrollInfo { ScrollMode = 0x61, ScrollSpeed = 07, PauseTime = 10 },
-                RedColor = 0xFF,
-                GreenColor = 0xFF,
-                BlueColor = 0xFF,
-                PhotoIndex = 1,
-
-                MessageContent = new List<StringMessage> { stringMessage }
-            };
-            var sequence1 = new Display.Sequence
-            {
-                SequenceNo = 1,
-                Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
-                Messages = new List<IMessage> { leftPlatform }
-            };
-
-            var startCode = new byte[] { 0x55, 0xAA };
-            var function = new PassengerInfoHandler(); // Use PassengerInfoHandler  
-            var packet = processor.CreatePacket(startCode, new List<byte> { 0x01 }, function.FunctionCode, new List<Sequence> { sequence1 });
-            var serializedData = processor.SerializePacket(packet);
-            ASI.Lib.Log.DebugLog.Log(_mProcName + "送到看板上", "Serialized display packet: " + BitConverter.ToString(serializedData));
-            _mSerial.Send(serializedData);
-        }
-        /// <summary>
         /// 緊急訊息   
-        /// </summary>    指定ID   0703 
+        /// </summary>
         public async void SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
         {
             try
@@ -165,8 +127,8 @@ namespace ASI.Wanda.DCU.TaskPDU
                 var serializedData1 = processor.SerializePacket(packet1);
                 ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData1));
 
-                var temp = _mSerial.Send(serializedData1);
-                ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + _mProcName, temp.ToString());
+                var send = _mSerial.Send(serializedData1);
+                ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + _mProcName, send.ToString());
                 // Send English Message 
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
                 var packet2 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
@@ -177,7 +139,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                 // Optional delay and turn off if situation is 84  
                 if (situation == 84)
                 {
-                    await Task.Delay(10000); // 延遲五秒   
+                    await Task.Delay(10000); // 延遲十秒   
                     var OffMode = new byte[] { 0x02 };
                     var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
                     var serializedDataOff = processor.SerializePacket(packetOff);
@@ -202,9 +164,6 @@ namespace ASI.Wanda.DCU.TaskPDU
             }
         }
 
-
-
-        #endregion
         Display.Sequence CreateSequence(string messageContent, int sequenceNo)
         {
             var textStringBody = new TextStringBody
@@ -248,15 +207,14 @@ namespace ASI.Wanda.DCU.TaskPDU
         {
             try
             {
-                return dmdPreRecordMessage.SelectMSGSetting(messageID);
-
+                return dmdPreRecordMessage.SelectMSGSetting(messageID); 
             }
             catch (Exception ex)
             {
                 ASI.Lib.Log.ErrorLog.Log("Error ProcessMessage ProcessMessage", ex);
                 return null;
             }
- 
+
         }
 
 
@@ -278,6 +236,9 @@ namespace ASI.Wanda.DCU.TaskPDU
                 return null;
             }
         }
+
+        #endregion
+
 
         #endregion
     }

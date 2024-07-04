@@ -27,14 +27,15 @@ namespace ASI.Wanda.DCU.TaskUPD
         static int mSEQ = 0; // 計算累進發送端的次數  
         ASI.Lib.Comm.SerialPort.SerialPortLib serial = null;
 
+        /// <summary>
+        /// 讀取火災資料
+        /// </summary>
         static string sCheckChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressChinese");
         static string sCheckEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressEnglish");
         static string sEmergencyChinese = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyChinese");
         static string sEmergencyEnglish = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyEnglish");
-
         static string sClearedChinese = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedChinese");
         static string sClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
-
         static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
         #endregion
