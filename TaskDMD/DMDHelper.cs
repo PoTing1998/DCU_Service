@@ -47,35 +47,84 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             try  
             {
-                var MSGFromTaskDCU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dmdserverTaskUPD"));
+                var MSGFromTaskUPD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dmdserverTaskUPD"));
                 //組相對應的封包 
-                MSGFromTaskDCU.MessageType = msgType;
-                MSGFromTaskDCU.MessageID = msgID;
-                MSGFromTaskDCU.JsonData = jsonData;
-                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskDCU);
+                MSGFromTaskUPD.MessageType = msgType;
+                MSGFromTaskUPD.MessageID = msgID;
+                MSGFromTaskUPD.JsonData = jsonData;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskUPD); 
             }
             catch (System.Exception ex)
             {
                 ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex); 
             }
         }
+        public void SendToTaskPDU(int msgType, int msgID, string jsonData)
+        {
+            try
+            {
+                var MSGFromTaskPDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dmdserverTaskPDU"));
+                //組相對應的封包 
+                MSGFromTaskPDU.MessageType = msgType;
+                MSGFromTaskPDU.MessageID = msgID;
+                MSGFromTaskPDU.JsonData = jsonData;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPDU);
+            }
+            catch (System.Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex);
+            }
+        }
+        public void SendToTaskSDU(int msgType, int msgID, string jsonData)
+        {
+            try
+            {
+                var MSGFromTaskSDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dmdserverTaskSDU"));
+                //組相對應的封包 
+                MSGFromTaskSDU.MessageType = msgType;
+                MSGFromTaskSDU.MessageID = msgID;
+                MSGFromTaskSDU.JsonData = jsonData;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskSDU);
+            }
+            catch (System.Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex);
+            }
+        }
+        public void SendToTaskLPD(int msgType, int msgID, string jsonData)
+        {
+            try
+            {
+                var MSGFromTaskLPD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dmdserverTaskLPD"));
+                //組相對應的封包 
+                MSGFromTaskLPD.MessageType = msgType;
+                MSGFromTaskLPD.MessageID = msgID;
+                MSGFromTaskLPD.JsonData = jsonData;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskLPD);
+            }
+            catch (System.Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex);
+            }
+        }
+
+
         ///收到DCU回傳的資料後 傳給CMFT
         public void SendResponsePreRecordMSGToCMFT(ASI.Wanda.DMD.Message.Message DMDServerMessage, string stationId, bool isSuccess, List<string> failedTargets)
         {
             var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-            
         }
         #region 資料庫的操作
         /// <summary>
-        /// 更新dmd_playlist的資料庫      
+        /// 更新dmd_playlist的資料庫
         /// </summary>  
         public IEnumerable<ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList> UpdateDCUPlayList()
         {
             try
             {
-                ///抓取CMFT的資料表          
+                ///抓取CMFT的資料表 
                 var tempList = DMD.DB.Tables.DMD.dmdPlayList.SelectAll(); 
-                ///轉換過程   
+                ///轉換過程 
                 var convertedList = tempList 
                     .Select(item => new DB.Models.dmd_playlist
                     {

@@ -80,7 +80,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             //ping DMD Server
             if (this.mDMDServerConnStr != "")
             {
-                try
+                try 
                 {
 
                     if (mIsConnectedToDMD)
@@ -148,11 +148,11 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sLog = "";
             try
             {
-
-                string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
-                string sByteArray = ASI.Lib.Text.Parsing.String.BytesToHexString(DMDServerMessage.CompleteContent, "");
-                string sJsonData = DMDServerMessage.JsonContent;
-                string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
+     
+                var sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
+                var sByteArray = ASI.Lib.Text.Parsing.String.BytesToHexString(DMDServerMessage.CompleteContent, "");
+                var sJsonData = DMDServerMessage.JsonContent;
+                var sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
                 int iMsgID = DMDServerMessage.MessageID;
                 //建立DMDHelper並將 DMD_API的send 委派 
                 var DMDHelper = new TaskDMDHelper<ASI.Wanda.DMD.DMD_API>(mDMD_API, (api, message) => api.Send(message));
@@ -174,15 +174,17 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUPreRecordMessage();
                             DMDHelper.UpdataConfig();
-                            var Msg = new ASI.Wanda.DCU.Message.Message(
-                                ASI.Wanda.DCU.Message.Message.eMessageType.Command,
-                                01, ASI.Lib.Text.Parsing.Json.SerializeObject(DMDServerMessage.JsonContent));
-                                DMDHelper.SendToTaskUPD(2,1,Msg.JsonContent);
+                            var Msg = new ASI.Wanda.DCU.Message.Message( ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(DMDServerMessage.JsonContent));
+                            DMDHelper.SendToTaskUPD(2,1,Msg.JsonContent);
+                            DMDHelper.SendToTaskPDU(2, 1, Msg.JsonContent);
+                            DMDHelper.SendToTaskSDU(2, 1, Msg.JsonContent);
+                            DMDHelper.SendToTaskLPD(2, 1, Msg.JsonContent);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendInstantMsg: //即時訊息 
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUPreRecordMessage();
                             DMDHelper.UpdataConfig();
+                         
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendScheduleSetting: //訊息排程 
                             DMDHelper.HandleAckMessage(DMDServerMessage);
