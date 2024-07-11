@@ -159,7 +159,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
 
-                // Send Chinese Message   
+                // Send Chinese Message 
                 var sequence1 = CreateSequence(FireContentChinese, 1);
                 var packet1 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
                 var serializedData1 = processor.SerializePacket(packet1);
@@ -177,7 +177,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                 // Optional delay and turn off if situation is 84  
                 if (situation == 84)
                 {
-                    await Task.Delay(10000); // 延遲五秒   
+                    await Task.Delay(10000); // 延遲十秒   
                     var OffMode = new byte[] { 0x02 };
                     var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
                     var serializedDataOff = processor.SerializePacket(packetOff);
@@ -201,9 +201,6 @@ namespace ASI.Wanda.DCU.TaskPDU
                 ASI.Lib.Log.ErrorLog.Log("SendMessageToUrgnt", ex);
             }
         }
-
-
-
         #endregion
         Display.Sequence CreateSequence(string messageContent, int sequenceNo)
         {
@@ -239,7 +236,6 @@ namespace ASI.Wanda.DCU.TaskPDU
 
 
         #region 資料庫的method
-
         /// <summary>
         /// 更新DMDPreRecordMessage資料表  
         /// </summary>

@@ -19,26 +19,21 @@ namespace ASI.Wanda.DCU.TaskLPD
     {
 
         #region constructor
-        private DateTime LastHeartbeatTime = DateTime.Now; //最後連線時間
-
         static int mSEQ = 0; // 計算累進發送端的次數  
-        public string mDMDServerConnStr = "";
-        static private Dictionary<string, int> mServerIP = null;
         ASI.Lib.Comm.SerialPort.SerialPortLib serial = null;
         /// <summary>
-        /// 要傳送的port匯集起來
+        /// 讀取火災資料
         /// </summary>
-        List<ASI.Lib.Comm.SerialPort.SerialPortLib> mySerialPorts = new List<Lib.Comm.SerialPort.SerialPortLib>();
-
-        public static string Green = "#008000";
-        public static string Yellow = "#ffff00";
-        public static string Blue = "#0000FF";
-        public static string Red = "#FF0000";
-        public static string White = "#FFFFFF";
-        public static string Black = "#000000";
-        public static int PaltFormIndex = 1;
-        public static string sCheck = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgress");
+        static string sCheckChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressChinese");
+        static string sCheckEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressEnglish");
+        static string sEmergencyChinese = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyChinese");
+        static string sEmergencyEnglish = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyEnglish");
+        static string sClearedChinese = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedChinese");
+        static string sClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
+        static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
+        static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
         #endregion
+
         /// <summary>
         /// 處理DMD模組執行程序所收到之訊息 
         /// </summary>
@@ -57,7 +52,7 @@ namespace ASI.Wanda.DCU.TaskLPD
             {
                 return ProMsgFromDMD(pBody);
             }
-            else if (pLabel == MSGFromTaskPA.Label)
+            else if (pLabel == PA.ProcMsg.MSGFromTaskPA.Label)
             {
                 return ProMsgFromPA(pBody);
             }
@@ -75,35 +70,41 @@ namespace ASI.Wanda.DCU.TaskLPD
         {
             mTimerTick = 30;
             mProcName = "TaskLPD";
-            mServerIP = new Dictionary<string, int>();
-            string sDBIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
-            string sDBPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
-            string sDBName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
-            string sUserID = "postgres";
-            string sPassword = "postgres";
-            string sCurrentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
+            // 讀取配置設置
+            string dbIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
+            string dbPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
+            string dbName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
+            string currentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
+            var iComPort = ConfigApp.Instance.GetConfigSetting("LPDComPort");
+            var iBaudrate = ConfigApp.Instance.GetConfigSetting("LPDBaudrate");
 
-            ///serialPort的開啟 
+            ///serialPort的開啟  
+            string dbUserID = "postgres";
+            string dbPassword = "postgres";
+            var connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
+
             serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
-            serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
-            serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
-            var iComPort = ConfigApp.Instance.GetConfigSetting("LPDComPort"); ;
-            var iBaudrate = ConfigApp.Instance.GetConfigSetting("LPDBaudrate"); ;
-            string connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
             serial.ConnectionString = connectionString;
-            var result = serial.Open();
-
+            int result = -1; // Default to an error state
             try
             {
-                //"Server='localhost'; Port='5432'; Database='DCUDB'; User Id='postgres'; Password='postgres'"; 
-                if (!ASI.Wanda.DCU.DB.Manager.Initializer(sDBIP, sDBPort, sDBName, sUserID, sPassword, sCurrentUserID))
+                result = serial.Open();
+                if (result != 0)
                 {
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗!{sDBIP}:{sDBPort};userid={sUserID}");
+                    ASI.Lib.Log.ErrorLog.Log(mProcName, "Serial port open failed");
+                    return result; // Return immediately if the serial port failed to open
+                }
+                // 初始化資料庫連線
+                if (!ASI.Wanda.DCU.DB.Manager.Initializer(dbIP, dbPort, dbName, dbUserID, dbPassword, currentUserID))
+                {
+                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗! {dbIP}:{dbPort};userid={dbUserID}");
+                    return -1; // Return immediately if the database initialization failed
                 }
             }
             catch (System.Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗!{sDBIP}:{sDBPort};userid={sUserID};ex={ex}");
+                ASI.Lib.Log.ErrorLog.Log(mProcName, $"例外發生! {ex.Message}");
+                return -1; // Return immediately if any exception occurs
             }
 
             return base.StartTask(pComputer, pProcName);
@@ -114,39 +115,39 @@ namespace ASI.Wanda.DCU.TaskLPD
         /// </summary> 
         private int ProMsgFromDMD(string pMessage)
         {
-            DataBase oDB = null;
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new MSGFromTaskDMD(new MSGFrameBase(""));
+                ASI.Wanda.DMD.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DMD.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
                 if (mSGFromTaskDMD.UnPack(pMessage) > 0)
                 {
                     string sJsonData = mSGFromTaskDMD.JsonData;
                     string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDMD.JsonData, "JsonObjectName");
                     string sStationID = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDMD.JsonData, "StationID");
                     string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "SeatID");
-
-
-
+                    string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
+                    string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
+                    string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
 
                     Guid iMsgID = new Guid(mSGFromTaskDMD.MessageID.ToString());
                     ASI.Lib.Log.DebugLog.Log(mProcName, $"收到來自TaskDMD的訊息，SeatID:{sSeatID}；MsgID:{iMsgID}；JsonObjectName:{sJsonObjectName}");
-                    ASI.Wanda.DCU.DB.Tables.DCU.userControlPanel.emergency(1, 71);
+                    var taskUPDHelper = new ASI.Wanda.DCU.TaskLPD.TaskLPDHelper(mProcName, serial);
 
-
-                    //判斷收到的訊息ID
-                    //  SetFullWindowDisplay(ASI.Wanda.DCU.DB.Tables.DMD.dmdTrainMessage.Priority(iMsgID));
+                    if (dbName1 == "dmd_train_message")
+                    {
+                        ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_train_message");
+                    }
+                    else
+                    {
+                        //判斷收到的訊息ID  
+                        ASI.Lib.Log.DebugLog.Log(mProcName, "處理其他訊息");
+                    }
+                    //傳送到面板上
+                    taskUPDHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
                 }
             }
             catch (Exception ex)
             {
                 ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
-            }
-            finally
-            {
-                if (oDB != null)
-                {
-                    oDB.Close();
-                }
             }
             return -1;
         }
@@ -155,94 +156,176 @@ namespace ASI.Wanda.DCU.TaskLPD
         /// </summary>
         private int ProMsgFromPA(string pMessage)
         {
-            DataBase oDB = null;
             string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
-            //從config當中讀取火災內容 
-            var sCheck = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgress");
-            var sEmergency = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmly");
-            var sCleared = ConfigApp.Instance.GetConfigSetting("FireAlarmCleared");
-            var sDetector = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmed");
             try
             {
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ProcMsg.MSGFromTaskPA(new MSGFrameBase(""));
                 if (MSGFromTaskPA.UnPack(pMessage) > 0)
                 {
-                    string sJsonData = MSGFromTaskPA.JsonData;
-                    var dataBytes = ASI.Lib.Text.Parsing.String.HexStringToBytes(MSGFromTaskPA.JsonData, 2);
-                    var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
-                    //拆解封包 依照收到不同的情況的內容投射在顯示器畫面上
-
-
-                    //組成要送去看板的封包內容 
-                    //      SetFullWindowDisplay(1);
-
-
+                    var sJsonData = MSGFromTaskPA.JsonData;
+                    ASI.Lib.Log.DebugLog.Log(mProcName + " received a message from TaskPA ", sJsonData); // Log the received message 
+                    // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除  
+                    // 假設sJsonData已經是十六進位字串格式，直接解析
+                    var sHexString = sJsonData;
+                    byte[] dataBytes = HexStringToBytes(sJsonData);
+                    if (dataBytes.Length >= 10) // 確保有足夠長度的陣列   
+                    {
+                        ProcessDataBytes(dataBytes);
+                    }
+                    else
+                    {
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes length less than 10", sHexString);
+                    }
+                    if (dataBytes.Length >= 3)
+                    {
+                        ProcessByteAtIndex2(dataBytes, sRcvTime, sJsonData);
+                    }
+                    else
+                    {
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes length less than 3", sJsonData);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
-            }
-            finally
-            {
-                if (oDB != null)
-                {
-                    oDB.Close();
-                }
+                ASI.Lib.Log.ErrorLog.Log(mProcName, ex); // 記錄例外情況 
             }
 
             return -1;
         }
-
-
-        #region serialport
-        void SerialPort_DisconnectedEvent(string source) //斷線處理  
+        private void ProcessDataBytes(byte[] dataBytes)
         {
+            byte dataByteAtIndex8 = dataBytes[8];
+            var taskUPDHelper = new ASI.Wanda.DCU.TaskLPD.TaskLPDHelper(mProcName, serial);
+            switch (dataByteAtIndex8)
+            {
+                case 0x81:
+                    taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
+                    break;
+                case 0x82:
+                    taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
+                    break;
+                case 0x83:
+                    taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
+                    break;
+                case 0x84:
+                    taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
+                    break;
+                default:
+                    ASI.Lib.Log.DebugLog.Log(mProcName + " ", $"{mProcName} unknown byte value at index 9: {dataByteAtIndex8.ToString("X2")}");
+                    break;
+            }
+        }
+        private void ProcessByteAtIndex2(byte[] dataBytes, string sRcvTime, string sJsonData)
+        {
+            byte dataByte2 = dataBytes[2];
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} dataByte2: ", dataByte2.ToString("X2"));
+
+            switch (dataByte2)
+            {
+                case 0x01:
+                    HandleCase01(dataBytes, sRcvTime, sJsonData);
+                    break;
+                case 0x06:
+                    ASI.Lib.Log.DebugLog.Log($"{mProcName} received a correct message from TaskPA", sJsonData);
+                    break;
+                case 0x15:
+                    HandleCase15(dataBytes, sRcvTime, sJsonData);
+                    break;
+                default:
+                    ASI.Lib.Log.DebugLog.Log($"{mProcName} received an unknown error message from PA", sJsonData);
+                    break;
+            }
+        }
+        private void HandleCase01(byte[] dataBytes, string sRcvTime, string sJsonData)
+        {
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} processing 0x01 case", sJsonData);
+            dataBytes[2] = 0x06;
+            Array.Resize(ref dataBytes, dataBytes.Length - 1); // Remove the last byte
+            byte newLRC = CalculateLRC(dataBytes);
+            Array.Resize(ref dataBytes, dataBytes.Length + 1); // Add a byte back
+            dataBytes[dataBytes.Length - 1] = newLRC;
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} replied to TaskPA message at {sRcvTime}", sJsonData);
+
+        }
+
+        private void HandleCase15(byte[] dataBytes, string sRcvTime, string sJsonData)
+        {
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} processing 0x15 case", sJsonData);
+            string errorLog;
+            switch (dataBytes[4])
+            {
+                case 0x01:
+                    errorLog = "Indicates packet data length error";
+                    break;
+                case 0x02:
+                    errorLog = "Indicates LRC error";
+                    break;
+                case 0x03:
+                    errorLog = "Indicates other errors";
+                    break;
+                default:
+                    errorLog = "Indicates unknown error";
+                    break;
+            }
+
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} received an error message from TaskPA: {errorLog} at {sRcvTime}", sJsonData);
+        }
+
+
+        /// <summary>
+        /// Convert a hexadecimal string to a byte array.
+        /// </summary>
+        /// <param name="hex">The hexadecimal string to convert.</param>
+        /// <returns>A byte array representing the hexadecimal string.</returns>
+        public static byte[] HexStringToBytes(string hex)
+        {
+            var mProcName = "HexStringToBytes";
             try
             {
-                serial.Close();
-                serial = null;
-                serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
-                serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
-                serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
+                // 移除所有空格和無效字符
+                hex = hex.Replace(" ", "").Replace("\"", "").ToUpper();
+
+                // 打印原始的十六進位字串
+                ASI.Lib.Log.DebugLog.Log(mProcName, "HexStringToBytes 轉換前的字串: " + hex);
+
+                if (hex.Length % 2 != 0)
+                {
+                    throw new ArgumentException("十六進位字串的長度必須是偶數");
+                }
+                // 確保所有字符都是有效的十六進位字符
+                foreach (char c in hex)
+                {
+                    if (!Uri.IsHexDigit(c))
+                    {
+                        throw new ArgumentException($"十六進位字串包含無效字符: {c}");
+                    }
+                }
+
+                // 創建一個字節陣列，長度為字串長度的一半
+                byte[] bytes = new byte[hex.Length / 2];
+
+                // 循環遍歷十六進位字串，將每對十六進位字符轉換為一個字節
+                for (int i = 0; i < hex.Length; i += 2)
+                {
+                    bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+                }
+
+                return bytes;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, "斷線處理錯誤");
+                ASI.Lib.Log.ErrorLog.Log(mProcName, "HexStringToBytes 轉換錯誤: " + ex.ToString());
+                return null;
             }
         }
 
-        void SerialPort_ReceivedEvent(byte[] dataBytes, string source) //顯示器的狀態顯示 只能限制一個ID
-        {
-            string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
-            string str = "";
-            foreach (byte b in dataBytes)
-            {
-                str += Convert.ToString(b, 16).ToUpper().PadLeft(2, '0') + " ";
-            }
-            var text = string.Format("{0} \r\n收到收包內容 {1} \r\n", sRcvTime, str);
-            var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
-            if (dataBytes.Length >= 3 && dataBytes[4] == 0x00)
-            {
-                ASI.Lib.Log.DebugLog.Log(mProcName, "顯示器的狀態收到的訊息" + sHexString.ToString());  //處理顯示器回報的狀態
-            }
-            else if (dataBytes[4] != 0x00)
-            {
-                if (dataBytes[4] == 0x01) { ASI.Lib.Log.ErrorLog.Log(mProcName, "曾經有通訊不良"); }
-                else if (dataBytes[4] == 0x02) { ASI.Lib.Log.ErrorLog.Log(mProcName, "處於關機狀態 "); }
-                else if (dataBytes[4] == 0x04) { ASI.Lib.Log.ErrorLog.Log(mProcName, "通訊逾時"); }
-                else if (dataBytes[4] == 0x07) { ASI.Lib.Log.ErrorLog.Log(mProcName, " 1/2/4 多重組合 "); }
-            }
-            ASI.Lib.Log.ErrorLog.Log(mProcName, "從顯示器收到的訊息" + sHexString.ToString());//log紀錄 
-        }
-
-        #endregion
         /// <summary>
         /// 計算LRC
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public byte calculateLRC(byte[] text)
+        public byte CalculateLRC(byte[] text)
         {
             byte xor = 0;
             // if no data then done  

@@ -20,7 +20,7 @@ namespace ASI.Wanda.DCU.TaskPA
         /// <param name="msgType"></param>   
         /// <param name="msgID"></param>    
         /// <param name="jsonData"></param> 
-        static public void SendToTaskDMD(int msgType, int msgID, string ContentDataBytes)
+        static public void SendToTaskUPD(int msgType, int msgID, string ContentDataBytes)
         {
             try
             {
@@ -29,6 +29,90 @@ namespace ASI.Wanda.DCU.TaskPA
                 MSGFromTaskPA.MessageID = msgID;
                 MSGFromTaskPA.JsonData = ContentDataBytes;
                 ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPA); 
+            }
+            catch (System.Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("TaskPA", ex);
+            }
+        }
+        /// <summary> 
+        /// 將PA的資料 傳給SDU看板 
+        /// </summary>
+        /// <param name="msgType"></param>   
+        /// <param name="msgID"></param>    
+        /// <param name="jsonData"></param> 
+        static public void SendToTaskSDU(int msgType, int msgID, string ContentDataBytes)
+        {
+            try
+            {
+                ASI.Wanda.DMD.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DMD.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskSDU"));
+                MSGFromTaskPA.MessageType = msgType;
+                MSGFromTaskPA.MessageID = msgID;
+                MSGFromTaskPA.JsonData = ContentDataBytes;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPA);
+            }
+            catch (System.Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("TaskPA", ex);
+            }
+        }
+        /// <summary> 
+        /// 將PA的資料 傳給LPD看板 
+        /// </summary>
+        /// <param name="msgType"></param>   
+        /// <param name="msgID"></param>    
+        /// <param name="jsonData"></param> 
+        static public void SendToTaskPDU(int msgType, int msgID, string ContentDataBytes)
+        {
+            try
+            {
+                ASI.Wanda.DMD.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DMD.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskLPD"));
+                MSGFromTaskPA.MessageType = msgType;
+                MSGFromTaskPA.MessageID = msgID;
+                MSGFromTaskPA.JsonData = ContentDataBytes;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPA);
+            }
+            catch (System.Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("TaskPA", ex);
+            }
+        }
+        /// <summary> 
+        /// 將PA的資料 傳給LPD看板 
+        /// </summary>
+        /// <param name="msgType"></param>   
+        /// <param name="msgID"></param>    
+        /// <param name="jsonData"></param> 
+        static public void SendToTaskLPD(int msgType, int msgID, string ContentDataBytes)
+        {
+            try
+            {
+                ASI.Wanda.DMD.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DMD.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskLPD"));
+                MSGFromTaskPA.MessageType = msgType;
+                MSGFromTaskPA.MessageID = msgID;
+                MSGFromTaskPA.JsonData = ContentDataBytes;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPA);
+            }
+            catch (System.Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("TaskPA", ex);
+            }
+        }
+        /// <summary> 
+        /// 將PA的資料 傳給UPD看板 
+        /// </summary>
+        /// <param name="msgType"></param>   
+        /// <param name="msgID"></param>    
+        /// <param name="jsonData"></param> 
+        static public void SendToTaskDMD(int msgType, int msgID, string ContentDataBytes)
+        {
+            try
+            {
+                ASI.Wanda.DMD.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DMD.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskUPD"));
+                MSGFromTaskPA.MessageType = msgType;
+                MSGFromTaskPA.MessageID = msgID;
+                MSGFromTaskPA.JsonData = ContentDataBytes;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPA);
             }
             catch (System.Exception ex)
             {

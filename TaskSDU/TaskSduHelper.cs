@@ -12,12 +12,12 @@ using Display.Function;
 
 namespace ASI.Wanda.DMD.TaskSDU
 {
-    public class TaskSduHelper
+    public class TaskSDUHelper
     {
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
 
-        public TaskSduHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
+        public TaskSDUHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
         {
             _mProcName = mProcName;
             _mSerial = serial;

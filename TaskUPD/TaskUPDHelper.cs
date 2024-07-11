@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ASI.Wanda.DMD.TaskUPD
+namespace ASI.Wanda.DCU.TaskUPD
 {
     class DeviceInfo
     {
@@ -43,64 +43,90 @@ namespace ASI.Wanda.DMD.TaskUPD
             return null;
         }
         #region  版型的操作
+        /// <summary>
+        /// 一般版型控制
+        /// </summary>
+        /// <param name="target_du"></param>
+        /// <param name="dbName1"></param>
+        /// <param name="dbName2"></param>
         public void SendMessageToDisplay(string target_du, string dbName1, string dbName2)
         {
+            ///判斷使否有這個裝置
             var deviceInfo = SplitStringToDeviceInfo(target_du);
+
+            //依照 dbName 判斷要讀取哪個資料庫
+
+          
             if (deviceInfo != null)
             {
+                dynamic message_layout = null;
                 var message_id = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(deviceInfo.StationID, deviceInfo.AreaID, deviceInfo.DeviceID);
-                // Add your code here to use message_id
-
-                var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id);
-
-                var fontColor = ProcessMEssageColor(message_layout.font_color);
-                //取得各項參數
-                var processor = new PacketProcessor();
-
-                var textStringBody = new TextStringBody
+                if (dbName1 == "dmd_pre_record_message")
                 {
-                    RedColor = fontColor[0],   
-                    GreenColor = fontColor[1],
-                    BlueColor = fontColor[2],
-                    StringText = message_layout.message_content
-                }; 
-                var stringMessage = new StringMessage
+                    message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id);
+                }
+                else if (dbName1 == "SendInstantMessage")
                 {
-                    StringMode = 0x2A, // TextMode (Static) 
-                    StringBody = textStringBody  
-                };
+                    message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdInstantMessage.SelectMessage(message_id);
+                }
 
-                var fullWindowMessage = new FullWindow //Display version
+                if (message_layout != null)
                 {
-                    MessageType = 0x71, // FullWindow message 
-                    MessageLevel = (byte)message_layout.message_priority, //  level
-                    MessageScroll = new ScrollInfo
+                    // Add your code here to use message_id
+                    // var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id);
+
+                    var fontColor = ProcessMEssageColor(message_layout.font_color);
+                    //取得各項參數
+                    var processor = new PacketProcessor();
+
+                    var textStringBody = new TextStringBody
                     {
-                        ScrollMode = 0x64,
-                        ScrollSpeed = (byte)message_layout.move_speed,
-                        PauseTime = 10
-                    },
-                    MessageContent = new List<StringMessage> { stringMessage }
-                };
-                var sequence1 = new Display.Sequence
-                {
-                    SequenceNo = 1,
-                    Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
-                    Messages = new List<IMessage> { fullWindowMessage }
-                };
+                        RedColor = fontColor[0],
+                        GreenColor = fontColor[1],
+                        BlueColor = fontColor[2],
+                        StringText = message_layout.message_content
+                    };
+                    var stringMessage = new StringMessage 
+                    {
+                        StringMode = 0x2A, // TextMode (Static) 
+                        StringBody = textStringBody
+                    };
 
-                var startCode = new byte[] { 0x55, 0xAA };
-                var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
-                var packet = processor.CreatePacket(startCode, new List<byte> { 0x23, 0x24 }, function.FunctionCode, new List<Sequence> { sequence1 });
-                var serializedData = processor.SerializePacket(packet);
-                ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
+                    var fullWindowMessage = new FullWindow //Display version
+                    {
+                        MessageType = 0x71, // FullWindow message 
+                        MessageLevel = (byte)message_layout.message_priority, //  level
+                        MessageScroll = new ScrollInfo
+                        {
+                            ScrollMode = 0x64,
+                            ScrollSpeed = (byte)message_layout.move_speed,
+                            PauseTime = 10
+                        },
+                        MessageContent = new List<StringMessage> { stringMessage }
+                    };
+                    var sequence1 = new Display.Sequence
+                    {
+                        SequenceNo = 1,
+                        Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
+                        Messages = new List<IMessage> { fullWindowMessage }
+                    };
 
-                _mSerial.Send(serializedData);
+                    var startCode = new byte[] { 0x55, 0xAA };
+                    var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
+                    var packet = processor.CreatePacket(startCode, new List<byte> { 0x23, 0x24 }, function.FunctionCode, new List<Sequence> { sequence1 });
+                    var serializedData = processor.SerializePacket(packet);
+                    ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
+
+                    _mSerial.Send(serializedData);
+                }
             }
         }
         /// <summary>
         /// 左測月台碼
         /// </summary>
+        /// <param name="target_du"></param>
+        /// <param name="dbName1"></param>
+        /// <param name="dbName2"></param>
         void SendMessageToDisplay2(string target_du, string dbName1, string dbName2)
         {
             var deviceInfo = SplitStringToDeviceInfo(target_du);
@@ -111,14 +137,14 @@ namespace ASI.Wanda.DMD.TaskUPD
                 RedColor = 0xFF,
                 GreenColor = 0xFF,
                 BlueColor = 0xFF,
-                StringText = "萬大線"
+                StringText = "歡迎搭乘萬大線"
             };
             var stringMessage = new StringMessage
             {
                 StringMode = 0x2A, // TextMode (Static)
                 StringBody = textStringBody
             };
-            var leftPlatform = new LeftPlatform //Display version
+            var leftPlatform = new LeftPlatform //Display version 
             {
                 MessageType = 0x72, // FullWindow message
                 MessageLevel = 0x04, //  level 
@@ -130,7 +156,7 @@ namespace ASI.Wanda.DMD.TaskUPD
 
                 MessageContent = new List<StringMessage> { stringMessage }
             };
-            var sequence1 = new Display.Sequence
+            var sequence1 = new Display.Sequence 
             {
                 SequenceNo = 1,
                 Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
@@ -140,13 +166,17 @@ namespace ASI.Wanda.DMD.TaskUPD
             var startCode = new byte[] { 0x55, 0xAA };
             var function = new PassengerInfoHandler(); // Use PassengerInfoHandler  
             var packet = processor.CreatePacket(startCode, new List<byte> { 0x01 }, function.FunctionCode, new List<Sequence> { sequence1 });
-            var serializedData = processor.SerializePacket(packet);
+            var serializedData = processor.SerializePacket(packet); 
             ASI.Lib.Log.DebugLog.Log(_mProcName + "送到看板上", "Serialized display packet: " + BitConverter.ToString(serializedData));
             _mSerial.Send(serializedData);
         }
+
         /// <summary>
-        /// 緊急訊息  
-        /// </summary> 
+        /// /緊急訊息
+        /// </summary>
+        /// <param name="FireContentChinese"></param>
+        /// <param name="FireContentEnglish"></param>
+        /// <param name="situation"></param>
         public async void SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
         {
             try
@@ -156,23 +186,23 @@ namespace ASI.Wanda.DMD.TaskUPD
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
 
-                // Send Chinese Message   
+                // Send Chinese Message 
                 var sequence1 = CreateSequence(FireContentChinese, 1);
                 var packet1 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
                 var serializedData1 = processor.SerializePacket(packet1);
-                ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData1));
+                ASI.Lib.Log.DebugLog.Log( _mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData1));
 
-                var temp = _mSerial.Send(serializedData1);
+                var temp = _mSerial.Send(serializedData1); 
                 ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + _mProcName, temp.ToString());
                 // Send English Message 
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
                 var packet2 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
                 var serializedData2 = processor.SerializePacket(packet2);
-                ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData2));
+                ASI.Lib.Log.DebugLog.Log( _mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData2));
 
                 _mSerial.Send(serializedData2);
                 // Optional delay and turn off if situation is 84  
-                if (situation == 84)
+                if (situation == 84) 
                 {
                     await Task.Delay(10000); // 延遲五秒   
                     var OffMode = new byte[] { 0x02 };

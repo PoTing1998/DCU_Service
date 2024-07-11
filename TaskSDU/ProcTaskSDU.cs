@@ -14,16 +14,20 @@ namespace ASI.Wanda.DCU.TaskSDU
     public class ProcTaskSDU : ProcBase
     {
         #region constructor
-        private DateTime LastHeartbeatTime = DateTime.Now; //最後連線時間
-
         static int mSEQ = 0; // 計算累進發送端的次數  
-        public string mDMDServerConnStr = "";
-        static private Dictionary<string, int> mServerIP = null;
         ASI.Lib.Comm.SerialPort.SerialPortLib serial = null;
+
         /// <summary>
-        /// 要傳送的port匯集起來
+        /// 讀取火災資料
         /// </summary>
-        List<ASI.Lib.Comm.SerialPort.SerialPortLib> mySerialPorts = new List<Lib.Comm.SerialPort.SerialPortLib>();
+        static string sCheckChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressChinese");
+        static string sCheckEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressEnglish");
+        static string sEmergencyChinese = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyChinese");
+        static string sEmergencyEnglish = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyEnglish");
+        static string sClearedChinese = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedChinese");
+        static string sClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
+        static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
+        static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
         #endregion
 
 
@@ -41,13 +45,17 @@ namespace ASI.Wanda.DCU.TaskSDU
             {
                 return 0;
             }
-            else if (pLabel == MSGFromTaskDMD.Label)
+            else if (pLabel == ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD.Label)
             {
                 return ProMsgFromDMD(pBody);
             }
-            else if (pLabel == MSGFromTaskPA.Label)
+            else if (pLabel == PA.ProcMsg.MSGFromTaskPA.Label)
             {
                 return ProMsgFromPA(pBody);
+            }
+            else if (pLabel == ProcMsg.MSGFromTaskPDU.Label)
+            {
+                return 0;
             }
             return base.ProcEvent(pLabel, pBody);
         }
@@ -63,7 +71,7 @@ namespace ASI.Wanda.DCU.TaskSDU
         {
             mTimerTick = 30;
             mProcName = "TaskSDU";
-            mServerIP = new Dictionary<string, int>();
+          
             string sDBIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
             string sDBPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
             string sDBName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
@@ -132,69 +140,44 @@ namespace ASI.Wanda.DCU.TaskSDU
 
         private int ProMsgFromPA(string pMessage)
         {
-            DataBase oDB = null;
             string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
-
             try
             {
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ProcMsg.MSGFromTaskPA(new MSGFrameBase(""));
                 if (MSGFromTaskPA.UnPack(pMessage) > 0)
                 {
-                    string sJsonData = MSGFromTaskPA.JsonData;
-                    var dataBytes = ASI.Lib.Text.Parsing.String.HexStringToBytes(MSGFromTaskPA.JsonData, 2);
-                    var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
-                    if (dataBytes.Length >= 3 && dataBytes[2] == 0x01)
+                    var sJsonData = MSGFromTaskPA.JsonData;
+                    ASI.Lib.Log.DebugLog.Log(mProcName + " received a message from TaskPA ", sJsonData); // Log the received message 
+                    // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除  
+                    // 假設sJsonData已經是十六進位字串格式，直接解析
+                    var sHexString = sJsonData;
+                    byte[] dataBytes = HexStringToBytes(sJsonData);
+                    if (dataBytes.Length >= 10) // 確保有足夠長度的陣列   
                     {
-                        dataBytes[2] = 0x06;
-                        // 去掉最後一個byte 
-                        Array.Resize(ref dataBytes, dataBytes.Length - 1);
-                        var NewLRC = calculateLRC(dataBytes);
-                        // 並且重新計算LRC並加回去  
-                        Array.Resize(ref dataBytes, dataBytes.Length + 1);
-                        dataBytes[dataBytes.Length - 1] = NewLRC;
-
-                        ASI.Lib.Log.DebugLog.Log("回復PA收到的訊息 " + sRcvTime, sHexString.ToString());//log紀錄  
-                      //  SendMSG(PA.Message.Message.MessageType.msg, dataBytes[7], dataBytes[8], dataBytes[9]);
+                        ProcessDataBytes(dataBytes);
                     }
-                    else if (dataBytes.Length >= 3 && dataBytes[2] == 0x06)
+                    else
                     {
-                       // SendMSG(PA.Message.Message.MessageType.correct, dataBytes[7], dataBytes[8], dataBytes[9]);
-                        ASI.Lib.Log.DebugLog.Log(mProcName+"PA收到正確的訊息 " + sRcvTime, sHexString.ToString());//log紀錄 
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes length less than 10", sHexString);
                     }
-                    else if (dataBytes.Length >= 3 && dataBytes[2] == 0x15)
+                    if (dataBytes.Length >= 3)
                     {
-                        var slog = "";
-                        if (dataBytes[4] == 0x01)
-                        {
-                            slog = "代表封包資料長度錯誤";
-                        }
-                        else if (dataBytes[4] == 0x02)
-                        {
-                            slog = "代表LRC錯誤";
-                        }
-                        else if (dataBytes[4] == 0x03)
-                        {
-                            slog = "代表其他錯誤";
-                        }
-                        ASI.Lib.Log.DebugLog.Log("PA收到錯誤的訊息 " + slog + sRcvTime, sHexString.ToString());//log紀錄
+                        ProcessByteAtIndex2(dataBytes, sRcvTime, sJsonData);
+                    }
+                    else
+                    {
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes length less than 3", sJsonData);
                     }
                 }
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
-            }
-            finally
-            {
-                if (oDB != null)
-                {
-                    oDB.Close();
-                }
+                ASI.Lib.Log.ErrorLog.Log(mProcName, ex); // 記錄例外情況 
             }
 
             return -1;
         }
-
+        #region private Method
         /// <summary>
         /// 計算LRC
         /// </summary>
@@ -211,6 +194,147 @@ namespace ASI.Wanda.DCU.TaskSDU
                 xor ^= text[i];
             return xor;
         }
+
+        public static byte[] HexStringToBytes(string hex)
+        {
+            var mProcName = "HexStringToBytes";
+            try
+            {
+                // 移除所有空格和無效字符
+                hex = hex.Replace(" ", "").Replace("\"", "").ToUpper();
+
+                // 打印原始的十六進位字串
+                ASI.Lib.Log.DebugLog.Log(mProcName, "HexStringToBytes 轉換前的字串: " + hex);
+
+                if (hex.Length % 2 != 0)
+                {
+                    throw new ArgumentException("十六進位字串的長度必須是偶數");
+                }
+                // 確保所有字符都是有效的十六進位字符
+                foreach (char c in hex)
+                {
+                    if (!Uri.IsHexDigit(c))
+                    {
+                        throw new ArgumentException($"十六進位字串包含無效字符: {c}");
+                    }
+                }
+
+                // 創建一個字節陣列，長度為字串長度的一半
+                byte[] bytes = new byte[hex.Length / 2];
+
+                // 循環遍歷十六進位字串，將每對十六進位字符轉換為一個字節
+                for (int i = 0; i < hex.Length; i += 2)
+                {
+                    bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+                }
+
+                return bytes;
+            }
+            catch (Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log(mProcName, "HexStringToBytes 轉換錯誤: " + ex.ToString());
+                return null;
+            }
+        }
+        private void ProcessDataBytes(byte[] dataBytes)
+        {
+            byte dataByteAtIndex8 = dataBytes[8];
+            var taskUPDHelper = new ASI.Wanda.DMD.TaskSDU.TaskSDUHelper(mProcName, serial);
+            switch (dataByteAtIndex8)
+            {
+                case 0x81:
+                    taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
+                    break;
+                case 0x82:
+                    taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
+                    break;
+                case 0x83:
+                    taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
+                    break;
+                case 0x84:
+                    taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
+                    break;
+                default:
+                    ASI.Lib.Log.DebugLog.Log(mProcName + " ", $"{mProcName} unknown byte value at index 9: {dataByteAtIndex8.ToString("X2")}");
+                    break;
+            }
+        }
+
+        private void ProcessByteAtIndex2(byte[] dataBytes, string sRcvTime, string sJsonData)
+        {
+            byte dataByte2 = dataBytes[2];
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} dataByte2: ", dataByte2.ToString("X2"));
+
+            switch (dataByte2)
+            {
+                case 0x01:
+                    HandleCase01(dataBytes, sRcvTime, sJsonData);
+                    break;
+                case 0x06:
+                    ASI.Lib.Log.DebugLog.Log($"{mProcName} received a correct message from TaskPA", sJsonData);
+                    break;
+                case 0x15:
+                    HandleCase15(dataBytes, sRcvTime, sJsonData);
+                    break;
+                default:
+                    ASI.Lib.Log.DebugLog.Log($"{mProcName} received an unknown error message from PA", sJsonData);
+                    break;
+            }
+        }
+
+        private void HandleCase01(byte[] dataBytes, string sRcvTime, string sJsonData)
+        {
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} processing 0x01 case", sJsonData);
+            dataBytes[2] = 0x06;
+            Array.Resize(ref dataBytes, dataBytes.Length - 1); // Remove the last byte
+            byte newLRC = CalculateLRC(dataBytes);
+            Array.Resize(ref dataBytes, dataBytes.Length + 1); // Add a byte back
+            dataBytes[dataBytes.Length - 1] = newLRC;
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} replied to TaskPA message at {sRcvTime}", sJsonData);
+
+        }
+
+        private void HandleCase15(byte[] dataBytes, string sRcvTime, string sJsonData)
+        {
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} processing 0x15 case", sJsonData);
+            string errorLog;
+            switch (dataBytes[4])
+            {
+                case 0x01:
+                    errorLog = "Indicates packet data length error";
+                    break;
+                case 0x02:
+                    errorLog = "Indicates LRC error";
+                    break;
+                case 0x03:
+                    errorLog = "Indicates other errors";
+                    break;
+                default:
+                    errorLog = "Indicates unknown error";
+                    break;
+            }
+
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} received an error message from TaskPA: {errorLog} at {sRcvTime}", sJsonData);
+        }
+
+
+        /// <summary>
+        /// 計算LRC 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>  
+        private byte CalculateLRC(byte[] text)
+        {
+            byte xor = 0;
+            // if no data then done   
+            if (text.Length <= 0)
+                return 0;
+            // incorporate remaining bytes into the value  
+            for (int i = 0; i < text.Length; i++)
+                xor ^= text[i];
+            return xor;
+        }
+        #endregion
         #region serialPort 
         void SerialPort_DisconnectedEvent(string source) //斷線處理  
         {

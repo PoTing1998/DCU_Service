@@ -154,7 +154,11 @@ namespace ASI.Wanda.DCU.TaskPA
                 serial.Send(arrPacketByte); 
                 ASI.Lib.Log.DebugLog.Log("Content of the packet sent to PA the second time", sHexString.ToString());
 
-                PAHelper.SendToTaskDMD(2, 1, msg.JsonContent);
+                ///發送到各個看板
+                PAHelper.SendToTaskPDU(2, 1, msg.JsonContent);
+                PAHelper.SendToTaskSDU(2, 1, msg.JsonContent);
+                PAHelper.SendToTaskUPD(2, 1, msg.JsonContent);
+                PAHelper.SendToTaskLPD(2, 1, msg.JsonContent);
 
                 serial.Send(dataBytes); // Resend
             }

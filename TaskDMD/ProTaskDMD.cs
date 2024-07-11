@@ -174,19 +174,23 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUPreRecordMessage();
                             DMDHelper.UpdataConfig();
-                            var Msg = new ASI.Wanda.DCU.Message.Message( ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(DMDServerMessage.JsonContent));
-                            DMDHelper.SendToTaskUPD(2,1,Msg.JsonContent);
+                            var RecordMessage = new ASI.Wanda.DCU.Message.Message( ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(DMDServerMessage.JsonContent));
+                            DMDHelper.SendToTaskUPD(2,1, RecordMessage.JsonContent);
+                            DMDHelper.SendToTaskPDU(2, 1, RecordMessage.JsonContent);
+                            DMDHelper.SendToTaskSDU(2, 1, RecordMessage.JsonContent);
+                            DMDHelper.SendToTaskLPD(2, 1, RecordMessage.JsonContent);
+                            break;
+                        case ASI.Wanda.DMD.TaskDMD.Constants.SendInstantMsg: //即時訊息 
+                            DMDHelper.UpdateDCUPlayList();
+                            DMDHelper.UpdataDCUInstantMessage();
+                            DMDHelper.UpdataConfig();
+                            var Msg = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(DMDServerMessage.JsonContent));
+                            DMDHelper.SendToTaskUPD(2, 1, Msg.JsonContent);
                             DMDHelper.SendToTaskPDU(2, 1, Msg.JsonContent);
                             DMDHelper.SendToTaskSDU(2, 1, Msg.JsonContent);
                             DMDHelper.SendToTaskLPD(2, 1, Msg.JsonContent);
                             break;
-                        case ASI.Wanda.DMD.TaskDMD.Constants.SendInstantMsg: //即時訊息 
-                            DMDHelper.UpdateDCUPlayList();
-                            DMDHelper.UpdataDCUPreRecordMessage();
-                            DMDHelper.UpdataConfig();
-                         
-                            break;
-                        case ASI.Wanda.DMD.TaskDMD.Constants.SendScheduleSetting: //訊息排程 
+                        case ASI.Wanda.DMD.TaskDMD.Constants.SendScheduleSetting: //訊息排程
                             DMDHelper.HandleAckMessage(DMDServerMessage);
                             break; 
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMessageSetting: //預錄訊息設定 

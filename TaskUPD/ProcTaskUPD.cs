@@ -26,7 +26,6 @@ namespace ASI.Wanda.DCU.TaskUPD
         #region constructor
         static int mSEQ = 0; // 計算累進發送端的次數  
         ASI.Lib.Comm.SerialPort.SerialPortLib serial = null;
-
         /// <summary>
         /// 讀取火災資料
         /// </summary>
@@ -145,7 +144,7 @@ namespace ASI.Wanda.DCU.TaskUPD
 
                     Guid iMsgID = new Guid(mSGFromTaskDMD.MessageID.ToString());
                     ASI.Lib.Log.DebugLog.Log(mProcName, $"收到來自TaskDMD的訊息，SeatID:{sSeatID}；MsgID:{iMsgID}；JsonObjectName:{sJsonObjectName}");
-                    var taskUPDHelper = new ASI.Wanda.DMD.TaskUPD.TaskUPDHelper(mProcName,serial);
+                    var taskUPDHelper = new ASI.Wanda.DCU.TaskUPD.TaskUPDHelper(mProcName,serial);
 
                     if (dbName1 == "dmd_train_message") 
                     {
@@ -214,7 +213,7 @@ namespace ASI.Wanda.DCU.TaskUPD
         private void ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
-            var taskUPDHelper = new ASI.Wanda.DMD.TaskUPD.TaskUPDHelper(mProcName, serial);
+            var taskUPDHelper = new ASI.Wanda.DCU.TaskUPD.TaskUPDHelper(mProcName, serial);
             switch (dataByteAtIndex8)
             {
                 case 0x81:
@@ -238,7 +237,6 @@ namespace ASI.Wanda.DCU.TaskUPD
         {
             byte dataByte2 = dataBytes[2];
             ASI.Lib.Log.DebugLog.Log($"{mProcName} dataByte2: ", dataByte2.ToString("X2"));
-
             switch (dataByte2)
             {
                 case 0x01:

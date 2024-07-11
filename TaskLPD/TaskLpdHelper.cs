@@ -21,12 +21,12 @@ namespace ASI.Wanda.DCU.TaskLPD
         public string AreaID { get; set; }
         public string DeviceID { get; set; }
     }
-    public class TaskLpdHelper
+    public class TaskLPDHelper
     {
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
 
-        public TaskLpdHelper(string mProcName, SerialPortLib mSerial )
+        public TaskLPDHelper(string mProcName, SerialPortLib mSerial )
         {
             _mProcName = mProcName;
             _mSerial = mSerial;
