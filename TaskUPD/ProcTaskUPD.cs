@@ -131,9 +131,10 @@ namespace ASI.Wanda.DCU.TaskUPD
         {
             try
             {
-                ASI.Wanda.DMD.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DMD.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
                 if (mSGFromTaskDMD.UnPack(pMessage) > 0)
                 {
+
                     string sJsonData = mSGFromTaskDMD.JsonData;
                     string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDMD.JsonData, "JsonObjectName");
                     string sStationID = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDMD.JsonData, "StationID");
@@ -146,7 +147,7 @@ namespace ASI.Wanda.DCU.TaskUPD
                     ASI.Lib.Log.DebugLog.Log(mProcName, $"收到來自TaskDMD的訊息，SeatID:{sSeatID}；MsgID:{iMsgID}；JsonObjectName:{sJsonObjectName}");
                     var taskUPDHelper = new ASI.Wanda.DCU.TaskUPD.TaskUPDHelper(mProcName,serial);
 
-                    if (dbName1 == "dmd_train_message") 
+                    if (dbName1 == "dmd_train_message")
                     {
                         ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_train_message");
                     }
@@ -184,7 +185,7 @@ namespace ASI.Wanda.DCU.TaskUPD
                     // 假設sJsonData已經是十六進位字串格式，直接解析
                     var sHexString = sJsonData;
                     byte[] dataBytes = HexStringToBytes(sJsonData);
-                    if (dataBytes.Length >= 10) // 確保有足夠長度的陣列   
+                    if (dataBytes.Length >= 10) // 確保有足夠長度的陣列
                     {                               
                         ProcessDataBytes(dataBytes);       
                     }

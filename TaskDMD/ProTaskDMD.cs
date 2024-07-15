@@ -19,7 +19,7 @@ namespace ASI.Wanda.DCU.TaskDMD
     public class ProcTaskDMD : ProcBase
     {
         private ASI.Wanda.DMD.DMD_API mDMD_API = null;
-
+        public string DCUSation ;
         /// <summary>
         /// 最後一次收到DMD訊息的時間
         /// </summary>
@@ -148,11 +148,16 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sLog = "";
             try
             {
-     
+                ////{"station":0,"seatID":"TEST","msg_id":["測試內容"],
+                ////"target_du":["LG01_CCS_CDU-1","LG01_CCS_CDU-2","LG01_UPF_PDU-1","LG08A_DPF_PDU-4"],"dbName1":"dmd_pre_record_message","dbName2":"dmd_target","JsonObjectName":"ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage"}
                 var sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
                 var sByteArray = ASI.Lib.Text.Parsing.String.BytesToHexString(DMDServerMessage.CompleteContent, "");
                 var sJsonData = DMDServerMessage.JsonContent;
+
                 var sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
+                var target = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
+                ////判斷車站
+                string DCUSation = target.Split('_')[0];
                 int iMsgID = DMDServerMessage.MessageID;
                 //建立DMDHelper並將 DMD_API的send 委派 
                 var DMDHelper = new TaskDMDHelper<ASI.Wanda.DMD.DMD_API>(mDMD_API, (api, message) => api.Send(message));
@@ -167,6 +172,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 {
                     sLog = $"從CMFT Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
                     ASI.Lib.Log.DebugLog.Log("FromCMFTDate", $"{sLog}\r\n");
+
                     //判斷從過來的ObjactName 
                     switch (sJsonObjectName)
                     {
@@ -192,7 +198,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendScheduleSetting: //訊息排程
                             DMDHelper.HandleAckMessage(DMDServerMessage);
-                            break; 
+                            break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMessageSetting: //預錄訊息設定 
                             DMDHelper.HandleAckMessage(DMDServerMessage);
                             break;

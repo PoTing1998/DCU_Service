@@ -108,19 +108,33 @@ namespace ASI.Wanda.DCU.TaskPDU
             DataBase oDB = null;
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new MSGFromTaskDMD(new MSGFrameBase(""));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
                 if (mSGFromTaskDMD.UnPack(pMessage) > 0)
                 {
+
                     string sJsonData = mSGFromTaskDMD.JsonData;
                     string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDMD.JsonData, "JsonObjectName");
                     string sStationID = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDMD.JsonData, "StationID");
                     string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "SeatID");
+                    string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
+                    string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
+                    string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
 
                     Guid iMsgID = new Guid(mSGFromTaskDMD.MessageID.ToString());
                     ASI.Lib.Log.DebugLog.Log(mProcName, $"收到來自TaskDMD的訊息，SeatID:{sSeatID}；MsgID:{iMsgID}；JsonObjectName:{sJsonObjectName}");
-                    ASI.Wanda.DCU.DB.Tables.DCU.userControlPanel.emergency(1,71);
-                    //判斷收到的訊息ID  
-                    //SetFullWindowDisplay(ASI.Wanda.DCU.DB.Tables.DMD.dmdTrainMessage.Priority(iMsgID));
+                    var taskPDUHelper = new ASI.Wanda.DCU.TaskPDU.TaskPDUHelper(mProcName, serial);
+
+                    if (dbName1 == "dmd_train_message")
+                    {
+                        ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_train_message");
+                    }
+                    else
+                    {
+                        //判斷收到的訊息ID  
+                        ASI.Lib.Log.DebugLog.Log(mProcName, "處理其他訊息");
+                    }
+                    //傳送到面板上
+                    taskPDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
                 }
             }
             catch (Exception ex)

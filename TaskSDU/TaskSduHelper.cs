@@ -10,10 +10,18 @@ using Display;
 using Display.DisplayMode;
 using Display.Function;
 
-namespace ASI.Wanda.DMD.TaskSDU
+namespace ASI.Wanda.DCU.TaskSDU
 {
+    class DeviceInfo
+    {
+        public string StationID { get; set; }
+        public string AreaID { get; set; }
+        public string DeviceID { get; set; }
+    }
+
     public class TaskSDUHelper
     {
+
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
 
@@ -271,10 +279,5 @@ namespace ASI.Wanda.DMD.TaskSDU
 
 
     }
-    class DeviceInfo
-    {
-        public string StationID { get; set; }
-        public string AreaID { get; set; }
-        public string DeviceID { get; set; }
-    }
+   
 }

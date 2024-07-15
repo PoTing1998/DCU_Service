@@ -117,9 +117,10 @@ namespace ASI.Wanda.DCU.TaskLPD
         {
             try
             {
-                ASI.Wanda.DMD.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DMD.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
                 if (mSGFromTaskDMD.UnPack(pMessage) > 0)
                 {
+
                     string sJsonData = mSGFromTaskDMD.JsonData;
                     string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDMD.JsonData, "JsonObjectName");
                     string sStationID = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDMD.JsonData, "StationID");
@@ -130,7 +131,7 @@ namespace ASI.Wanda.DCU.TaskLPD
 
                     Guid iMsgID = new Guid(mSGFromTaskDMD.MessageID.ToString());
                     ASI.Lib.Log.DebugLog.Log(mProcName, $"收到來自TaskDMD的訊息，SeatID:{sSeatID}；MsgID:{iMsgID}；JsonObjectName:{sJsonObjectName}");
-                    var taskUPDHelper = new ASI.Wanda.DCU.TaskLPD.TaskLPDHelper(mProcName, serial);
+                    var taskLPDHelper = new ASI.Wanda.DCU.TaskLPD.TaskLPDHelper(mProcName, serial);
 
                     if (dbName1 == "dmd_train_message")
                     {
@@ -142,7 +143,7 @@ namespace ASI.Wanda.DCU.TaskLPD
                         ASI.Lib.Log.DebugLog.Log(mProcName, "處理其他訊息");
                     }
                     //傳送到面板上
-                    taskUPDHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
+                    taskLPDHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
                 }
             }
             catch (Exception ex)
