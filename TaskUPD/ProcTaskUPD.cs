@@ -97,6 +97,8 @@ namespace ASI.Wanda.DCU.TaskUPD
            
             serial = new ASI.Lib.Comm.SerialPort.SerialPortLib ();
             serial.ConnectionString = connectionString;
+            serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
+            serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
             int result = -1; // Default to an error state
 
             try

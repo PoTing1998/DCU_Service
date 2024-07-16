@@ -70,34 +70,42 @@ namespace ASI.Wanda.DCU.TaskSDU
             mTimerTick = 30;
             mProcName = "TaskSDU";
           
-            string sDBIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
-            string sDBPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
-            string sDBName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
-            string sUserID = "postgres";
-            string sPassword = "postgres";
-            string sCurrentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
+            string dbIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
+            string dbPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
+            string dbName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
+            string dbUserID = "postgres";
+            string dbPassword = "postgres";
+            string currentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
 
-            ///serialPort的開啟 
-            serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
-            serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
-            serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
+         
             var iComPort = ConfigApp.Instance.GetConfigSetting("SDUComPort"); ;
             var iBaudrate = ConfigApp.Instance.GetConfigSetting("SDUBaudrate"); ;
+            serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
             string connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
-            serial.ConnectionString = connectionString;    
-            var result = serial.Open();
-
+            serial.ConnectionString = connectionString;
+            serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
+            serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
+            int result = -1; // Default to an error state
             try
             {
-                //"Server='localhost'; Port='5432'; Database='DCUDB'; User Id='postgres'; Password='postgres'"; 
-                if (!ASI.Wanda.DCU.DB.Manager.Initializer(sDBIP, sDBPort, sDBName, sUserID, sPassword, sCurrentUserID))
+                result = serial.Open();
+                if (result != 0)
                 {
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗!{sDBIP}:{sDBPort};userid={sUserID}");
+                    ASI.Lib.Log.ErrorLog.Log(mProcName, "Serial port open failed");
+                    return result; // Return immediately if the serial port failed to open
+                }
+
+                // 初始化資料庫連線
+                if (!ASI.Wanda.DCU.DB.Manager.Initializer(dbIP, dbPort, dbName, dbUserID, dbPassword, currentUserID))
+                {
+                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗! {dbIP}:{dbPort};userid={dbUserID}");
+                    return -1; // Return immediately if the database initialization failed
                 }
             }
             catch (System.Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗!{sDBIP}:{sDBPort};userid={sUserID};ex={ex}");
+                ASI.Lib.Log.ErrorLog.Log(mProcName, $"例外發生! {ex.Message}");
+                return -1; // Return immediately if any exception occurs
             }
 
             return base.StartTask(pComputer, pProcName);

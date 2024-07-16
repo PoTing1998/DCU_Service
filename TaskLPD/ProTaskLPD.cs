@@ -74,17 +74,17 @@ namespace ASI.Wanda.DCU.TaskLPD
             string dbIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
             string dbPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
             string dbName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
-            string currentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
-            var iComPort = ConfigApp.Instance.GetConfigSetting("LPDComPort");
-            var iBaudrate = ConfigApp.Instance.GetConfigSetting("LPDBaudrate");
-
-            ///serialPort的開啟  
             string dbUserID = "postgres";
             string dbPassword = "postgres";
-            var connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
+            string currentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
 
+            var iComPort = ConfigApp.Instance.GetConfigSetting("LPDComPort");
+            var iBaudrate = ConfigApp.Instance.GetConfigSetting("LPDBaudrate");
             serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
+            var connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
             serial.ConnectionString = connectionString;
+            serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
+            serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
             int result = -1; // Default to an error state
             try
             {
@@ -163,7 +163,7 @@ namespace ASI.Wanda.DCU.TaskLPD
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ProcMsg.MSGFromTaskPA(new MSGFrameBase(""));
                 if (MSGFromTaskPA.UnPack(pMessage) > 0)
                 {
-                    var sJsonData = MSGFromTaskPA.JsonData;
+                    var sJsonData = MSGFromTaskPA.JsonData; 
                     ASI.Lib.Log.DebugLog.Log(mProcName + " received a message from TaskPA ", sJsonData); // Log the received message 
                     // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除  
                     // 假設sJsonData已經是十六進位字串格式，直接解析
@@ -337,9 +337,43 @@ namespace ASI.Wanda.DCU.TaskLPD
                 xor ^= text[i];
             return xor;
         }
-        #region DU 
-
-
-        #endregion
+        void SerialPort_ReceivedEvent(byte[] dataBytes, string source) //顯示器的狀態顯示 
+        {
+            string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
+            string str = "";
+            foreach (byte b in dataBytes)
+            {
+                str += Convert.ToString(b, 16).ToUpper().PadLeft(2, '0') + " ";
+            }
+            var text = string.Format("{0} \r\n收到收包內容 {1} \r\n", sRcvTime, str);
+            var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
+            if (dataBytes.Length >= 3 && dataBytes[4] == 0x00)
+            {
+                ASI.Lib.Log.DebugLog.Log(mProcName, "顯示器的狀態收到的訊息" + sHexString.ToString());  //處理顯示器回報的狀態
+            }
+            else if (dataBytes[4] != 0x00)
+            {
+                if (dataBytes[4] == 0x01) { ASI.Lib.Log.ErrorLog.Log(mProcName, "曾經有通訊不良"); }
+                else if (dataBytes[4] == 0x02) { ASI.Lib.Log.ErrorLog.Log(mProcName, "處於關機狀態 "); }
+                else if (dataBytes[4] == 0x04) { ASI.Lib.Log.ErrorLog.Log(mProcName, "通訊逾時"); }
+                else if (dataBytes[4] == 0x07) { ASI.Lib.Log.ErrorLog.Log(mProcName, " 1/2/4 多重組合 "); }
+            }
+            ASI.Lib.Log.DebugLog.Log(mProcName, "從顯示器收到的訊息" + sHexString.ToString());//log紀錄 
+        }
+        void SerialPort_DisconnectedEvent(string source) //斷線處理  
+        {
+            try
+            {
+                serial.Close();
+                serial = null;
+                serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
+                serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
+                serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
+            }
+            catch (Exception)
+            {
+                ASI.Lib.Log.ErrorLog.Log(mProcName, "斷線處理錯誤");
+            }
+        }
     }
 }
