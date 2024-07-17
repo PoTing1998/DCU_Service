@@ -14,15 +14,15 @@ namespace ASI.Wanda.DMD.TaskDMD
     /// </summary>
     public static class Constants
     {
-        public const string SendPreRecordMsg = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.SendPreRecordMessage";
-        public const string SendInstantMsg = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.SendInstantMessage";
-        public const string SendScheduleSetting = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.ScheduleSetting";
-        public const string SendPreRecordMessageSetting = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.PreRecordMessageSetting";
-        public const string SendTrainMessageSetting = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.TrainMessageSetting";
-        public const string SendPowerTimeSetting = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.PowerTimeSetting";
-        public const string SendGroupSetting = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.GroupSetting";
-        public const string SendParameterSetting = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.ParameterSetting";
-    }
+        public const string SendPreRecordMsg                = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage";
+        public const string SendInstantMsg                  = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendInstantMessage";
+        public const string SendScheduleSetting             = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ScheduleSetting";
+        public const string SendPreRecordMessageSetting     = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting";
+        public const string SendTrainMessageSetting         = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMessageSetting";
+        public const string SendPowerTimeSetting            = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PowerTimeSetting";
+        public const string SendGroupSetting                = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting";
+        public const string SendParameterSetting            = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ParameterSetting";
+    }                                                                    
 
     public class TaskDMDHelper<T> where T : class
     {

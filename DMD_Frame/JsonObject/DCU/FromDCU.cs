@@ -16,7 +16,7 @@ namespace ASI.Wanda.DMD.JsonObject.DCU.FromDCU
         public int status { get; set; }
         public string dbName1 { get; set; } = "sys_equip_status";
     }
-    //(4)	預錄訊息命令  
+    //(4)	預錄訊息命令
     public class Res_SendPreRecordMessage : ASI.Wanda.DMD.JsonObject.Base
     {
         public Res_SendPreRecordMessage(ASI.Wanda.DMD.Enum.Station station) : base(station)
@@ -32,21 +32,24 @@ namespace ASI.Wanda.DMD.JsonObject.DCU.FromDCU
 
         public List<string> failed_target { get; set; }
     }
-    //(5).	即時訊息命令 SendInstantMessage  
-    public class Res_SendInstantMessage : ASI.Wanda.DMD.JsonObject.Base  
+    //(5).	即時訊息命令 SendInstantMessage
+    public class Res_SendInstantMessage : ASI.Wanda.DMD.JsonObject.Base
     {
         public Res_SendInstantMessage(ASI.Wanda.DMD.Enum.Station station) : base(station)
         {
         }
         //席位
         public string seatID { get; set; }
-        // 即時訊息ID 
+        // 即時訊息ID
         public string msg_id { get; set; }
         public string station_id { get; set; }
         public bool is_success { get; set; }
 
         public List<string> failed_target { get; set; }
     }
+    
+
+
 
     #endregion
 }

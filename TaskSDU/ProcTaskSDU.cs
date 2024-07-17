@@ -176,9 +176,9 @@ namespace ASI.Wanda.DCU.TaskSDU
                     // 假設sJsonData已經是十六進位字串格式，直接解析
                     var sHexString = sJsonData;
                     byte[] dataBytes = HexStringToBytes(sJsonData);
-                    if (dataBytes.Length >= 10) // 確保有足夠長度的陣列   
+                    if (dataBytes.Length >= 10) // 確保有足夠長度的陣列
                     {
-                        ProcessDataBytes(dataBytes);
+                        ProcessDataBytes(dataBytes); 
                     }
                     else
                     {

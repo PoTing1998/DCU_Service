@@ -137,6 +137,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             {
                 ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗!{sDBIP}:{sDBPort};userid={sUserID};ex={ex}");
             }
+            ConnToDMDServer();
             return base.StartTask(pComputer, pProcName);
         }
         /// <summary>
@@ -155,13 +156,14 @@ namespace ASI.Wanda.DCU.TaskDMD
                 var sJsonData = DMDServerMessage.JsonContent;
 
                 var sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
+       
+                //建立DMDHelper並將 DMD_API的send 委派 
+                var DMDHelper = new TaskDMDHelper<ASI.Wanda.DMD.DMD_API>(mDMD_API, (api, message) => api.Send(message));
+
                 var target = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
                 ////判斷車站
                 string DCUSation = target.Split('_')[0];
                 int iMsgID = DMDServerMessage.MessageID;
-                //建立DMDHelper並將 DMD_API的send 委派 
-                var DMDHelper = new TaskDMDHelper<ASI.Wanda.DMD.DMD_API>(mDMD_API, (api, message) => api.Send(message));
-                
                 if (DMDServerMessage.MessageType == ASI.Wanda.DMD.Message.Message.eMessageType.Ack)
                 {
                     ///Ack
@@ -325,38 +327,42 @@ namespace ASI.Wanda.DCU.TaskDMD
         {
             try
             {
-                if (mDMD_API != null)
-                {
-                    mDMD_API.ReceivedEvent -= DMD_API_ReceivedEvent;
-                    mDMD_API.DisconnectedEvent -= DMD_API_DisconnectedEvent;
-                    mDMD_API.Dispose(); 
-                }
+                DisconnectExistingDMDAPI();
 
                 mDMD_API = new ASI.Wanda.DMD.DMD_API();
                 mDMD_API.ReceivedEvent += DMD_API_ReceivedEvent;
                 mDMD_API.DisconnectedEvent += DMD_API_DisconnectedEvent;
                 mDMDServerConnStr = ConfigApp.Instance.GetConfigSetting("DMD_Server");
+
                 int iResult = mDMD_API.Initial(mDMDServerConnStr);
                 if (iResult == 0)
                 {
                     mIsConnectedToDMD = true;
-                    ASI.Lib.Log.DebugLog.Log(mProcName, $"與DMD Server連線成功");
-                    //連線成功時，重新計算最後一次收到DMD的時間 
-                    LastHeartbeatTime = System.DateTime.Now;
+                    ASI.Lib.Log.DebugLog.Log(mProcName, "與DMD Server連線成功");
+                    LastHeartbeatTime = DateTime.Now;
                 }
                 else
                 {
                     mIsConnectedToDMD = false;
-                    ASI.Lib.Log.DebugLog.Log(mProcName, $"與DMD Server連線失敗，DMD_Server:{mDMDServerConnStr}");
+                    ASI.Lib.Log.DebugLog.Log(mProcName, $"與DMD Server連線失敗，DCU_Server: {mDMDServerConnStr}");
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
+                ASI.Lib.Log.ErrorLog.Log(mProcName, $"Exception in ConnToDMDServer: {ex}");
             }
         }
 
-
+        private void DisconnectExistingDMDAPI()
+        {
+            if (mDMD_API != null)
+            {
+                mDMD_API.ReceivedEvent -= DMD_API_ReceivedEvent;
+                mDMD_API.DisconnectedEvent -= DMD_API_DisconnectedEvent;
+                mDMD_API.Dispose();
+                ASI.Lib.Log.DebugLog.Log(mProcName, "Existing DMD_API disconnected and disposed.");
+            }
+        }
 
 
     }

@@ -27,8 +27,11 @@ namespace ASI.Wanda.DMD.Message
         /// </summary>
         public readonly byte HEAD = 0xAC;
 
+
+
         public enum eMessageType
         {
+            Heartbeat = 0x00,
             Ack = 0x01,
             Command = 0x02,
             Response = 0x03,
@@ -36,7 +39,7 @@ namespace ASI.Wanda.DMD.Message
         }
 
         /// <summary>
-        /// 訊息類別碼，分別為Ack = 0x01；Change/Command = 0x02；Response = 0x03
+        /// 訊息類別碼，分別為Ack = 0x01；Change/Command = 0x02；Response = 0x03 
         /// </summary>
         public eMessageType MessageType;
 
@@ -197,12 +200,12 @@ namespace ASI.Wanda.DMD.Message
         #endregion
 
         /// <summary>
-        /// 設定或取得CRC16檢查碼，固定為2個byte。
+        /// 設定或取得CRC16檢查碼，固定為2個byte。 
         /// </summary>
         public byte[] CRC16 { get; set; }
        
         /// <summary>
-        /// 依據目前所在封包內容取得檢查碼(CRC16檢查碼校驗範圍：起始識別碼 + 訊息類別碼 + 訊息識別碼 + 訊息長度 + 訊息內容)，固定為2個byte。
+        /// 依據目前所在封包內容取得檢查碼(CRC16檢查碼校驗範圍：起始識別碼 + 訊息類別碼 + 訊息識別碼 + 訊息長度 + 訊息內容)，固定為2個byte。  
         /// </summary>
         /// <returns></returns>
         public byte[] GenCRC16()

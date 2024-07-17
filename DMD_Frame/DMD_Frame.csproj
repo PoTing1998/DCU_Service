@@ -60,6 +60,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y "$(ProjectDir)$(OutDir)*.*" "D:\ASI.Wanda.DMD.DCUService"</PostBuildEvent>
+    <PostBuildEvent>xcopy /y "$(ProjectDir)$(OutDir)*.*" "D:\ASI.Wanda.DMD.DMDService"</PostBuildEvent>
   </PropertyGroup>
 </Project>

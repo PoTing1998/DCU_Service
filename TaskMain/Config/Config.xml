@@ -16,7 +16,7 @@
 	<add key="Process" value="TaskSDU" />
 	<add key="Process" value="TaskLPD" />
 	<add key="PDUComPort" value="3" />
-	<add key="CPDUBaudrate" value="38400" />
+	<add key="PDUBaudrate" value="38400" />
 	<add key="UPComPort" value="1" />
 	<add key="UPBaudrate" value="38400" />
 	<add key="LPDComPort" value="2" />
