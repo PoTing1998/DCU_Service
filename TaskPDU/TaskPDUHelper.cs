@@ -10,17 +10,18 @@ using System.Text;
 using System.Threading.Tasks;
 using ASI.Wanda.DCU.DB.Models.DMD;
 using ASI.Wanda.DCU.DB.Tables.DMD;
+using System.Text.RegularExpressions;
 
 namespace ASI.Wanda.DCU.TaskPDU
 {
 
-    class DeviceInfo
+    public class DeviceInfo
     {
-        public string StationID { get; set; }
-        public string AreaID { get; set; }
-        public string DeviceID { get; set; }
+        public string Station { get; set; }
+        public string Location { get; set; }
+        public string DeviceWithNumber { get; set; }
     }
-    public  class TaskPDUHelper 
+    public class TaskPDUHelper
     {
 
         private string _mProcName;
@@ -30,76 +31,92 @@ namespace ASI.Wanda.DCU.TaskPDU
             _mProcName = mProcName;
             _mSerial = serial;
         }
-        static DeviceInfo SplitStringToDeviceInfo(string input)
+        private static DeviceInfo SplitStringToDeviceInfo(string deviceString)
         {
-            if (string.IsNullOrEmpty(input)) return null;
+            // 正則表達式模式
+            string pattern = @"([A-Z0-9]+)_([A-Z]+)_([A-Z]+-\d+)";
+            Match match = Regex.Match(deviceString, pattern);
 
-            string[] parts = input.Split('_');
-            if (parts.Length == 3)
+            if (match.Success)
             {
                 return new DeviceInfo
-                { 
-                    StationID = parts[0],  
-                    AreaID = parts[1],
-                    DeviceID = parts[2]
+                {
+                    Station = match.Groups[1].Value,
+                    Location = match.Groups[2].Value,
+                    DeviceWithNumber = match.Groups[3].Value
                 };
             }
-            return null;
+            else
+            {
+                throw new ArgumentException("Invalid device string format", nameof(deviceString));
+            }
         }
         #region  版型的操作    
         public void SendMessageToDisplay(string target_du, string dbName1, string dbName2)
         {
-            var deviceInfo = SplitStringToDeviceInfo(target_du); 
-            if (deviceInfo != null)
+            ASI.Lib.Log.DebugLog.Log(_mProcName + "Hepler", $" received a message {target_du}  {dbName1}  {dbName2}");
+            try
             {
-                var message_id = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(deviceInfo.StationID, deviceInfo.AreaID, deviceInfo.DeviceID);
-                // Add your code here to use message_id   
-                var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id); 
 
-                var fontColor = ProcessMEssageColor(message_layout.font_color); 
-                //取得各項參數   
-                var processor = new PacketProcessor();   
+                var deviceInfo = SplitStringToDeviceInfo(target_du);
+               ASI.Lib.Log.DebugLog.Log(_mProcName + "deviceInfo", $" received a message {deviceInfo.Station}  {deviceInfo.Location}  {deviceInfo.DeviceWithNumber}");
+                if (deviceInfo != null)
+                {
+                
+                    var message_id = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
+                    // Add your code here to use message_id   
+                    var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id);
 
-                var textStringBody = new TextStringBody
-                {
-                    RedColor = fontColor[0],
-                    GreenColor = fontColor[1],
-                    BlueColor = fontColor[2],
-                    StringText = message_layout.message_content
-                };
-                var stringMessage = new StringMessage
-                {
-                    StringMode = 0x2A, // TextMode (Static) 
-                    StringBody = textStringBody
-                };
+                    var fontColor = ProcessMEssageColor(message_layout.font_color);
+                    //取得各項參數   
+                    var processor = new PacketProcessor();
 
-                var fullWindowMessage = new FullWindow //Display version
-                {
-                    MessageType = 0x71, // FullWindow message 
-                    MessageLevel = (byte)message_layout.message_priority, //  level
-                    MessageScroll = new ScrollInfo
+                    var textStringBody = new TextStringBody
                     {
-                        ScrollMode = 0x64,
-                        ScrollSpeed = (byte)message_layout.move_speed,
-                        PauseTime = 10
-                    },
-                    MessageContent = new List<StringMessage> { stringMessage }
-                };
-                var sequence1 = new Display.Sequence
-                {
-                    SequenceNo = 1,
-                    Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
-                    Messages = new List<IMessage> { fullWindowMessage }
-                };
+                        RedColor = fontColor[0],
+                        GreenColor = fontColor[1],
+                        BlueColor = fontColor[2],
+                        StringText = message_layout.message_content
+                    };
+                    var stringMessage = new StringMessage
+                    {
+                        StringMode = 0x2A, // TextMode (Static) 
+                        StringBody = textStringBody
+                    };
 
-                var startCode = new byte[] { 0x55, 0xAA };
-                var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
-                var packet = processor.CreatePacket(startCode, new List<byte> { 0x23, 0x24 }, function.FunctionCode, new List<Sequence> { sequence1 });
-                var serializedData = processor.SerializePacket(packet);
-                ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
+                    var fullWindowMessage = new FullWindow //Display version
+                    {
+                        MessageType = 0x71, // FullWindow message 
+                        MessageLevel = (byte)message_layout.message_priority, //  level
+                        MessageScroll = new ScrollInfo
+                        {
+                            ScrollMode = 0x64,
+                            ScrollSpeed = (byte)message_layout.move_speed,
+                            PauseTime = 10
+                        },
+                        MessageContent = new List<StringMessage> { stringMessage }
+                    };
+                    var sequence1 = new Display.Sequence
+                    {
+                        SequenceNo = 1,
+                        Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
+                        Messages = new List<IMessage> { fullWindowMessage }
+                    };
 
-                _mSerial.Send(serializedData);
+                    var startCode = new byte[] { 0x55, 0xAA };
+                    var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
+                    var packet = processor.CreatePacket(startCode, new List<byte> { 0x23, 0x24 }, function.FunctionCode, new List<Sequence> { sequence1 });
+                    var serializedData = processor.SerializePacket(packet);
+                    ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
+
+                    _mSerial.Send(serializedData);
+                }
             }
+            catch (Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex.ToString());
+            }
+
         }
         /// <summary>
         /// 左測月台碼
@@ -252,7 +269,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                 ASI.Lib.Log.ErrorLog.Log("Error ProcessMessage ProcessMessage", ex);
                 return null;
             }
- 
+
         }
 
 

@@ -147,6 +147,7 @@ namespace ASI.Wanda.DCU.TaskDMD
         private void DMD_API_ReceivedEvent(ASI.Wanda.DMD.Message.Message DMDServerMessage)
         {
             string sLog = "";
+           
             try
             {
                 ////{"station":0,"seatID":"TEST","msg_id":["測試內容"],
@@ -162,7 +163,7 @@ namespace ASI.Wanda.DCU.TaskDMD
 
                 var target = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
                 ////判斷車站
-                string DCUSation = target.Split('_')[0];
+               // string DCUSation = target.Split('_')[0];
                 int iMsgID = DMDServerMessage.MessageID;
                 if (DMDServerMessage.MessageType == ASI.Wanda.DMD.Message.Message.eMessageType.Ack)
                 {
@@ -172,17 +173,24 @@ namespace ASI.Wanda.DCU.TaskDMD
                 }
                 else if (DMDServerMessage.MessageType == ASI.Wanda.DMD.Message.Message.eMessageType.Command)
                 {
-                    sLog = $"從CMFT Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
-                    ASI.Lib.Log.DebugLog.Log("FromCMFTDate", $"{sLog}\r\n");
-
+                    sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
+                    ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
+                    //收到封包
+                    var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
+                    //組封包 
+                    var sendPreRecordMessage = new DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage(ASI.Wanda.DMD.Enum.Station.OCC);
+                    sendPreRecordMessage.seatID = oJsonObject.seatID;
+                    sendPreRecordMessage.msg_id = oJsonObject.msg_id;
+                    sendPreRecordMessage.target_du = oJsonObject.target_du;
                     //判斷從過來的ObjactName 
                     switch (sJsonObjectName)
                     {
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMsg: //預錄訊息
+                           
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUPreRecordMessage();
                             DMDHelper.UpdataConfig();
-                            var RecordMessage = new ASI.Wanda.DCU.Message.Message( ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(DMDServerMessage.JsonContent));
+                            var RecordMessage = new ASI.Wanda.DCU.Message.Message( ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendPreRecordMessage));
                             DMDHelper.SendToTaskUPD(2,1, RecordMessage.JsonContent);
                             DMDHelper.SendToTaskPDU(2, 1, RecordMessage.JsonContent);
                             DMDHelper.SendToTaskSDU(2, 1, RecordMessage.JsonContent);
@@ -192,7 +200,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUInstantMessage();
                             DMDHelper.UpdataConfig();
-                            var Msg = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(DMDServerMessage.JsonContent));
+                            var Msg = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendPreRecordMessage));
                             DMDHelper.SendToTaskUPD(2, 1, Msg.JsonContent);
                             DMDHelper.SendToTaskPDU(2, 1, Msg.JsonContent);
                             DMDHelper.SendToTaskSDU(2, 1, Msg.JsonContent);

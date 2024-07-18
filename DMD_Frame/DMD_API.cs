@@ -265,60 +265,81 @@ namespace ASI.Wanda.DMD
         /// </returns>
         private int SocketConnect(string connStr)
         {
-            int iOpenResult = 0;
+            int openResult = 0;
+
             try
             {
-                mSocket = new Lib.Comm.Socket.SocketLib();
+                mSocket = new Lib.Comm.Socket.SocketLib
+                {
+                    ConnectionString = connStr
+                };
 
-                mSocket.ConnectionString = connStr;
                 mSocket.ReceivedEvent += Socket_ReceivedEvent;
                 mSocket.ErrorEvent += Socket_ErrorEvent;
 
                 if (mSocket.Type == "Server")
-                {
-                    mSocket.OpenEvent += Socket_OpenEvent;
-                    mSocket.CloseEvent += Socket_CloseEvent;
-                    mSocket.ConnectedEvent += Socket_ConnectedEvent;
-                    mSocket.DisconnectedEvent += Socket_DisconnectedEvent;
+                { 
+                    SetupServerSocket();
+                    ASI.Lib.Log.DebugLog.Log(mProcName, $"Socket Server嘗試開啟，ConnectionString = {mSocket.ConnectionString}");
 
-                    ASI.Lib.Log.DebugLog.Log(mProcName, "Socket Server嘗試開啟，ConnectionString = " + mSocket.ConnectionString);
-                    iOpenResult = mSocket.Open();
-                    if (iOpenResult == 0 &&
-                        mSocket.IsConnect)
-                    {
-                        ASI.Lib.Log.DebugLog.Log(mProcName, "Socket Server開啟成功! ConnectionString = " + mSocket.ConnectionString);
-                    }
-                    else
-                    {
-                        ASI.Lib.Log.DebugLog.Log(mProcName, $"Socket Server開啟失敗! 失敗碼:{iOpenResult} ； ConnectionString = {mSocket.ConnectionString}");
-                    }
+                    openResult = mSocket.Open();
+                    LogServerSocketResult(openResult);
                 }
                 else
                 {
-                    //Socket Client
-                    mSocket.OtherSideDisconnectEvent += Socket_OtherSideDisconnectEvent;
+                    SetupClientSocket();
+                    ASI.Lib.Log.DebugLog.Log(mProcName, $"Socket Client嘗試連線，ConnectionString = {mSocket.ConnectionString}");
 
-                    ASI.Lib.Log.DebugLog.Log(mProcName, "Socket Client嘗試連線，ConnectionString = " + mSocket.ConnectionString);
-                    iOpenResult = mSocket.Open();
-                    if (iOpenResult == 0 &&
-                        mSocket.IsConnect)
-                    {
-                        ASI.Lib.Log.DebugLog.Log(mProcName, "Socket 連線成功! ConnectionString = " + mSocket.ConnectionString);
-                    }
-                    else
-                    {
-                        ASI.Lib.Log.DebugLog.Log(mProcName, $"Socket 連線失敗! 失敗碼:{iOpenResult} ； ConnectionString = {mSocket.ConnectionString}");
-                    }
+                    openResult = mSocket.Open();
+                    LogClientSocketResult(openResult);
                 }
 
-                return iOpenResult;
+                return openResult;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 ASI.Lib.Log.ErrorLog.Log(mProcName, ex.StackTrace);
                 return -1;
             }
         }
+
+        private void SetupServerSocket()
+        {
+            mSocket.OpenEvent += Socket_OpenEvent;
+            mSocket.CloseEvent += Socket_CloseEvent;
+            mSocket.ConnectedEvent += Socket_ConnectedEvent;
+            mSocket.DisconnectedEvent += Socket_DisconnectedEvent;
+        }
+
+        private void SetupClientSocket()
+        {
+            mSocket.OtherSideDisconnectEvent += Socket_OtherSideDisconnectEvent;
+        }
+
+        private void LogServerSocketResult(int openResult)
+        {
+            if (openResult == 0 && mSocket.IsConnect)
+            {
+                ASI.Lib.Log.DebugLog.Log(mProcName, $"Socket Server開啟成功! ConnectionString = {mSocket.ConnectionString}");
+            }
+            else
+            {
+                ASI.Lib.Log.DebugLog.Log(mProcName, $"Socket Server開啟失敗! 失敗碼:{openResult} ； ConnectionString = {mSocket.ConnectionString}");
+            }
+        }
+
+        private void LogClientSocketResult(int openResult)
+        {
+            if (openResult == 0 && mSocket.IsConnect)
+            {
+                ASI.Lib.Log.DebugLog.Log(mProcName, $"Socket 連線成功! ConnectionString = {mSocket.ConnectionString}");
+            }
+            else
+            {
+                ASI.Lib.Log.DebugLog.Log(mProcName, $"Socket 連線失敗! 失敗碼:{openResult} ； ConnectionString = {mSocket.ConnectionString}");
+            }
+        }
+
 
         private void SocketDisConnect()
         {

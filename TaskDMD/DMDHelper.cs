@@ -48,7 +48,8 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             try
             {
-                var MSGFromTaskUPD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dmdserverTaskUPD"));
+
+                var MSGFromTaskUPD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskupd"));
                 //組相對應的封包 
                 MSGFromTaskUPD.MessageType = msgType;
                 MSGFromTaskUPD.MessageID = msgID;
@@ -64,7 +65,9 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             try
             {
-                var MSGFromTaskPDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dmdserverTaskPDU"));
+                var sendPreRecordMessage = new JsonObject.DCU.FromDMD.SendPreRecordMessage(Enum.Station.OCC);
+      
+                var MSGFromTaskPDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskpdu"));
                 //組相對應的封包 
                 MSGFromTaskPDU.MessageType = msgType;
                 MSGFromTaskPDU.MessageID = msgID;
@@ -80,7 +83,7 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             try
             {
-                var MSGFromTaskSDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dmdserverTaskSDU"));
+                var MSGFromTaskSDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertasksdu"));
                 //組相對應的封包 
                 MSGFromTaskSDU.MessageType = msgType;
                 MSGFromTaskSDU.MessageID = msgID;
@@ -96,7 +99,7 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             try
             {
-                var MSGFromTaskLPD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dmdserverTaskLPD"));
+                var MSGFromTaskLPD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertasklpd"));
                 //組相對應的封包 
                 MSGFromTaskLPD.MessageType = msgType;
                 MSGFromTaskLPD.MessageID = msgID;
@@ -248,8 +251,6 @@ namespace ASI.Wanda.DMD.TaskDMD
             }
         }
 
-
-
         /// <summary>
         /// 更新DMDPreRecordMessage資料表   
         /// </summary>
@@ -331,14 +332,16 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             try
             {
+                //從DMD撈取資料
                 var tempList = ASI.Wanda.DMD.DB.Tables.System.sysConfig.SelectAll();
-                ///轉換過程 
+                // 轉換過程
                 var convertedList = tempList
-                    .Select(item => new ASI.Wanda.DMD.DB.Models.System.sys_config
+                    .Select(item => new ASI.Wanda.DCU.DB.Models.System.sys_config
                     {
                         config_name = item.config_name,
                         config_value = item.config_value,
                         config_description = item.config_description,
+                        system_id = item.system_id,
                         remark = item.remark,
                         ins_user = item.ins_user,
                         ins_time = item.ins_time,
@@ -347,23 +350,24 @@ namespace ASI.Wanda.DMD.TaskDMD
                     })
                     .ToList();
 
-                ///遍歷轉換後的列表，進行更新操作 
+                // 遍歷轉換後的列表，進行更新操作   
                 foreach (var item in convertedList)
                 {
-                    DCU.DB.Tables.System.sysConfig.InsertSystemConfig(
+                    ASI.Wanda.DCU.DB.Tables.System.sysConfig.InsertSystemConfig(
                        item.config_name,
                        item.config_value,
-                       item.config_description
+                       item.config_description,
+                       item.system_id,
+                       item.remark
                     );
                 }
-
                 return convertedList.Cast<DCU.DB.Tables.System.sysConfig>();
             }
             catch (Exception updateException)
             {
-                ///記錄例外狀況 
+                // 記錄例外狀況
                 ASI.Lib.Log.ErrorLog.Log("Error updating dmdPreRecordMessage", updateException);
-                return Enumerable.Empty<DCU.DB.Tables.System.sysConfig>();
+                return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.System.sysConfig>();
             }
         }
 

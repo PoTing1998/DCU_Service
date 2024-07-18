@@ -269,7 +269,14 @@ namespace ASI.Wanda.DCU.DB.Models.System
             get;
             set;
         }
-
+        /// <summary>  
+        /// 備註        
+        /// </summary> 
+        public string system_id
+        {
+            get;
+            set;
+        }
         /// <summary>  
         /// 備註        
         /// </summary> 
