@@ -12,7 +12,7 @@ using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ASI.Wanda.DCU.DB.Tables 
+namespace ASI.Wanda.DCU.DB.Tables
 {
     abstract public class Table<T>
     {
@@ -55,14 +55,14 @@ namespace ASI.Wanda.DCU.DB.Tables
                 IDbCommand command = new NpgsqlCommand();
                 command.CommandText = commandString;
                 command.Connection = connection;
-                if(sqlParameters != null)
+                if (sqlParameters != null)
                 {
                     command.Parameters.Add(sqlParameters);
                 }
 
 
                 IDataReader reader;
-                reader = command.ExecuteReader(CommandBehavior.CloseConnection| CommandBehavior.SingleResult);
+                reader = command.ExecuteReader(CommandBehavior.CloseConnection | CommandBehavior.SingleResult);
 
 
                 while (reader.Read())
@@ -71,7 +71,7 @@ namespace ASI.Wanda.DCU.DB.Tables
                     model = Activator.CreateInstance<T>();
 
 
-                    foreach(PropertyInfo property in model.GetType().GetRuntimeProperties())
+                    foreach (PropertyInfo property in model.GetType().GetRuntimeProperties())
                     {
                         Type _modelColType = property.PropertyType;
                         string _modelColName = property.Name;
@@ -85,12 +85,12 @@ namespace ASI.Wanda.DCU.DB.Tables
                             property.SetValue(model, _colValue, null);
                         }
                     }
-                   
+
                     modelList.Add(model);
 
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 如果發生異常，在錯誤訊息中包含 SQL 命令，然後重新拋出異常  
                 string errorMsg = string.Format(
@@ -113,7 +113,7 @@ namespace ASI.Wanda.DCU.DB.Tables
         static protected int NonQuery(string commandString, SqlParameter[] sqlParams = null)
         {
             List<T> modelList = new List<T>();
-            IDbConnection connection = new NpgsqlConnection();  
+            IDbConnection connection = new NpgsqlConnection();
             int impactRow = 0;
             try
             {
@@ -130,7 +130,7 @@ namespace ASI.Wanda.DCU.DB.Tables
 
                 impactRow = command.ExecuteNonQuery();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 string errorMsg = $"Sql命令:{Environment.NewLine}{commandString}";
                 throw new Exception(errorMsg, ex);
@@ -285,8 +285,9 @@ namespace ASI.Wanda.DCU.DB.Tables
             endString = "values(" + "\n" + endString + ")";
 
             //string commandString = insertString + "\n" + contentString + "\n" + endString + ";";
+          
             string commandString = insertString + "\n" + endString + ";";
-
+         
             return NonQuery(commandString, null);
         }
         static protected int Delete(params object[] pks)
@@ -314,7 +315,7 @@ namespace ASI.Wanda.DCU.DB.Tables
             string commandString = deleteString + "\n" + whereString + ";";
             return NonQuery(commandString, null);
         }
-       
+
         static protected List<T> SelectWhere(string where, eSortWay inserTimeSortWay = eSortWay.Asc)
         {
             ICollection<T> result = null;
@@ -342,7 +343,7 @@ namespace ASI.Wanda.DCU.DB.Tables
         }
 
 
-  
+
 
         static protected int DeleteWhere(string where)
         {

@@ -54,7 +54,6 @@ namespace ASI.Wanda.DCU.TaskPDU
         #region  版型的操作    
         public void SendMessageToDisplay(string target_du, string dbName1, string dbName2)
         {
-            ASI.Lib.Log.DebugLog.Log(_mProcName + "Hepler", $" received a message {target_du}  {dbName1}  {dbName2}");
             try
             {
 

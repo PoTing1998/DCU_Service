@@ -174,6 +174,8 @@ namespace ASI.Wanda.DCU.TaskDMD
                 else if (DMDServerMessage.MessageType == ASI.Wanda.DMD.Message.Message.eMessageType.Command)
                 {
                     sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
+
+                    UpdataConfig();
                     ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
                     //收到封包
                     var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
@@ -182,14 +184,14 @@ namespace ASI.Wanda.DCU.TaskDMD
                     sendPreRecordMessage.seatID = oJsonObject.seatID;
                     sendPreRecordMessage.msg_id = oJsonObject.msg_id;
                     sendPreRecordMessage.target_du = oJsonObject.target_du;
+                 
                     //判斷從過來的ObjactName 
                     switch (sJsonObjectName)
                     {
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMsg: //預錄訊息
-                           
+                     
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUPreRecordMessage();
-                            DMDHelper.UpdataConfig();
                             var RecordMessage = new ASI.Wanda.DCU.Message.Message( ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendPreRecordMessage));
                             DMDHelper.SendToTaskUPD(2,1, RecordMessage.JsonContent);
                             DMDHelper.SendToTaskPDU(2, 1, RecordMessage.JsonContent);
@@ -197,9 +199,9 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.SendToTaskLPD(2, 1, RecordMessage.JsonContent);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendInstantMsg: //即時訊息 
+                           // DMDHelper.UpdataConfig();
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUInstantMessage();
-                            DMDHelper.UpdataConfig();
                             var Msg = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendPreRecordMessage));
                             DMDHelper.SendToTaskUPD(2, 1, Msg.JsonContent);
                             DMDHelper.SendToTaskPDU(2, 1, Msg.JsonContent);
@@ -371,7 +373,51 @@ namespace ASI.Wanda.DCU.TaskDMD
                 ASI.Lib.Log.DebugLog.Log(mProcName, "Existing DMD_API disconnected and disposed.");
             }
         }
+        /// <summary>
+        /// 從DMD更新Config的表 拿到相對色碼顏色  
+        /// </summary>
+        public IEnumerable<ASI.Wanda.DCU.DB.Tables.System.sysConfig> UpdataConfig()
+        {
+            try
+            {
+                var tempList = ASI.Wanda.DMD.DB.Tables.System.sysConfig.SelectAll();
+                ///轉換過程 
+                var convertedList = tempList
+                    .Select(item => new ASI.Wanda.DMD.DB.Models.System.sys_config
+                    {
+                        config_name = item.config_name,
+                        config_value = item.config_value,
+                        config_description = item.config_description,
+                        system_id = item.system_id,
+                        remark = item.remark,
+                        ins_user = item.ins_user,
+                        ins_time = item.ins_time,
+                        upd_user = item.upd_user,
+                        upd_time = item.upd_time,
+                    })
+                    .ToList();
+               
+                ///遍歷轉換後的列表，進行更新操作 
+                foreach (var item in convertedList)
+                {
+                    ASI.Wanda.DCU.DB.Tables.System.sysConfig.UpdataSystemConfig(
+                       item.config_name,
+                       item.config_value,
+                       item.config_description,
+                       item.system_id,
+                       item.remark
+                    );
+                }
 
+                return convertedList.Cast<ASI.Wanda.DCU.DB.Tables.System.sysConfig>();
+            }
+            catch (Exception updateException)
+            {
+                ///記錄例外狀況 
+                ASI.Lib.Log.ErrorLog.Log("Error updating sysConfig", updateException);
+                return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.System.sysConfig>();
+            }
+        }
 
     }
 }
