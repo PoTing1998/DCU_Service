@@ -281,13 +281,13 @@ namespace ASI.Wanda.DCU.TaskPDU
                     HandleCase01(dataBytes, sRcvTime, sJsonData);
                     break;
                 case 0x06:
-                    ASI.Lib.Log.DebugLog.Log($"{mProcName} received a correct message from TaskPA", sJsonData);
+                    ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到來自 TaskPA 的正確消息", sJsonData);
                     break;
                 case 0x15:
                     HandleCase15(dataBytes, sRcvTime, sJsonData);
                     break;
                 default:
-                    ASI.Lib.Log.DebugLog.Log($"{mProcName} received an unknown error message from PA", sJsonData);
+                    ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到來自 PA 的未知錯誤消息", sJsonData);
                     break;
             }
         }
@@ -305,26 +305,27 @@ namespace ASI.Wanda.DCU.TaskPDU
 
         private void HandleCase15(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
-            ASI.Lib.Log.DebugLog.Log($"{mProcName} processing 0x15 case", sJsonData);
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} 處理 0x15 案例", sJsonData);
             string errorLog;
             switch (dataBytes[4])
             {
                 case 0x01:
-                    errorLog = "Indicates packet data length error";
+                    errorLog = "表示數據包長度錯誤";
                     break;
                 case 0x02:
-                    errorLog = "Indicates LRC error";
+                    errorLog = "表示 LRC 錯誤";
                     break;
                 case 0x03:
-                    errorLog = "Indicates other errors";
+                    errorLog = "表示其他錯誤";
                     break;
                 default:
-                    errorLog = "Indicates unknown error";
+                    errorLog = "表示未知錯誤";
                     break;
             }
 
-            ASI.Lib.Log.DebugLog.Log($"{mProcName} received an error message from TaskPA: {errorLog} at {sRcvTime}", sJsonData);
+            ASI.Lib.Log.DebugLog.Log($"{mProcName} 在 {sRcvTime} 收到來自 TaskPA 的錯誤消息：{errorLog}", sJsonData);
         }
+
 
         #region serialport
         void SerialPort_DisconnectedEvent(string source) //斷線處理  
