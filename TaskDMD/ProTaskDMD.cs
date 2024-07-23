@@ -141,7 +141,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             return base.StartTask(pComputer, pProcName);
         }
         /// <summary>
-        /// 從DMDServer接收訊息    
+        /// 從DMDServer接收訊息      
         /// </summary>
         /// <param name="DMDServerMessage"></param> 
         private void DMD_API_ReceivedEvent(ASI.Wanda.DMD.Message.Message DMDServerMessage)

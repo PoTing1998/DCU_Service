@@ -73,7 +73,6 @@ namespace ASI.Wanda.DCU.TaskPDU
             string dbUserID = "postgres";
             string dbPassword = "postgres";
             string currentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
-         
             ///serialPort的開啟 
             var iComPort = ConfigApp.Instance.GetConfigSetting("PDUComPort"); ;
             var iBaudrate = ConfigApp.Instance.GetConfigSetting("PDUBaudrate"); ;
@@ -82,26 +81,26 @@ namespace ASI.Wanda.DCU.TaskPDU
             serial.ConnectionString = connectionString;
             serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
             serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
-            int result = -1; // Default to an error state
+            int result = -1; // 默認為錯誤狀態
             try
             {
                 result = serial.Open();
                 if (result != 0)
                 {
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, "Serial port open failed");
-                    return result; // Return immediately if the serial port failed to open
+                    ASI.Lib.Log.ErrorLog.Log(mProcName, "打開串口失敗");
+                    return result; // 如果串口打開失敗，立即返回
                 }
                 // 初始化資料庫連線
                 if (!ASI.Wanda.DCU.DB.Manager.Initializer(dbIP, dbPort, dbName, dbUserID, dbPassword, currentUserID))
                 {
                     ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗! {dbIP}:{dbPort};userid={dbUserID}");
-                    return -1; // Return immediately if the database initialization failed
+                    return -1; // 如果資料庫初始化失敗，立即返回
                 }
             }
             catch (System.Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, $"例外發生! {ex.Message}");
-                return -1; // Return immediately if any exception occurs
+                ASI.Lib.Log.ErrorLog.Log(mProcName, $"發生例外! {ex.Message}");
+                return -1; // 如果發生任何例外，立即返回
             }
 
             return base.StartTask(pComputer, pProcName);
@@ -169,7 +168,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ProcMsg.MSGFromTaskPA(new MSGFrameBase(""));
                 if (MSGFromTaskPA.UnPack(pMessage) > 0)
                 {
-                    var sJsonData = MSGFromTaskPA.JsonData;
+                    var sJsonData = MSGFromTaskPA.JsonData;  
                     ASI.Lib.Log.DebugLog.Log(mProcName + " received a message from TaskPA ", sJsonData); // Log the received message 
                     // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除  
                     // 假設sJsonData已經是十六進位字串格式，直接解析

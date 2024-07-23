@@ -106,7 +106,6 @@ namespace ASI.Wanda.DMD.JsonObject.DCU.FromDMD
             public Enum.SqlCommand SqlCommand { get; set; }
 
             public string dbName1 { get; set; } = "dmd_power_setting";
-
         }
         //(10)	群組設定 
         public class GroupSetting : ASI.Wanda.DMD.JsonObject.Base

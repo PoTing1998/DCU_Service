@@ -94,10 +94,10 @@ namespace ASI.Wanda.DCU.TaskPA
                 string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
                 var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
 
-                // Log the initial content of dataBytes
+                // 記錄 dataBytes 的初始內容
                 ASI.Lib.Log.DebugLog.Log($"{mProcName} initial dataBytes: ", sHexString);
 
-                // Form the packet for DCU
+                // 構建 DCU 的封包
                 if (dataBytes.Length >= 3)
                 {
                     byte dataByte2 = dataBytes[2];
@@ -105,68 +105,69 @@ namespace ASI.Wanda.DCU.TaskPA
 
                     if (dataByte2 == 0x01)
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} processing 0x01 case", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 處理 0x01 案例", sHexString);
                         dataBytes[2] = 0x06;
-                        Array.Resize(ref dataBytes, dataBytes.Length - 1); // Remove the last byte
+                        Array.Resize(ref dataBytes, dataBytes.Length - 1); // 移除最後一個位元組
                         byte newLRC = CalculateLRC(dataBytes);
-                        Array.Resize(ref dataBytes, dataBytes.Length + 1); // Add a byte back
+                        Array.Resize(ref dataBytes, dataBytes.Length + 1); // 再添加一個位元組
                         dataBytes[dataBytes.Length - 1] = newLRC;
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} replied to TaskPA message at {sRcvTime}", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 回應 TaskPA 消息於 {sRcvTime}", sHexString);
                     }
                     else if (dataByte2 == 0x06)
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} received a correct message from TaskPA", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到 TaskPA 正確消息", sHexString);
                     }
                     else if (dataByte2 == 0x15)
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} processing 0x15 case", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 處理 0x15 案例", sHexString);
                         string slog = "";
-                        if (dataBytes[4] == 0x01) 
+                        if (dataBytes[4] == 0x01)
                         {
-                            slog = "Indicates packet data length error";
+                            slog = "表示數據包長度錯誤";
                         }
                         else if (dataBytes[4] == 0x02)
                         {
-                            slog = "Indicates LRC error";
+                            slog = "表示 LRC 錯誤";
                         }
                         else if (dataBytes[4] == 0x03)
                         {
-                            slog = "Indicates other errors";
+                            slog = "表示其他錯誤";
                         }
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} received an error message from TaskPA: {slog} at {sRcvTime}", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到 TaskPA 錯誤消息: {slog} 於 {sRcvTime}", sHexString);
                     }
                     else
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} received an unknown error message from PA", sHexString); // Log other unknown error message
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到來自 PA 的未知錯誤消息", sHexString); // 記錄其他未知錯誤消息
                     }
                 }
-                else 
+                else
                 {
-                    ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes length less than 3", sHexString);
-                    ASI.Lib.Log.DebugLog.Log($"{mProcName} replied to TaskPA message at {sRcvTime}", sHexString); // Log the reply message
+                    ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes 長度小於 3", sHexString);
+                    ASI.Lib.Log.DebugLog.Log($"{mProcName} 回應 TaskPA 消息於 {sRcvTime}", sHexString); // 記錄回應消息
                 }
 
                 var msg = new ASI.Wanda.DMD.Message.Message(ASI.Wanda.DMD.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sHexString));
 
-                // Send twice to ensure the broadcast is received
-                serial.Send(arrPacketByte); 
-                ASI.Lib.Log.DebugLog.Log("Content of the packet sent to PA the first time", sHexString.ToString());
-                serial.Send(arrPacketByte); 
-                ASI.Lib.Log.DebugLog.Log("Content of the packet sent to PA the second time", sHexString.ToString());
+                // 發送兩次以確保廣播被接收
+                serial.Send(arrPacketByte);
+                ASI.Lib.Log.DebugLog.Log("發送到 PA 的封包內容第一次", sHexString.ToString());
+                serial.Send(arrPacketByte);
+                ASI.Lib.Log.DebugLog.Log("發送到 PA 的封包內容第二次", sHexString.ToString());
 
-                ///發送到各個看板
+                // 發送到各個看板
                 PAHelper.SendToTaskPDU(2, 1, msg.JsonContent);
                 PAHelper.SendToTaskSDU(2, 1, msg.JsonContent);
                 PAHelper.SendToTaskUPD(2, 1, msg.JsonContent);
                 PAHelper.SendToTaskLPD(2, 1, msg.JsonContent);
 
-                serial.Send(dataBytes); // Resend
+                serial.Send(dataBytes); // 重新發送
             }
             catch (Exception e)
             {
-                ASI.Lib.Log.ErrorLog.Log("Error reason", e.ToString());
+                ASI.Lib.Log.ErrorLog.Log("錯誤原因", e.ToString());
             }
         }
+
 
         void SerialPort_DisconnectedEvent(string source) //斷線處理 
         {
@@ -255,7 +256,7 @@ namespace ASI.Wanda.DCU.TaskPA
                         //將訊息傳給DCU
                         var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(mSGFromTaskDCU.JsonData);
 
-                        //組封包  
+                        //組封包 
                         var Res_SendPreRecordMessage = new ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage(ASI.Wanda.DMD.Enum.Station.OCC);
                         Res_SendPreRecordMessage.seatID = oJsonObject.seatID;
                         Res_SendPreRecordMessage.msg_id = oJsonObject.msg_id;
@@ -345,38 +346,5 @@ namespace ASI.Wanda.DCU.TaskPA
             return -1; 
         }
 
-        #region Method 
-
-        //private void SerialPort_ReceivedEvent(ASI.Wanda.PA.Message.Message.MessageType messageType, 
-        //   string station, string platForm, string situation)
-        //{
-        //    ASI.Lib.Log.DebugLog.Log("PA接收", messageType.ToString());
-        //    //回應PA
-        //    responseTimer = new System.Timers.Timer();
-        //    responseTimer.Interval = 3000;  
-        //    responseTimer.AutoReset = false; 
-        //    responseTimer.Elapsed += ResponseTimerElapsed; 
-        //    ///組成封包內容
-        //    ASI.Wanda.PA.Message.Message oPAMsg = new ASI.Wanda.PA.Message.Message(messageType); 
-            
-        //    oPAMsg.station = oPAMsg.GetStationValue(station);
-        //    oPAMsg.platform = oPAMsg.GetPlatformFromValue(platForm);
-        //    oPAMsg.situation = oPAMsg.GetSituationFromValue(situation);
-            
-        //    oPAMsg.SEQ = (byte)mSEQ++;  
-        //    oPAMsg.LRC = oPAMsg.GetMsgLRC();
-        //    arrPacketByte = ASI.Wanda.PA.Message.Helper.Pack(oPAMsg);  
-
-        //    string sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(arrPacketByte, " ");
-
-        //    //傳送兩次以確保廣播確實收到 
-        //    serial.Send(arrPacketByte);
-        //    ASI.Lib.Log.DebugLog.Log("傳送給PA的封包的內容第一次", sHexString.ToString());
-        //    serial.Send(arrPacketByte);
-        //    ASI.Lib.Log.DebugLog.Log("傳送給PA的封包的內容第二次", sHexString.ToString());
-            
-
-        //}
-        #endregion
     }
 }

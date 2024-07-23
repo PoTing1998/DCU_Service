@@ -17,8 +17,6 @@ namespace ASI.Wanda.DCU.Message
             MessageID = messageID;
             JsonContent = jsonContent;
         }
-
-
         #endregion
 
         #region property
