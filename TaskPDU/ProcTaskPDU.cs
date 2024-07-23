@@ -168,8 +168,8 @@ namespace ASI.Wanda.DCU.TaskPDU
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ProcMsg.MSGFromTaskPA(new MSGFrameBase(""));
                 if (MSGFromTaskPA.UnPack(pMessage) > 0)
                 {
-                    var sJsonData = MSGFromTaskPA.JsonData;  
-                    ASI.Lib.Log.DebugLog.Log(mProcName + " received a message from TaskPA ", sJsonData); // Log the received message 
+                    var sJsonData = MSGFromTaskPA.JsonData;
+                    ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到來自 TaskPA 的消息", sJsonData); // 記錄收到的消息
                     // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除  
                     // 假設sJsonData已經是十六進位字串格式，直接解析
                     var sHexString = sJsonData;
@@ -180,7 +180,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                     }
                     else
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes length less than 10", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes 長度小於 10", sHexString);
                     }
                     if (dataBytes.Length >= 3)
                     {
@@ -188,7 +188,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                     }
                     else
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes length less than 3", sJsonData);
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes 長度小於 3", sJsonData);
                     }
                 }
             }
