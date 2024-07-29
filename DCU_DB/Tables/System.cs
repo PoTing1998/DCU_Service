@@ -37,7 +37,6 @@ namespace ASI.Wanda.DCU.DB.Tables.System
     public class sysAlarmList : ASI.Wanda.DCU.DB.Tables.Table<sys_alarm_list>
     {
         #region Methods
-
         #endregion
     }
     public class sysConfig : ASI.Wanda.DCU.DB.Tables.Table<sys_config>

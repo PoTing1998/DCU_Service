@@ -270,7 +270,7 @@ namespace ASI.Wanda.DCU.DB.Models.System
             set;
         }
         /// <summary>  
-        /// 備註        
+        /// 系統ID       
         /// </summary> 
         public string system_id
         {

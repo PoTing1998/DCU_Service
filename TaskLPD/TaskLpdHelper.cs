@@ -196,7 +196,34 @@ namespace ASI.Wanda.DCU.TaskLPD
             };
         }
 
-
+        /// <summary>
+        /// 顯示器的畫面開啟
+        /// </summary>
+        public void PowerSettingOpen()
+        {
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Open = new byte[] { 0x3A, 0X00 };
+            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Open);
+            var serializedDataOpen = processor.SerializePacket(packetOpen);
+            _mSerial.Send(serializedDataOpen);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
+        }
+        /// <summary>
+        /// 顯示器的畫面關閉
+        /// </summary>
+        public void PowerSettingOff()
+        {
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Off = new byte[] { 0x3A, 0X01 };
+            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
+            var serializedDataOff = processor.SerializePacket(packetOff);
+            _mSerial.Send(serializedDataOff);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
+        }
         #region 資料庫的method
 
         /// <summary>

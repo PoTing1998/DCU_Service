@@ -97,7 +97,7 @@ namespace ASI.Wanda.DCU.TaskSDU
 
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
-                var packet = processor.CreatePacket(startCode, new List<byte> { 0x23, 0x24 }, function.FunctionCode, new List<Sequence> { sequence1 });
+                var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
                 var serializedData = processor.SerializePacket(packet);
                 ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
 
@@ -238,6 +238,34 @@ namespace ASI.Wanda.DCU.TaskSDU
                 Font = new FontSetting { Size = FontSize.Font16x16, Style = FontStyle.Ming },
                 Messages = new List<IMessage> { urgentMessage }
             };
+        }
+        /// <summary>
+        /// 顯示器的畫面開啟
+        /// </summary>
+        public void PowerSettingOpen()
+        {
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Open = new byte[] { 0x3A, 0X00 };
+            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Open);
+            var serializedDataOpen = processor.SerializePacket(packetOpen);
+            _mSerial.Send(serializedDataOpen);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
+        }
+        /// <summary>
+        /// 顯示器的畫面關閉
+        /// </summary>
+        public void PowerSettingOff()
+        {
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Off = new byte[] { 0x3A, 0X01 };
+            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
+            var serializedDataOff = processor.SerializePacket(packetOff);
+            _mSerial.Send(serializedDataOff);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
         }
 
         #region  資料庫的操作

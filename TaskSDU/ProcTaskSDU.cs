@@ -37,7 +37,6 @@ namespace ASI.Wanda.DCU.TaskSDU
         /// <returns></returns>
         public override int ProcEvent(string pLabel, string pBody)
         {
-            LogFile.Display(pBody);
 
             if (pLabel == MSGFinish.Label)
             {

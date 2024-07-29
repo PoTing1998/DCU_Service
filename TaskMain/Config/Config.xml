@@ -4,15 +4,16 @@
 	<add key="DCU_DB_IP" value="127.0.0.1" />
 	<add key="DCU_DB_Port" value="5432" />
 	<add key="DCU_DB_Name" value="DCUDB" />
+	<add key="DMD_DB_IP" value="127.0.0.1" />
+	<add key="DMD_DB_Port" value="5432" />
+	<add key="DMD_DB_Name" value="DMDDB" />
 	<add key="Current_User_ID" value="DCU Server" />
 	<add key="tasktime" value="tasktime;192.168.145.147;6022" />
-	<add key="Socket_Server_IP" value="10.107.26.99" />
-	<add key="Socket_Server_Port" value="8000" />
-	<add key="DCU_Server" value="IP=10.107.26.1;Port=8000;Type=Client" />
+	<add key="DMD_Server" value="IP=10.107.26.1;Port=8000;Type=Client" />
 	<add key="Process" value="TaskDMD" />
 	<add key="Process" value="TaskPA" />
-  <add key="Process" value="TaskUPD" />
-  <add key="Process" value="TaskPDU" />
+  	<add key="Process" value="TaskUPD" />
+  	<add key="Process" value="TaskPDU" />
 	<add key="Process" value="TaskSDU" />
 	<add key="Process" value="TaskLPD" />
 	<add key="PDUComPort" value="3" />

@@ -36,6 +36,8 @@ namespace Display
             return packet;
         }
 
+
+
         public CustomPacket CreatePacketOff(byte[] startCode, List<byte> ids, byte functionCode, byte[] sequences)
         {
             var customPacket = new CustomPacket

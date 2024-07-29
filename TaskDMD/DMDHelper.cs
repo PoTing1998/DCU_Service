@@ -332,11 +332,10 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             try
             {
-                //從DMD撈取資料
                 var tempList = ASI.Wanda.DMD.DB.Tables.System.sysConfig.SelectAll();
-                // 轉換過程
+                ///轉換過程 
                 var convertedList = tempList
-                    .Select(item => new ASI.Wanda.DCU.DB.Models.System.sys_config
+                    .Select(item => new ASI.Wanda.DMD.DB.Models.System.sys_config
                     {
                         config_name = item.config_name,
                         config_value = item.config_value,
@@ -350,10 +349,10 @@ namespace ASI.Wanda.DMD.TaskDMD
                     })
                     .ToList();
 
-                // 遍歷轉換後的列表，進行更新操作   
+                ///遍歷轉換後的列表，進行更新操作 
                 foreach (var item in convertedList)
                 {
-                    ASI.Wanda.DCU.DB.Tables.System.sysConfig.InsertSystemConfig(
+                    ASI.Wanda.DCU.DB.Tables.System.sysConfig.UpdataSystemConfig(
                        item.config_name,
                        item.config_value,
                        item.config_description,
@@ -361,12 +360,13 @@ namespace ASI.Wanda.DMD.TaskDMD
                        item.remark
                     );
                 }
-                return convertedList.Cast<DCU.DB.Tables.System.sysConfig>();
+
+                return convertedList.Cast<ASI.Wanda.DCU.DB.Tables.System.sysConfig>();
             }
             catch (Exception updateException)
             {
-                // 記錄例外狀況
-                ASI.Lib.Log.ErrorLog.Log("Error updating dmdPreRecordMessage", updateException);
+                ///記錄例外狀況 
+                ASI.Lib.Log.ErrorLog.Log("Error updating sysConfig", updateException);
                 return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.System.sysConfig>();
             }
         }

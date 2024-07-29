@@ -9,6 +9,7 @@ using ASI.Wanda.DMD.TaskDMD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Timers;
 
 
 namespace ASI.Wanda.DCU.TaskDMD
@@ -24,21 +25,24 @@ namespace ASI.Wanda.DCU.TaskDMD
         /// 最後一次收到DMD訊息的時間
         /// </summary>
         private System.DateTime LastHeartbeatTime = System.DateTime.Now;
-
         /// <summary>
         /// 與DMD Server的連線狀態
         /// </summary>
         private bool mIsConnectedToDMD = false;
 
+        private Timer _connectionTimer;
+        private const int ConnectionInterval = 10000; // 每10秒
 
-        /// <summary>
-        /// 設備訊息
+
+        // <summary>
+        /// 初始化並開始定時連線
         /// </summary>
-        public class DeviceInfo
-        {                                             
-            public string StationID { get; set; } 
-            public string AreaID { get; set; }
-            public string DeviceID { get; set; }
+        public void StartConnectionProcess()
+        {
+            _connectionTimer = new System.Timers.Timer(ConnectionInterval);
+            _connectionTimer.Elapsed += OnTimedEvent;
+            _connectionTimer.AutoReset = true; // 確保定時器重複執行
+            _connectionTimer.Enabled = true;
         }
 
         public string mDMDServerConnStr = "";
@@ -117,25 +121,40 @@ namespace ASI.Wanda.DCU.TaskDMD
         {
             mTimerTick = 30;
             mProcName = "TaskDMD";
+            // DCU Database Configuration
+            string sDCU_DBIP    = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
+            string sDCU_DBPort  = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
+            string sDCU_DBName  = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
+            // DMD Database Configuration
+            string sDMD_DBIP    = ConfigApp.Instance.GetConfigSetting("DMD_DB_IP");
+            string sDMD_DBPort  = ConfigApp.Instance.GetConfigSetting("DMD_DB_Port");
+            string sDMD_DBName  = ConfigApp.Instance.GetConfigSetting("DMD_DB_Name");
 
-            string sDBIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
-            string sDBPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
-            string sDBName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
             string sUserID = "postgres";
             string sPassword = "postgres";
             string sCurrentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
 
             try
             {
-                //"Server='localhost'; Port='5432'; Database='DMDDB'; User Id='postgres'; Password='postgres'"; 
-                if (!ASI.Wanda.DMD.DB.Manager.Initializer(sDBIP, sDBPort, sDBName, sUserID, sPassword, sCurrentUserID))
+                  //"Server='localhost'; Port='5432'; Database='DMDDB'; User Id='postgres'; Password='postgres'";
+                // 嘗試初始化 DMD 資料庫連線
+                if (!ASI.Wanda.DMD.DB.Manager.Initializer(sDMD_DBIP, sDMD_DBPort, sDMD_DBName, sUserID, sPassword, sCurrentUserID))
                 {
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗!{sDBIP}:{sDBPort};userid={sUserID}"); 
+                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"DMD資料庫連線失敗!{sDMD_DBIP}:{sDMD_DBPort};userid={sUserID}");
+                    return -1; // 返回錯誤代碼
                 }
+                // 嘗試初始化 DCU 資料庫連線
+                if (!ASI.Wanda.DCU.DB.Manager.Initializer(sDCU_DBIP, sDCU_DBPort, sDCU_DBName, sUserID, sPassword, sCurrentUserID))
+                {
+                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"CMFT資料庫連線失敗!{sDCU_DBIP}:{sDCU_DBPort};userid={sUserID}");
+                    return -1; // 返回錯誤代碼
+                }
+
             }
             catch (System.Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗!{sDBIP}:{sDBPort};userid={sUserID};ex={ex}");
+                ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗! Exception: {ex.Message}");
+                return -1; // 返回錯誤代碼
             }
             ConnToDMDServer();
             return base.StartTask(pComputer, pProcName);
@@ -189,7 +208,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                     switch (sJsonObjectName)
                     {
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMsg: //預錄訊息
-                     
+                            DMDHelper.UpdataConfig();
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUPreRecordMessage();
                             var RecordMessage = new ASI.Wanda.DCU.Message.Message( ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendPreRecordMessage));
@@ -199,7 +218,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.SendToTaskLPD(2, 1, RecordMessage.JsonContent);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendInstantMsg: //即時訊息 
-                           // DMDHelper.UpdataConfig();
+                            DMDHelper.UpdataConfig();
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUInstantMessage();
                             var Msg = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendPreRecordMessage));
@@ -343,7 +362,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 mDMD_API.ReceivedEvent += DMD_API_ReceivedEvent;
                 mDMD_API.DisconnectedEvent += DMD_API_DisconnectedEvent;
                 mDMDServerConnStr = ConfigApp.Instance.GetConfigSetting("DMD_Server");
-
+                StartConnectionProcess();
                 int iResult = mDMD_API.Initial(mDMDServerConnStr);
                 if (iResult == 0)
                 {
@@ -418,6 +437,14 @@ namespace ASI.Wanda.DCU.TaskDMD
                 return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.System.sysConfig>();
             }
         }
-
+        /// <summary>
+        /// 定時器回調函數
+        /// </summary>
+        /// <param name="state"></param>
+        private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
+        {
+            ASI.Lib.Log.DebugLog.Log(mProcName, "開始嘗試與DMD Server連線");
+            ConnToDMDServer();
+        }
     }
 }

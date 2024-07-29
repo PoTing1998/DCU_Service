@@ -56,12 +56,10 @@ namespace ASI.Wanda.DCU.TaskPDU
         {
             try
             {
-
                 var deviceInfo = SplitStringToDeviceInfo(target_du);
                ASI.Lib.Log.DebugLog.Log(_mProcName + "deviceInfo", $" received a message {deviceInfo.Station}  {deviceInfo.Location}  {deviceInfo.DeviceWithNumber}");
                 if (deviceInfo != null)
                 {
-                
                     var message_id = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
                     // Add your code here to use message_id   
                     var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id);
@@ -104,7 +102,7 @@ namespace ASI.Wanda.DCU.TaskPDU
 
                     var startCode = new byte[] { 0x55, 0xAA };
                     var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
-                    var packet = processor.CreatePacket(startCode, new List<byte> { 0x23, 0x24 }, function.FunctionCode, new List<Sequence> { sequence1 });
+                    var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
                     var serializedData = processor.SerializePacket(packet);
                     ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
 
@@ -217,6 +215,34 @@ namespace ASI.Wanda.DCU.TaskPDU
                 ASI.Lib.Log.ErrorLog.Log("SendMessageToUrgnt", ex);
             }
         }
+        /// <summary>
+        /// 顯示器的畫面開啟
+        /// </summary>
+        public void PowerSettingOpen()
+        {
+            var startCode   = new byte[] { 0x55, 0xAA };
+            var processor   = new PacketProcessor();
+            var function    = new PowerControlHandler();
+            var Open        = new byte[] { 0x3A, 0X00 };
+            var packetOpen   = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Open);
+            var serializedDataOpen = processor.SerializePacket(packetOpen);
+            _mSerial.Send(serializedDataOpen);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
+        }
+        /// <summary>
+        /// 顯示器的畫面關閉
+        /// </summary>
+        public void PowerSettingOff()
+        {
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Off = new byte[] { 0x3A, 0X01 };
+            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
+            var serializedDataOff = processor.SerializePacket(packetOff);
+            _mSerial.Send(serializedDataOff);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
+        }
         #endregion
         Display.Sequence CreateSequence(string messageContent, int sequenceNo)
         {
@@ -270,9 +296,6 @@ namespace ASI.Wanda.DCU.TaskPDU
             }
 
         }
-
-
-
         /// <summary>
         /// 色碼轉換成byte
         /// </summary>
@@ -290,7 +313,6 @@ namespace ASI.Wanda.DCU.TaskPDU
                 return null;
             }
         }
-
         #endregion
     }
 }

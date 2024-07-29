@@ -13,7 +13,6 @@ namespace ASI.Wanda.DCU.TaskPDU
 {
     public class ProcTaskPDU : ProcBase
     {
-
         #region constructor
         static int mSEQ = 0; // 計算累進發送端的次數  
         ASI.Lib.Comm.SerialPort.SerialPortLib serial = null;
@@ -38,8 +37,6 @@ namespace ASI.Wanda.DCU.TaskPDU
         /// <returns></returns>
         public override int ProcEvent(string pLabel, string pBody)
         {
-            LogFile.Display(pBody);
-
             if (pLabel == MSGFinish.Label)
             {
                 return 0;
@@ -113,7 +110,6 @@ namespace ASI.Wanda.DCU.TaskPDU
         {
             try
             {
-               
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
                 if (mSGFromTaskDMD.UnPack(pMessage) > 0)
                 {
@@ -134,14 +130,15 @@ namespace ASI.Wanda.DCU.TaskPDU
                         if (dbName1 == "dmd_pre_record_message")
                         {
                             ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_pre_record_message");
+                            //傳送到面板上
+                            taskPDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
                         }
                         else
                         {
                             //判斷收到的訊息ID  
                             ASI.Lib.Log.DebugLog.Log(mProcName, "處理其他訊息");
                         }
-                        //傳送到面板上
-                        taskPDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
+                      
                     }
                     catch (Exception ex)
                     {

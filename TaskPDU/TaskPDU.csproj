@@ -68,6 +68,10 @@
       <Project>{fd5a072f-115d-4896-91d3-996ed55cdae3}</Project>
       <Name>Display</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DMD_DB\DMD_DB.csproj">
+      <Project>{26b445f9-2971-44b6-953a-8b9bf8205408}</Project>
+      <Name>DMD_DB</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PA_Frame\PA_Frame.csproj">
       <Project>{a55f3208-0803-474d-b13d-c93abc96854e}</Project>
       <Name>PA_Frame</Name>
