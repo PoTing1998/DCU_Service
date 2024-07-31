@@ -339,8 +339,6 @@ namespace ASI.Wanda.DMD
                 ASI.Lib.Log.DebugLog.Log(mProcName, $"Socket 連線失敗! 失敗碼:{openResult} ； ConnectionString = {mSocket.ConnectionString}");
             }
         }
-
-
         private void SocketDisConnect()
         {
             if (mSocket != null)

@@ -3,7 +3,7 @@ using ASI.Lib.DB;
 using ASI.Lib.Log;
 using ASI.Lib.Process;
 using ASI.Wanda.DCU.ProcMsg;
-
+using ASI.Wanda.DMD.ProcMsg;
 using System;
 using System.Collections.Generic;
 
@@ -28,6 +28,8 @@ namespace ASI.Wanda.DCU.TaskPDU
         static string sClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
         static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
+
+        static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         #endregion
         /// <summary>
         /// 處理DMD模組執行程序所收到之訊息 
@@ -41,7 +43,12 @@ namespace ASI.Wanda.DCU.TaskPDU
             {
                 return 0;
             }
+          
             else if (pLabel == MSGFromTaskDMD.Label)
+            {
+                return ProMsgFromDMD(pBody);
+            }
+            else if (pLabel == MSGFromTaskDCU.Label)
             {
                 return ProMsgFromDMD(pBody);
             }
@@ -117,28 +124,37 @@ namespace ASI.Wanda.DCU.TaskPDU
                     {
                         string sJsonData = mSGFromTaskDMD.JsonData;
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-          
-                        string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
-                        string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
-                        string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
-                        string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
-                        string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
-
-                        ASI.Lib.Log.DebugLog.Log(mProcName,  $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
                         var taskPDUHelper = new ASI.Wanda.DCU.TaskPDU.TaskPDUHelper(mProcName, serial);
+                        switch (sJsonObjectName)
+                        {
+                            case ASI.Wanda.DCU.TaskPDU.Constants.SendPreRecordMsg:
+                                string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
+                                string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
+                                string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
+                                string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
+                                string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
 
-                        if (dbName1 == "dmd_pre_record_message")
-                        {
-                            ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_pre_record_message");
-                            //傳送到面板上
-                            taskPDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
+                                ASI.Lib.Log.DebugLog.Log(mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
+
+                                if (dbName1 == "dmd_pre_record_message")
+                                {
+                                    ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_pre_record_message");
+                                    //傳送到面板上
+                                    taskPDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
+                                }
+                                else
+                                {
+                                    //判斷收到的訊息ID  
+                                    ASI.Lib.Log.DebugLog.Log(mProcName, "處理其他訊息");
+                                }
+                                break;
+
+                            case ASI.Wanda.DCU.TaskPDU.Constants.SendPowerTimeSetting:
+                                taskPDUHelper.PowerSetting(Station_ID);
+                                break;
                         }
-                        else
-                        {
-                            //判斷收到的訊息ID  
-                            ASI.Lib.Log.DebugLog.Log(mProcName, "處理其他訊息");
-                        }
-                      
+
+
                     }
                     catch (Exception ex)
                     {

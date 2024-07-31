@@ -65,6 +65,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             {
                 return ProMsgFromDCU(pBody);
             }
+         
 
             return base.ProcEvent(pLabel, pBody);
         }
@@ -82,32 +83,32 @@ namespace ASI.Wanda.DCU.TaskDMD
             }
 
             //ping DMD Server
-            if (this.mDMDServerConnStr != "")
-            {
-                try 
-                {
+            //if (this.mDMDServerConnStr != "")
+            //{
+            //    try 
+            //    {
 
-                    if (mIsConnectedToDMD)
-                    {
-                        //若原本為連線，則檢查目前連線狀態 
-                        //超過60秒未收到DMD傳送的訊息則判定為離線
+            //        if (mIsConnectedToDMD)
+            //        {
+            //            //若原本為連線，則檢查目前連線狀態 
+            //            //超過60秒未收到DMD傳送的訊息則判定為離線
 
-                        string sStatusValue = true.ToString();
-                        if (System.DateTime.Now.Subtract(LastHeartbeatTime).TotalSeconds > 60)
-                        {
-                            sStatusValue = false.ToString();
-                        }
-                    }
-                    else
-                    {
+            //            string sStatusValue = true.ToString();
+            //            if (System.DateTime.Now.Subtract(LastHeartbeatTime).TotalSeconds > 60)
+            //            {
+            //                sStatusValue = false.ToString();
+            //            }
+            //        }
+            //        else
+            //        {
 
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
-                }
-            }
+            //        }
+            //    }
+            //    catch (System.Exception ex)
+            //    {
+            //        ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
+            //    }
+            //}
             return 1;
         } 
 
@@ -133,7 +134,6 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sUserID = "postgres";
             string sPassword = "postgres";
             string sCurrentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
-
             try
             {
                   //"Server='localhost'; Port='5432'; Database='DMDDB'; User Id='postgres'; Password='postgres'";
@@ -159,6 +159,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             ConnToDMDServer();
             return base.StartTask(pComputer, pProcName);
         }
+
         /// <summary>
         /// 從DMDServer接收訊息      
         /// </summary>
@@ -194,7 +195,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 {
                     sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
 
-                    UpdataConfig();
+                    //UpdataConfig();
                     ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
                     //收到封包
                     var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
@@ -221,11 +222,11 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.UpdataConfig();
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUInstantMessage();
-                            var Msg = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendPreRecordMessage));
-                            DMDHelper.SendToTaskUPD(2, 1, Msg.JsonContent);
-                            DMDHelper.SendToTaskPDU(2, 1, Msg.JsonContent);
-                            DMDHelper.SendToTaskSDU(2, 1, Msg.JsonContent);
-                            DMDHelper.SendToTaskLPD(2, 1, Msg.JsonContent);
+                            var InstantMessage = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendPreRecordMessage));
+                            DMDHelper.SendToTaskUPD(2, 1, InstantMessage.JsonContent);
+                            DMDHelper.SendToTaskPDU(2, 1, InstantMessage.JsonContent);
+                            DMDHelper.SendToTaskSDU(2, 1, InstantMessage.JsonContent);
+                            DMDHelper.SendToTaskLPD(2, 1, InstantMessage.JsonContent);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendScheduleSetting: //訊息排程
                             DMDHelper.HandleAckMessage(DMDServerMessage);
@@ -237,7 +238,12 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.HandleAckMessage(DMDServerMessage);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendPowerTimeSetting: //電池設定
-                            DMDHelper.HandleAckMessage(DMDServerMessage);
+                            DMDHelper.UpDateDMDPowerSetting();
+                            var PowerSetting = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendPreRecordMessage));
+                            DMDHelper.SendToTaskUPD(2, 1, PowerSetting.JsonContent);
+                            DMDHelper.SendToTaskPDU(2, 1, PowerSetting.JsonContent);
+                            DMDHelper.SendToTaskSDU(2, 1, PowerSetting.JsonContent);
+                            DMDHelper.SendToTaskLPD(2, 1, PowerSetting.JsonContent);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendGroupSetting: //群組設定
                             DMDHelper.HandleAckMessage(DMDServerMessage);
@@ -367,18 +373,18 @@ namespace ASI.Wanda.DCU.TaskDMD
                 if (iResult == 0)
                 {
                     mIsConnectedToDMD = true;
-                    ASI.Lib.Log.DebugLog.Log(mProcName, "與DMD Server連線成功");
+                    ASI.Lib.Log.DebugLog.Log(mProcName, "與DMD Server的scoket開啟成功");
                     LastHeartbeatTime = DateTime.Now;
                 }
                 else
                 {
                     mIsConnectedToDMD = false;
-                    ASI.Lib.Log.DebugLog.Log(mProcName, $"與DMD Server連線失敗，DCU_Server: {mDMDServerConnStr}");
+                    ASI.Lib.Log.DebugLog.Log(mProcName, $"與DMD Server的scoket開啟失敗，DCU_Server: {mDMDServerConnStr}");
                 }
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, $"Exception in ConnToDMDServer: {ex}");
+                ASI.Lib.Log.ErrorLog.Log(mProcName, $"Exception in ConnToDMDServer scoket: {ex}");
             }
         }
 
@@ -444,7 +450,7 @@ namespace ASI.Wanda.DCU.TaskDMD
         private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
         {
             ASI.Lib.Log.DebugLog.Log(mProcName, "開始嘗試與DMD Server連線");
-            ConnToDMDServer();
+           // ConnToDMDServer();
         }
     }
 }

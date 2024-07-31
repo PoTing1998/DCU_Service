@@ -11,10 +11,24 @@ using System.Threading.Tasks;
 using ASI.Wanda.DCU.DB.Models.DMD;
 using ASI.Wanda.DCU.DB.Tables.DMD;
 using System.Text.RegularExpressions;
+using ASI.Lib.Config;
 
 namespace ASI.Wanda.DCU.TaskPDU
 {
+    
+    public static class Constants
+    {
+        public const string SendPreRecordMsg                = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.SendPreRecordMessage";
+        public const string SendInstantMsg                  = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.SendInstantMessage";
+        public const string SendScheduleSetting             = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.ScheduleSetting";
+        public const string SendPreRecordMessageSetting     = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.PreRecordMessageSetting";
+        public const string SendTrainMessageSetting         = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.TrainMessageSetting";
+        public const string SendPowerTimeSetting            = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.PowerTimeSetting";
+        public const string SendGroupSetting                = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.GroupSetting";
+        public const string SendParameterSetting            = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.ParameterSetting";
 
+      
+    }
     public class DeviceInfo
     {
         public string Station { get; set; }
@@ -23,7 +37,7 @@ namespace ASI.Wanda.DCU.TaskPDU
     }
     public class TaskPDUHelper
     {
-
+        static string StationID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
         public TaskPDUHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
@@ -118,7 +132,7 @@ namespace ASI.Wanda.DCU.TaskPDU
         /// <summary>
         /// 左測月台碼
         /// </summary>
-        void SendMessageToDisplay2(string target_du, string dbName1, string dbName2)
+        public void SendMessageToDisplay2(string target_du, string dbName1, string dbName2)
         {
             var deviceInfo = SplitStringToDeviceInfo(target_du);
             var processor = new PacketProcessor();
@@ -313,6 +327,85 @@ namespace ASI.Wanda.DCU.TaskPDU
                 return null;
             }
         }
+
+        /// <summary>
+        /// 找尋車站Id並且判斷是否需要關閉
+        /// </summary>
+        /// <param name="messageID"></param>
+        /// <returns></returns>
+        public  dmdPowerSetting PowerSetting(string stationID)
+        {
+            var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
+            string[] notEcoDays = stationData.not_eco_day.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (stationData.eco_mode == "ON")
+            {
+                // 獲取當前日期的月和日以及現在的時間（時和分）
+                int currentMonth = DateTime.Now.Month;
+                int currentDay = DateTime.Now.Day;
+                int currentHour = DateTime.Now.Hour;
+
+                // 使用 List 儲存不啟動節能模式的日期
+                var nonEcoDates = new List<(int Month, int Day)>();
+
+                foreach (string day in notEcoDays)
+                {
+                    if (day.Length == 4)
+                    {
+                        int month = int.Parse(day.Substring(0, 2));
+                        int dayOfMonth = int.Parse(day.Substring(2, 2));
+                        nonEcoDates.Add((month, dayOfMonth));
+
+                        // 檢查當前日期是否在不啟動節能模式的日期列表中
+                        if (month == currentMonth && dayOfMonth == currentDay)
+                        {
+                            // 當前日期不啟動節能模式
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        // 處理長度不是 4 的情況，代表日期格式錯誤
+                        Console.WriteLine("無效的日期格式：" + day);
+                        continue;
+                    }
+
+                    // 檢查開關顯示器的時間
+                    string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (autoPlayTimes.Length == 2 && autoEcoTimes.Length == 2)
+                    {
+                        int autoPlayStartHour = int.Parse(autoPlayTimes[0]);
+                        int autoPlayEndHour = int.Parse(autoPlayTimes[1]);
+                        int autoEcoStartHour = int.Parse(autoEcoTimes[0]);
+                        int autoEcoEndHour = int.Parse(autoEcoTimes[1]);
+                       
+                        if (currentHour >= autoPlayStartHour && currentHour <= autoPlayEndHour)
+                        {
+                            // 關閉顯示器
+                            Console.WriteLine("關閉顯示器");
+                            PowerSettingOff();
+
+
+                        }
+                        else if (currentHour >= autoEcoStartHour && currentHour <= autoEcoEndHour)
+                        {
+                            // 開啟顯示器
+                            Console.WriteLine("開啟顯示器");
+                            PowerSettingOpen();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // 不需要做任何處理
+            }
+
+            return null;
+        }
+
         #endregion
     }
 }

@@ -28,19 +28,29 @@ namespace ASI.Wanda.DCU.TaskUPD
         }
         static DeviceInfo SplitStringToDeviceInfo(string input)
         {
-            if (string.IsNullOrEmpty(input)) return null;
-
-            string[] parts = input.Split('_');
-            if (parts.Length == 3)
+            try
             {
-                return new DeviceInfo
+                if (string.IsNullOrEmpty(input)) return null;
+
+                string[] parts = input.Split('_');
+                if (parts.Length == 3)
                 {
-                    StationID = parts[0],
-                    AreaID = parts[1],
-                    DeviceID = parts[2]
-                };
+                    return new DeviceInfo
+                    {
+                        StationID = parts[0],
+                        AreaID = parts[1],
+                        DeviceID = parts[2]
+                    };
+                }
+                return null;
             }
-            return null;
+            catch (Exception ex ) 
+            {
+
+                ASI.Lib.Log.ErrorLog.Log(input + " SendMessageToDisplay", "錯誤內容: " + ex.ToString());
+                return null;    
+            }
+            
         }
         #region  版型的操作
         /// <summary>
@@ -55,7 +65,7 @@ namespace ASI.Wanda.DCU.TaskUPD
             {
                 ///判斷使否有這個裝置
                 var deviceInfo = SplitStringToDeviceInfo(target_du);
-
+               
                 //依照 dbName 判斷要讀取哪個資料庫
 
                 if (deviceInfo != null)
@@ -119,6 +129,10 @@ namespace ASI.Wanda.DCU.TaskUPD
 
                         _mSerial.Send(serializedData);
                     }
+                }
+                else
+                {
+                    ASI.Lib.Log.DebugLog.Log(deviceInfo.ToString()+ _mProcName, target_du.ToString());
                 }
             }
             catch (Exception ex)
