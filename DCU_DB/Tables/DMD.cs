@@ -130,6 +130,7 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
         {
             return Select(stationID);
         }
+      
         static public void UpdatePowerSetting(string stationID, string ecoMode, int ecoTime, string notEcoDay, string autoPlayTime, string autoEcoTime)
         {
             Update(

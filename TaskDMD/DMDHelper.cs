@@ -496,7 +496,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                 ///遍歷轉換後的列表，進行更新操作
                 foreach (var item in convertedList)
                 {
-                    ///MSGtype  0 =預錄  1= 及時 
+                
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.UpdatePowerSetting(
                        item.station_id,
                        item.eco_mode,

@@ -315,11 +315,18 @@ namespace ASI.Wanda.DCU.TaskPDU
         /// </summary>
         /// <param name="colorName"></param>
         /// <returns></returns>
-        private static byte[] ProcessMEssageColor(string colorName)
+        private  byte[] ProcessMEssageColor(string colorName)
         {
             try
             {
-                return Display.DataConversion.FromHex(ASI.Wanda.DCU.DB.Tables.System.sysConfig.PickColor(colorName));
+                var ConfigDate = ASI.Wanda.DCU.DB.Tables.System.sysConfig.SelectColor(colorName);
+                ASI.Lib.Log.DebugLog.Log(_mProcName, ConfigDate.config_value.ToString());
+                //var colors = DataConversion.FromHex(ConfigDate);
+                //foreach (var color in colors)
+                //{
+                //    ASI.Lib.Log.DebugLog.Log(_mProcName, color.ToString());
+                //}
+                return DataConversion.FromHex(ConfigDate.config_value);
             }
             catch (Exception ex)
             {

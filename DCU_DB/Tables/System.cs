@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
 using System.Security.Claims;
+using System.Xml.Linq;
 
 using ASI.Wanda.DCU.DB.Models.System;
 using ASI.Wanda.DCU.DB.Tables;
@@ -55,11 +56,19 @@ namespace ASI.Wanda.DCU.DB.Tables.System
             string whereString = string.Format("where config_name = '{0}' ", configName);
             DeleteWhere(whereString);
         }
-        public static string PickColor(string name )
+       
+        static public string PickColor(string name)
         {
-          var color =   SelectWhere(string.Format("where config_name = '{0}'", name))
+            var color = SelectWhere(string.Format("where config_name = '{0}'", name))
                  .SingleOrDefault();
+
             return color.config_value;
+        }
+
+
+        public static sys_config SelectColor(string ColorName)
+        {
+            return Select(ColorName);
         }
         #endregion
     }

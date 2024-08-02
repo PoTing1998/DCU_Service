@@ -5,9 +5,11 @@ using ASI.Lib.Process;
 using ASI.Wanda.DCU.ProcMsg;
 using ASI.Wanda.DMD.ProcMsg;
 using ASI.Wanda.PA.ProcMsg;
+
 using Display;
 using Display.DisplayMode;
 using Display.Function;
+
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -81,7 +83,7 @@ namespace ASI.Wanda.DCU.TaskUPD
         /// <returns></returns>
         public override int StartTask(string pComputer, string pProcName)
         {
-            mTimerTick = 30; 
+            mTimerTick = 30;
             mProcName = "TaskUPD";
             // 讀取配置設置
             string dbIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
@@ -94,8 +96,8 @@ namespace ASI.Wanda.DCU.TaskUPD
             string dbUserID = "postgres";
             string dbPassword = "postgres";
             var connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
-           
-            serial = new ASI.Lib.Comm.SerialPort.SerialPortLib ();
+
+            serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
             serial.ConnectionString = connectionString;
             serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
             serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
@@ -133,35 +135,41 @@ namespace ASI.Wanda.DCU.TaskUPD
         {
             try
             {
-
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
                 if (mSGFromTaskDMD.UnPack(pMessage) > 0)
                 {
                     try
                     {
-                        string sJsonData = mSGFromTaskDMD.JsonData;
-                        string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-
-                        string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
-                        string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
-                        string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
-                        string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
-                        string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
-
-                        ASI.Lib.Log.DebugLog.Log(mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
                         var taskUPDHelper = new ASI.Wanda.DCU.TaskUPD.TaskUPDHelper(mProcName, serial);
 
-                        if (dbName1 == "dmd_pre_record_message")
+                        string sJsonData = mSGFromTaskDMD.JsonData;
+                        string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
+                       
+                        if (sJsonObjectName == ASI.Wanda.DCU.TaskUPD.TaskUPDHelper.Constants.SendPreRecordMsg)
                         {
-                            ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_pre_record_message");
+                            string PreRecordMessageSettingSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
+                            string PreRecordMessageSettingMsg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
+                            string PreRecordMessageSettingDbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
+                            string PreRecordMessageSettingDbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
+                            string PreRecordMessageSettingTarget_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
+
+                            ASI.Lib.Log.DebugLog.Log(mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{PreRecordMessageSettingSeatID}；MsgID:{PreRecordMessageSettingMsg_id}；target_du:{PreRecordMessageSettingTarget_du}; dbName1 :{PreRecordMessageSettingDbName1};dbName2 :{PreRecordMessageSettingDbName2}");
+
+                            //傳送到面板上
+                            taskUPDHelper.SendMessageToDisplay(PreRecordMessageSettingTarget_du, PreRecordMessageSettingDbName1, PreRecordMessageSettingDbName2);
+
                         }
-                        else
+
+                        else if (sJsonObjectName == ASI.Wanda.DCU.TaskUPD.TaskUPDHelper.Constants.SendInstantMsg)
                         {
-                            //判斷收到的訊息ID  
-                            ASI.Lib.Log.DebugLog.Log(mProcName, "處理其他訊息");
+
                         }
-                        //傳送到面板上
-                        taskUPDHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
+                        else if(sJsonObjectName == ASI.Wanda.DCU.TaskUPD.TaskUPDHelper.Constants.SendPowerTimeSetting)
+                        {
+                            taskUPDHelper.PowerSetting("LG02");
+                        }
+                            
+                              
                     }
                     catch (Exception ex)
                     {
@@ -183,25 +191,25 @@ namespace ASI.Wanda.DCU.TaskUPD
         /// </summary>  
         private int ProMsgFromPA(string pMessage)
         {
-            string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff"); 
+            string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
             try
             {
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ProcMsg.MSGFromTaskPA(new MSGFrameBase(""));
                 if (MSGFromTaskPA.UnPack(pMessage) > 0)
-                {   
-                    var sJsonData = MSGFromTaskPA.JsonData;  
+                {
+                    var sJsonData = MSGFromTaskPA.JsonData;
                     ASI.Lib.Log.DebugLog.Log(mProcName + " received a message from TaskPA ", sJsonData); // Log the received message 
                     // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除  
                     // 假設sJsonData已經是十六進位字串格式，直接解析
                     var sHexString = sJsonData;
                     byte[] dataBytes = HexStringToBytes(sJsonData);
                     if (dataBytes.Length >= 10) // 確保有足夠長度的陣列
-                    {                               
-                        ProcessDataBytes(dataBytes);       
-                    }
-                    else 
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes length less than 10", sHexString);  
+                        ProcessDataBytes(dataBytes);
+                    }
+                    else
+                    {
+                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes length less than 10", sHexString);
                     }
                     if (dataBytes.Length >= 3)
                     {
@@ -232,7 +240,7 @@ namespace ASI.Wanda.DCU.TaskUPD
                     break;
                 case 0x82:
                     taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
-                    break; 
+                    break;
                 case 0x83:
                     taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
                     break;
