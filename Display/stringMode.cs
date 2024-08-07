@@ -40,7 +40,6 @@ namespace Display
             var textBytes = Encoding.GetEncoding("BIG5").GetBytes(StringText);
             var result = new List<byte> { RedColor, GreenColor, BlueColor };
             result.AddRange(textBytes);
-
             return result.ToArray();
         } 
     }

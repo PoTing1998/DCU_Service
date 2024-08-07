@@ -74,117 +74,178 @@ namespace ASI.Wanda.DCU.TaskUPD
                     }
                 }
             }
+            ////value tuple
+            //var data = new List<(string, string, string)>();
+            ////收到字串模式target_du:["LG01_CCS_CDU-1", "LG01_CCS_CDU-2", "LG01_UPF_PDU-1", "LG08A_DPF_PDU-4"];
+            //target_du = target_du.Trim(new char[] { '[', ']', ' ' });
+            //target_du = target_du.Replace("\"", ""); // 去除所有的引號
+            //var items = target_du.Split(',');
+            //foreach (var item in items)
+            //{
+            //    var parts = item.Split(new char[] { '_', '-' });
+
+            //    if (parts.Length == 4)
+            //    {
+            //        string stationID = parts[0];
+            //        string areaID = parts[1];
+            //        string deviceID = $"{parts[2]}-{parts[3]}";
+            //        // 檢查是否符合條件
+            //        // 檢查是否符合條件
+            //        //if (string.Equals(stationID, _stationID, StringComparison.OrdinalIgnoreCase) &&
+            //        //    string.Equals(areaID, _areaID, StringComparison.OrdinalIgnoreCase) &&
+            //        //    string.Equals(deviceID, _deviceID, StringComparison.OrdinalIgnoreCase))
+
+            //        //{
+            //        //    ASI.Lib.Log.DebugLog.Log(_mProcName, $"Matching condition met: stationID={stationID}, areaID={areaID}, deviceID={deviceID}");
+            //        //    // 符合條件，加入到 data 列表
+            //        //    data.Add((stationID, areaID, deviceID));
+            //        //    var messageId = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(stationID, areaID, deviceID);
+            //        //    ASI.Lib.Log.DebugLog.Log(_mProcName, $"Message ID added: {messageId}");
+
+            //        //}
+            //        //else
+            //        //{
+            //        //    ASI.Lib.Log.DebugLog.Log(_mProcName, $"No match: stationID={stationID} (expected {_stationID}), areaID={areaID} (expected {_areaID}), deviceID={deviceID} (expected {_deviceID})");
+            //        //}
+            //    }
+            //    else
+            //    {
+            //        ASI.Lib.Log.DebugLog.Log(_mProcName, $"Invalid item format: {item}. Expected format: stationID_areaID_deviceName-deviceNumber.");
+            //    }
+            //}
             return messageIds.FirstOrDefault();
         }
 
         #region  版型的操作
+
+        public void judgeDbName(string name)
+        {  
+            if (name == "dmd_instant_message" || name == "dmd_pre_record_message")
+            {
+                SendMessageToDisplay(name);
+            }
+            else if (name == "dmd_schedule")
+            {
+                SendMessageToDisplay(name);
+            }
+
+        }
         /// <summary>
         /// 一般版型控制
         /// </summary>
         /// <param name="target_du"></param>
         /// <param name="dbName1"></param>
         /// <param name="dbName2"></param>
-        public void SendMessageToDisplay(string target_du, string dbName1, string dbName2)
+        public void SendMessageToDisplay( string dbName1)
         {
             try
             {
-                //value tuple
-                var data = new List<(string, string, string)>();
-                //收到字串模式target_du:["LG01_CCS_CDU-1", "LG01_CCS_CDU-2", "LG01_UPF_PDU-1", "LG08A_DPF_PDU-4"];
-                target_du = target_du.Trim(new char[] { '[', ']', ' ' });
-                target_du = target_du.Replace("\"", ""); // 去除所有的引號
-                var items = target_du.Split(',');
-                //foreach (var item in items)
-                //{
-                //    var parts = item.Split(new char[] { '_', '-' });
-
-                //    if (parts.Length == 4)
-                //    {
-                //        string stationID = parts[0];
-                //        string areaID = parts[1];
-                //        string deviceID = $"{parts[2]}-{parts[3]}";
-                //        // 檢查是否符合條件
-                //        // 檢查是否符合條件
-                //        //if (string.Equals(stationID, _stationID, StringComparison.OrdinalIgnoreCase) &&
-                //        //    string.Equals(areaID, _areaID, StringComparison.OrdinalIgnoreCase) &&
-                //        //    string.Equals(deviceID, _deviceID, StringComparison.OrdinalIgnoreCase))
-
-                //        //{
-                //        //    ASI.Lib.Log.DebugLog.Log(_mProcName, $"Matching condition met: stationID={stationID}, areaID={areaID}, deviceID={deviceID}");
-                //        //    // 符合條件，加入到 data 列表
-                //        //    data.Add((stationID, areaID, deviceID));
-                //        //    var messageId = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(stationID, areaID, deviceID);
-                //        //    ASI.Lib.Log.DebugLog.Log(_mProcName, $"Message ID added: {messageId}");
-
-                //        //}
-                //        //else
-                //        //{
-                //        //    ASI.Lib.Log.DebugLog.Log(_mProcName, $"No match: stationID={stationID} (expected {_stationID}), areaID={areaID} (expected {_areaID}), deviceID={deviceID} (expected {_deviceID})");
-                //        //}
-                //    }
-                //    else
-                //    {
-                //        ASI.Lib.Log.DebugLog.Log(_mProcName, $"Invalid item format: {item}. Expected format: stationID_areaID_deviceName-deviceNumber.");
-                //    }
-                //}
-                var messageIdTest = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(_stationID, _areaID, _deviceID);
-
-                // 假設 messageId 是 messageIds 列表中的第一个（如果有）
                 dmd_pre_record_message message_layout = new dmd_pre_record_message();
-                if (dbName1 == "dmd_pre_record_message")
+                var messageIdTest = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(_stationID, _areaID, _deviceID);
+                if (dbName1 == "dmd_instant_message" || dbName1 == "dmd_pre_record_message")
                 {
-                    message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(messageIdTest);
-                }
-
-                if (message_layout != null)
-                {
-                    string color = message_layout.font_color;
-
-                    var fontColor = ProcessColor(color);
-                    //取得各項參數
-                    var processor = new PacketProcessor();
-                   
-                    var textStringBody = new TextStringBody
+                    if (dbName1 == "dmd_pre_record_message")
                     {
-                        RedColor = fontColor[0],
-                        GreenColor = fontColor[1],
-                        BlueColor = fontColor[2],
-                        StringText = message_layout.message_content
-                    };
-                    var stringMessage = new StringMessage
+                        message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(messageIdTest);
+                    }
+                    if (message_layout != null)
                     {
-                        StringMode = 0x2A, // TextMode (Static) 
-                        StringBody = textStringBody
-                    };
-                    var fullWindowMessage = new FullWindow //Display version
-                    {
-                        MessageType = 0x71, // FullWindow message 
-                        MessageLevel = (byte)message_layout.message_priority, //  level
-                        MessageScroll = new ScrollInfo
+                        string color = message_layout.font_color;
+                        var fontColor = ProcessColor(color);
+                        //取得各項參數
+                        var processor = new PacketProcessor();
+                        var content =  message_layout.message_content;
+                        content += message_layout.message_content_en;
+                        var textStringBody = new TextStringBody
                         {
-                            ScrollMode = 0x64,
-                            ScrollSpeed = (byte)message_layout.move_speed,
-                            PauseTime = 10
-                        },
-
-                        MessageContent = new List<StringMessage> { stringMessage }
-                    };
-                    var sequence1 = new Display.Sequence
-                    {
-                        SequenceNo = 1,
-                        Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
-                        Messages = new List<IMessage> { fullWindowMessage }
-                    };
-                    var startCode = new byte[] { 0x55, 0xAA };
-                    var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
-                    var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
-                    var serializedData = processor.SerializePacket(packet);
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
-
-                    _mSerial.Send(serializedData);
+                            RedColor = fontColor[0],
+                            GreenColor = fontColor[1],
+                            BlueColor = fontColor[2],
+                            StringText = content
+                        };
+                        var stringMessage = new StringMessage
+                        {
+                            StringMode = 0x2A, // TextMode (Static) 
+                            StringBody = textStringBody
+                        };
+                        var fullWindowMessage = new FullWindow //Display version
+                        {
+                            MessageType = 0x71, // FullWindow message 
+                            MessageLevel = (byte)message_layout.message_priority, //  level
+                            MessageScroll = new ScrollInfo
+                            {
+                                ScrollMode = 0x64,
+                                ScrollSpeed = (byte)message_layout.move_speed,
+                                PauseTime = 10
+                            },
+                            MessageContent = new List<StringMessage> { stringMessage }
+                        };
+                        var sequence1 = new Display.Sequence
+                        {
+                            SequenceNo = 1,
+                            Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
+                            Messages = new List<IMessage> { fullWindowMessage }
+                        };
+                        var startCode = new byte[] { 0x55, 0xAA };
+                        var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
+                        var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
+                        var serializedData = processor.SerializePacket(packet);
+                        ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
+                        _mSerial.Send(serializedData);
+                    }
                 }
+                else if (dbName1 == "dmd_schedule")
+                {
+                 
+                    var ID = ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedule.SelectScheduleISEnable();
+                    var Message = ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedulePlayList.GetPlayingItemId(ID, _stationID, _deviceID);
+                    message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(messageIdTest);
+                    if (message_layout != null)
+                    {
+                        string color = message_layout.font_color;
 
+                        var fontColor = ProcessColor(color);
+                        //取得各項參數
+                        var processor = new PacketProcessor();
 
+                        var textStringBody = new TextStringBody
+                        {
+                            RedColor = fontColor[0],
+                            GreenColor = fontColor[1],
+                            BlueColor = fontColor[2],
+                            StringText = message_layout.message_content
+                        };
+                        var stringMessage = new StringMessage
+                        {
+                            StringMode = 0x2A, // TextMode (Static) 
+                            StringBody = textStringBody
+                        };
+                        var fullWindowMessage = new FullWindow //Display version
+                        {
+                            MessageType = 0x71, // FullWindow message 
+                            MessageLevel = (byte)message_layout.message_priority, //  level
+                            MessageScroll = new ScrollInfo
+                            {
+                                ScrollMode = 0x64,
+                                ScrollSpeed = (byte)message_layout.move_speed,
+                                PauseTime = 10
+                            },
+                            MessageContent = new List<StringMessage> { stringMessage }
+                        };
+                        var sequence1 = new Display.Sequence
+                        {
+                            SequenceNo = 1,
+                            Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
+                            Messages = new List<IMessage> { fullWindowMessage }
+                        };
+                        var startCode = new byte[] { 0x55, 0xAA };
+                        var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
+                        var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
+                        var serializedData = processor.SerializePacket(packet);
+                        ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
+                        _mSerial.Send(serializedData);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -240,7 +301,6 @@ namespace ASI.Wanda.DCU.TaskUPD
             ASI.Lib.Log.DebugLog.Log(_mProcName + "送到看板上", "Serialized display packet: " + BitConverter.ToString(serializedData));
             _mSerial.Send(serializedData);
         }
-
         /// <summary>
         /// /緊急訊息
         /// </summary>
@@ -298,6 +358,98 @@ namespace ASI.Wanda.DCU.TaskUPD
                 ASI.Lib.Log.ErrorLog.Log("SendMessageToUrgnt", ex);
             }
         }
+        /// <summary>
+        /// 找尋車站Id並且判斷是否需要關閉
+        /// </summary>
+        /// <param name="messageID"></param>
+        /// <returns></returns>
+        public dmdPowerSetting PowerSetting(string stationID)
+        {
+            try
+            {
+                //從資料庫讀取資料
+                var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
+                string[] notEcoDays = stationData.not_eco_day.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                if (stationData.eco_mode == "on")
+                {
+                    // 獲取當前日期的月和日以及現在的時間（時和分）
+                    int currentMonth = DateTime.Now.Month;
+                    int currentDay = DateTime.Now.Day;
+                    int currentHour = DateTime.Now.Hour;
+                    int currentMinute = DateTime.Now.Minute;
+                    // 使用 List 儲存不啟動節能模式的日期
+                    var nonEcoDates = new List<(int Month, int Day)>();
+
+                    foreach (string day in notEcoDays)
+                    {
+                        ASI.Lib.Log.DebugLog.Log("PowerSetting", day.ToString());
+                        if (day.Length == 4)
+                        {
+                            int month = int.Parse(day.Substring(0, 2));
+                            int dayOfMonth = int.Parse(day.Substring(2, 2));
+                            nonEcoDates.Add((month, dayOfMonth));
+
+                            // 檢查當前日期是否在不啟動節能模式的日期列表中
+                            if (month == currentMonth && dayOfMonth == currentDay)
+                            {
+                                // 當前日期不啟動節能模式
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            // 處理長度不是 4 的情況，代表日期格式錯誤
+                            Console.WriteLine("無效的日期格式：" + day);
+                            continue;
+                        }
+                        // 檢查開關顯示器的時間
+                        string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (autoPlayTimes.Length == 1 && autoEcoTimes.Length == 1)
+                        {
+                            // 解析時間字串
+                            int autoPlayHour = int.Parse(autoPlayTimes[0].Substring(0, 2));//開啟的時間單位 時
+                            int autoPlayMinute = int.Parse(autoPlayTimes[0].Substring(3, 2));//開啟的時間單位 分
+                            int autoEcoHour = int.Parse(autoEcoTimes[0].Substring(0, 2));//關閉的時間單位 時
+                            int autoEcoMinute = int.Parse(autoEcoTimes[0].Substring(3, 2));//關閉的時間單位 分
+                           // 判斷當前時間是否在自動播放時間範圍內 
+                            if (currentHour == autoPlayHour && currentMinute == autoPlayMinute)
+                            {
+                                // 關閉顯示器
+                              ASI.Lib.Log.DebugLog.Log(_mProcName ,"關閉顯示器");
+                                PowerSettingOff();
+                            }
+                            // 判斷當前時間是否在節能模式時間範圍內
+                            else if (currentHour == autoEcoHour && currentMinute == autoEcoMinute)
+                            {
+                                // 開啟顯示器
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, "開啟顯示器");
+                                PowerSettingOpen();
+                            }
+                            else
+                            {
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, "當前時間不在自動播放或節能模式時間範圍內");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // 不需要做任何處理
+                    ASI.Lib.Log.DebugLog.Log("PowerSetting", "目前沒有開啟節能模式");
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                // 加入詳細的錯誤信息
+                ASI.Lib.Log.ErrorLog.Log($"Error ProcessMessage PowerSetting: {ex.Message}\nStack Trace: {ex.StackTrace}", ex);
+                return null;
+            }
+
+        }
         #endregion
         Display.Sequence CreateSequence(string messageContent, int sequenceNo)
         {
@@ -330,7 +482,6 @@ namespace ASI.Wanda.DCU.TaskUPD
                 Messages = new List<IMessage> { urgentMessage }
             };
         }
-
         /// <summary>
         /// 顯示器的畫面開啟
         /// </summary>
@@ -397,102 +548,6 @@ namespace ASI.Wanda.DCU.TaskUPD
                 return null;
             }
         }
-
-        /// <summary>
-        /// 找尋車站Id並且判斷是否需要關閉
-        /// </summary>
-        /// <param name="messageID"></param>
-        /// <returns></returns>
-        public dmdPowerSetting PowerSetting(string stationID)
-        {
-            try
-            {
-                //從資料庫讀取資料
-                var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
-                string[] notEcoDays = stationData.not_eco_day.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                if (stationData.eco_mode == "on")
-                {
-                    // 獲取當前日期的月和日以及現在的時間（時和分）
-                    int currentMonth = DateTime.Now.Month;
-                    int currentDay = DateTime.Now.Day;
-                    int currentHour = DateTime.Now.Hour;
-                    int currentMinute = DateTime.Now.Minute;
-                    // 使用 List 儲存不啟動節能模式的日期
-                    var nonEcoDates = new List<(int Month, int Day)>();
-
-                    foreach (string day in notEcoDays)
-                    {
-                        ASI.Lib.Log.DebugLog.Log("PowerSetting", day.ToString());
-                        if (day.Length == 4)
-                        {
-                            int month = int.Parse(day.Substring(0, 2));
-                            int dayOfMonth = int.Parse(day.Substring(2, 2));
-                            nonEcoDates.Add((month, dayOfMonth));
-                           
-                            // 檢查當前日期是否在不啟動節能模式的日期列表中
-                            if (month == currentMonth && dayOfMonth == currentDay)
-                            {
-                                // 當前日期不啟動節能模式
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            // 處理長度不是 4 的情況，代表日期格式錯誤
-                            Console.WriteLine("無效的日期格式：" + day);
-                            continue;
-                        }
-                        // 檢查開關顯示器的時間
-                        string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                        string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-                        if (autoPlayTimes.Length == 1 && autoEcoTimes.Length == 1)
-                        {
-                            // 解析時間字串
-                            int autoPlayHour = int.Parse(autoPlayTimes[0].Substring(0, 2));//開啟的時間單位 時
-                            int autoPlayMinute = int.Parse(autoPlayTimes[0].Substring(3, 2));//開啟的時間單位 分
-                            int autoEcoHour = int.Parse(autoEcoTimes[0].Substring(0, 2));//關閉的時間單位 時
-                            int autoEcoMinute = int.Parse(autoEcoTimes[0].Substring(3, 2));//關閉的時間單位 分
-                                                                                           // 判斷當前時間是否在自動播放時間範圍內 
-                            if (currentHour == autoPlayHour && currentMinute == autoPlayMinute)
-                            {
-                                // 關閉顯示器
-                                Console.WriteLine("關閉顯示器");
-                                 PowerSettingOff();
-                            }
-                            // 判斷當前時間是否在節能模式時間範圍內
-                            else if (currentHour == autoEcoHour && currentMinute == autoEcoMinute)
-                            {
-                                // 開啟顯示器
-                                Console.WriteLine("開啟顯示器");
-                                 PowerSettingOpen();
-                            }
-                            else
-                            {
-                                Console.WriteLine("當前時間不在自動播放或節能模式時間範圍內");
-                            }
-                        }
-                    }
-                }
-                else 
-                {
-                    // 不需要做任何處理
-                    ASI.Lib.Log.DebugLog.Log("PowerSetting", "目前沒有開啟節能模式");
-                }
-
-                return null;
-            }
-            catch (Exception ex )
-            {
-                // 加入詳細的錯誤信息
-                ASI.Lib.Log.ErrorLog.Log($"Error ProcessMessage PowerSetting: {ex.Message}\nStack Trace: {ex.StackTrace}", ex);
-                return null;
-            }
-           
-        }
-
-
-
     }
 }
 

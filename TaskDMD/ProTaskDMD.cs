@@ -235,17 +235,23 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.SendToTaskLPD(2, 1, InstantMessage.JsonContent);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendScheduleSetting: //訊息排程
-                                                                                  //收到封包
                             var oJsonObjectSendScheduleSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendScheduleSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
                             //組封包 
                             var sendScheduleSetting = new DMD.JsonObject.DCU.FromDMD.SendScheduleSetting(ASI.Wanda.DMD.Enum.Station.OCC);
                             sendScheduleSetting.seatID = oJsonObjectSendScheduleSetting.seatID;
                             sendScheduleSetting.sched_id = oJsonObjectSendScheduleSetting.sched_id;
                             sendScheduleSetting.SqlCommand = oJsonObjectSendScheduleSetting.SqlCommand;
-                            break;
-                        case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMessageSetting: //預錄訊息設定 
                             DMDHelper.UpSchedule();
                             DMDHelper.UpDMDSchedulePlaylist();
+                            DMDHelper.UpdataDCUPreRecordMessage();                                             
+                            //收到封包
+                            var ScheduleSetting = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendScheduleSetting));
+                            DMDHelper.SendToTaskUPD(2, 1, ScheduleSetting.JsonContent);
+                            DMDHelper.SendToTaskPDU(2, 1, ScheduleSetting.JsonContent);
+                            DMDHelper.SendToTaskSDU(2, 1, ScheduleSetting.JsonContent);
+                            DMDHelper.SendToTaskLPD(2, 1, ScheduleSetting.JsonContent);
+                            break;
+                        case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMessageSetting: //預錄訊息設定 
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendTrainMessageSetting: //列車訊息 
                             DMDHelper.HandleAckMessage(DMDServerMessage);

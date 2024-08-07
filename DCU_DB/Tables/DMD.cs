@@ -115,8 +115,6 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
         static public Guid GetPlayingItemId(string stationID, string area_id, string deviceID)
         {
             var temp = SelectWhere( string.Format("where station_id = '{0}' AND area_id = '{1}' AND  device_id = '{2}' ", stationID, area_id, deviceID)).SingleOrDefault();
-           
-            
             return    temp.message_id;
         }
 
@@ -241,11 +239,21 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
         {
             Delete(scheduleID);
         }
+        static public Guid  SelectScheduleISEnable( )
+        {
+            var temp = SelectWhere(string.Format("where is_enable = 'true' ")).SingleOrDefault();
+            return temp.schedule_id;
+        }
         #endregion
     }
     public class dmdSchedulePlayList : ASI.Wanda.DCU.DB.Tables.Table<dmd_schedule_playlist>
     {
         #region Methods
+        static public Guid GetPlayingItemId(Guid stationID, string area_id, string deviceID)
+        {
+            var temp = SelectWhere(string.Format("where station_id = '{0}' AND area_id = '{1}' AND  device_id = '{2}' ", stationID, area_id, deviceID)).SingleOrDefault();
+            return temp.message_id;
+        }
         static public void InsertSchedulePlayListItem(Guid scheduleID, Guid messageID, string stationID, string deviceID)
         {
             Insert(
@@ -278,15 +286,6 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
             }
             return SeatList;
         }
-        //public static string SelectPanelStatusError(string StationID,string AreaID , string DeviceID)
-        //{
-        //    var SeatList = SelectWhere(string.Format("where station_id = '{0}' AND area_id = '{1}' AND  device_id = '{2}'  ", StationID, AreaID, DeviceID)).ToList();
-
-            
-           
-        //}
-
-
         #endregion
     }
     public class dmdTrainMessage : ASI.Wanda.DCU.DB.Tables.Table<dmd_train_message>
