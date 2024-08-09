@@ -53,12 +53,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interface\IMessageFormatter.cs" />
     <Compile Include="MSGHelper\MessageHelper.cs" />
     <Compile Include="MSGHelper\PacketHelper.cs" />
     <Compile Include="MSGHelper\SequenceHelper.cs" />
     <Compile Include="MSGHelper\StringModeHelper.cs" />
     <Compile Include="MSG\Packet.cs" />
+    <Compile Include="DUEnum.cs" />
     <Compile Include="MSG\Sequence.cs" />
     <Compile Include="MSG\Message.cs" />
     <Compile Include="MSG\StringMode.cs" />
@@ -70,17 +70,10 @@
       <Project>{5b6fc193-a36d-409e-8e9b-2c45fe574189}</Project>
       <Name>ASILib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DCU_DB\DCU_DB.csproj">
-      <Project>{a6951f86-d11c-427e-b294-f3d4d34dffb3}</Project>
-      <Name>DCU_DB</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DMD_Frame\DMD_Frame.csproj">
       <Project>{a169f312-d665-4361-9a74-edd9d2e807f8}</Project>
       <Name>DMD_Frame</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>xcopy /y "$(ProjectDir)$(OutDir)*.*" "D:\ASI.Wanda.DMD.DCUService"</PostBuildEvent>
-  </PropertyGroup>
 </Project>

@@ -16,7 +16,7 @@ using ASI.Wanda.DMD;
 
 using DuFrame.MSG;
 
-using static DuFrame.DisplaySettingsEnums;
+using static DuFrame.DUEnum;
 
 namespace DuFrame.MSG
 {
@@ -33,8 +33,8 @@ namespace DuFrame.MSG
         public Message(
             StringMode container
            , WindowDisplayMode version
-           , int fontSize
-           , string fontStyle)
+           , DuFrame.DUEnum.fontSize fontSize
+           , DuFrame.DUEnum.fontStyle fontStyle)
         {
             mstringMode = container;
            
@@ -45,11 +45,12 @@ namespace DuFrame.MSG
         /// <summary>
         /// 左側月台顯示
         /// </summary>
+ 
         public Message(
            StringMode container
           , WindowDisplayMode version
-          , int fontSize 
-          , string fontStyle
+          , DuFrame.DUEnum.fontSize fontSize
+          , DuFrame.DUEnum.fontStyle fontStyle
           , byte[] PhotoColor
           , byte[] index)
         {
@@ -66,8 +67,8 @@ namespace DuFrame.MSG
         public Message(
            StringMode container
           , WindowDisplayMode version
-           , int fontSize
-           , string fontStyle
+          , DuFrame.DUEnum.fontSize fontSize
+          , DuFrame.DUEnum.fontStyle fontStyle
           , byte[] PhotoColor
           , byte[] index
           , byte[] time_color
@@ -90,16 +91,14 @@ namespace DuFrame.MSG
         public Message(
           StringMode container
          , WindowDisplayMode version
-
-         , int fontSize
-           , string fontStyle
+         , DuFrame.DUEnum.fontSize fontSize
+         , DuFrame.DUEnum.fontStyle fontStyle
          , byte[] time_color
          , byte[] startValue
          , byte[] endValue)
         {
             mstringMode = container;
             Version = version;
-          
             FontSize = fontSize;
             FontStyle = fontStyle;
             TimeColor = time_color;
@@ -112,10 +111,10 @@ namespace DuFrame.MSG
         public Message(
          StringMode container
          , WindowDisplayMode version
-          , int fontSize
-           , string fontStyle
+         , DuFrame.DUEnum.fontSize fontSize
+         , DuFrame.DUEnum.fontStyle fontStyle
          , byte[] clockColor
-         , DuFrame.DisplaySettingsEnums.clock clock)
+         , DuFrame.DUEnum.clock clock)
         {
             mstringMode = container;
             Version = version;
@@ -128,11 +127,11 @@ namespace DuFrame.MSG
         public Message(
         StringMode container
         , WindowDisplayMode version
-        , int fontSize
-           , string fontStyle
+        , DuFrame.DUEnum.fontSize fontSize
+        , DuFrame.DUEnum.fontStyle fontStyle
         , byte[] clockColor
         , byte[] photographDataContent
-        , DuFrame.DisplaySettingsEnums.clock clock)
+        , DuFrame.DUEnum.clock clock)
         {
             mstringMode = container;
             Version = version;
@@ -162,8 +161,8 @@ namespace DuFrame.MSG
             , byte [] RightclockColor
             , byte [] RightStartValue
             , byte [] RightEndValue
-           , int fontSize
-           , string fontStyle
+            , DuFrame.DUEnum.fontSize fontSize
+            , DuFrame.DUEnum.fontStyle fontStyle
             )
         {
             mstringMode = container;
@@ -184,18 +183,8 @@ namespace DuFrame.MSG
             FontSize = fontSize;
             FontStyle = fontStyle;
         }
-        /// <summary>
-        ///    連通道上排
-        /// </summary>
-        public Message(StringMode container, 
-            WindowDisplayMode version , 
-            WindowActionCode topCode , 
-            bool top ,byte[] PhotoColor , 
-            byte[] index , byte[] time_color, 
-            byte[]startValue, byte[] endValue , 
-            bool ModeSwitch
-             , int fontSize
-           , string fontStyle)
+        //連通道上排
+        public Message(StringMode container, WindowDisplayMode version , WindowActionCode topCode , bool top ,byte[] PhotoColor , byte[] index , byte[] time_color, byte[]startValue, byte[] endValue , bool ModeSwitch,DUEnum.fontSize fontSize , DUEnum.fontStyle fontStyle)
         {
             mstringMode = container;
             Version = version;
@@ -211,12 +200,9 @@ namespace DuFrame.MSG
             FontStyle = fontStyle;
   
         }
-        /// <summary>
-        /// 連通道下排
-        /// </summary>
+        //連通道下排
         public Message(StringMode container, WindowDisplayMode version, WindowActionCode bottomCode, bool bottom , byte[] LeftclockColor, byte[] RightclockColor, byte[] RightStartValue, byte[]RightEndValue
-            ,bool ModeSwitch, int fontSize
-           , string fontStyle)
+            ,bool ModeSwitch , DUEnum.fontSize fontSize , DUEnum.fontStyle fontStyle)
         {
             mstringMode = container;
             Version = version;
@@ -241,8 +227,8 @@ namespace DuFrame.MSG
          , EmergencyCommand emergencyCommand 
          , WindowActionCode emergency
          , byte[] emergencyLampStatus
-          , int fontSize
-           , string fontStyle)
+         , DuFrame.DUEnum.fontSize fontSize
+         , DuFrame.DUEnum.fontStyle fontStyle)
         {
             mstringMode = container;
             emergencyMode = emergencyCommand;
@@ -257,11 +243,11 @@ namespace DuFrame.MSG
         #region  property
 
         // 消息長度
-        public int FontSize { get; set; }
-        public string FontStyle { get; set; }
+        public fontSize FontSize { get; set; }
+        public fontStyle FontStyle { get; set; }
 
         // 視窗版本和時間
-        public DuFrame.DisplaySettingsEnums.WindowDisplayMode Version { get; set; }
+        public DuFrame.DUEnum.WindowDisplayMode Version { get; set; }
         public byte[] TimeColor { get; set; }
         public byte[] TimeStart { get; set; }
         public byte[] TimeEnd { get; set; } = new byte[] { 0x00 };
@@ -271,7 +257,7 @@ namespace DuFrame.MSG
         public byte[] Platformphoto { get; set; }
         public byte[] Platformphotoindex { get; set; }
         // 鬧鐘命令和設置
-        public DuFrame.DisplaySettingsEnums.clock Clock { get; set; }
+        public DuFrame.DUEnum.clock Clock { get; set; }
         public byte[] ClockColor { get; set; }
 
         // 圖片長度和內容
@@ -301,15 +287,13 @@ namespace DuFrame.MSG
 
 
         // 緊急播放次數
-        public DisplaySettingsEnums.EmergencyCommand emergencyMode { get; set; }
-        public DuFrame.DisplaySettingsEnums.WindowActionCode Emergency { get; set; }
+        public DUEnum.EmergencyCommand emergencyMode { get; set; }
+        public DuFrame.DUEnum.WindowActionCode Emergency { get; set; }
         public byte[] EmergencyLampStatus { get; set; }
         public byte[] EmergencyTimes { get; set; } = new byte[] { 0x00 };
 
         protected readonly byte[] MessageEnd = new byte[] { 0x1E };
 
         #endregion
-
-
     }
 }

@@ -1,4 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using ASI.Lib.Process;
+using ASI.Wanda.DMD;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web.UI.WebControls;
+using System.Windows.Forms;
+
+using static DuFrame.DUEnum;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace DuFrame.MSG
 {
@@ -23,6 +36,9 @@ namespace DuFrame.MSG
             if (MSG is Message message) this.message = message;
             else if (MSG is List<MSG.Message> messages) this.messages = messages;
         }
+       
         #endregion
+
+
     }
 }

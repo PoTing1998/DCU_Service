@@ -6,12 +6,15 @@ using Display;
 using Display.DisplayMode;
 using Display.Function;
 
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 using static Display.DisplaySettingsEnums;
+
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ASI.Wanda.DCU.TaskUPD
 {
@@ -22,9 +25,8 @@ namespace ASI.Wanda.DCU.TaskUPD
         private static string _areaID = "UPF";
         private static string _deviceID = "PDU-1";
         private static string _stationID = "LG01";
-        public static class Constants 
+        public static class Constants
         {
-                                                
             public const string SendPreRecordMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage";
             public const string SendInstantMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendInstantMessage";
             public const string SendScheduleSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ScheduleSetting";
@@ -119,16 +121,15 @@ namespace ASI.Wanda.DCU.TaskUPD
         #region  版型的操作
 
         public void judgeDbName(string name)
-        {  
-            if (name == "dmd_instant_message" || name == "dmd_pre_record_message")
+        {
+            if ( name == "dmd_pre_record_message")
             {
                 SendMessageToDisplay(name);
             }
-            else if (name == "dmd_schedule")
+            else if (name == "dmd_instant_message" )
             {
                 SendMessageToDisplay(name);
             }
-
         }
         /// <summary>
         /// 一般版型控制
@@ -136,7 +137,7 @@ namespace ASI.Wanda.DCU.TaskUPD
         /// <param name="target_du"></param>
         /// <param name="dbName1"></param>
         /// <param name="dbName2"></param>
-        public void SendMessageToDisplay( string dbName1)
+       public void SendMessageToDisplay(string dbName1)
         {
             try
             {
@@ -151,11 +152,12 @@ namespace ASI.Wanda.DCU.TaskUPD
                     if (message_layout != null)
                     {
                         string color = message_layout.font_color;
-                        var fontColor = ProcessColor(color);
+                        // var fontColor = ProcessColor(color);
                         //取得各項參數
                         var processor = new PacketProcessor();
-                        var content =  message_layout.message_content;
-                        content += message_layout.message_content_en;
+                        var content = "萬大線";
+
+                        var fontColor = new byte[] { 0XFF, 0XFF, 0XFF };
                         var textStringBody = new TextStringBody
                         {
                             RedColor = fontColor[0],
@@ -196,7 +198,7 @@ namespace ASI.Wanda.DCU.TaskUPD
                 }
                 else if (dbName1 == "dmd_schedule")
                 {
-                 
+
                     var ID = ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedule.SelectScheduleISEnable();
                     var Message = ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedulePlayList.GetPlayingItemId(ID, _stationID, _deviceID);
                     message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(messageIdTest);
@@ -204,10 +206,10 @@ namespace ASI.Wanda.DCU.TaskUPD
                     {
                         string color = message_layout.font_color;
 
-                        var fontColor = ProcessColor(color);
+                        //     var fontColor = ProcessColor(color);
                         //取得各項參數
                         var processor = new PacketProcessor();
-
+                        var fontColor = new byte[] { 0XFF, 0XFF, 0XFF };
                         var textStringBody = new TextStringBody
                         {
                             RedColor = fontColor[0],
@@ -413,11 +415,11 @@ namespace ASI.Wanda.DCU.TaskUPD
                             int autoPlayMinute = int.Parse(autoPlayTimes[0].Substring(3, 2));//開啟的時間單位 分
                             int autoEcoHour = int.Parse(autoEcoTimes[0].Substring(0, 2));//關閉的時間單位 時
                             int autoEcoMinute = int.Parse(autoEcoTimes[0].Substring(3, 2));//關閉的時間單位 分
-                           // 判斷當前時間是否在自動播放時間範圍內 
+                                                                                           // 判斷當前時間是否在自動播放時間範圍內 
                             if (currentHour == autoPlayHour && currentMinute == autoPlayMinute)
                             {
                                 // 關閉顯示器
-                              ASI.Lib.Log.DebugLog.Log(_mProcName ,"關閉顯示器");
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, "關閉顯示器");
                                 PowerSettingOff();
                             }
                             // 判斷當前時間是否在節能模式時間範圍內
@@ -548,6 +550,8 @@ namespace ASI.Wanda.DCU.TaskUPD
                 return null;
             }
         }
+
+
     }
 }
 

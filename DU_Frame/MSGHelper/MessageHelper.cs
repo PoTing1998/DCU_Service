@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DuFrame.MSG;
-using static DuFrame.DisplaySettingsEnums;
+using static DuFrame.DUEnum;
 namespace DuFrame.MSGHelper
 {
     public class MessageGenerator
@@ -81,7 +81,7 @@ namespace DuFrame.MSGHelper
                 {
                     var messageContent = GetMessageContent(i);
                     var messageLength = CalculateTextLength(messageContent);
-                    AppendDataToByteList(packet,WindowDisplayMode.LeftPlatform, messageLength, messageContent, MessageEnd);
+                    AppendDataToByteList(packet,WindowDisplayMode.LeftSide, messageLength, messageContent, MessageEnd);
                 }
             }
             return packet.ToArray();
@@ -105,7 +105,7 @@ namespace DuFrame.MSGHelper
                 {
                     var messageContent = GetMessageContent(i);
                      var messageLength = CalculateTextLength(messageContent);
-                    AppendDataToByteList(packet,WindowDisplayMode.LeftPlatformRightTime, messageLength, messageContent, MessageEnd);
+                    AppendDataToByteList(packet,WindowDisplayMode.LeftAndRight, messageLength, messageContent, MessageEnd);
                 }
             }
             return packet.ToArray();
@@ -128,7 +128,7 @@ namespace DuFrame.MSGHelper
                 {
                     var messageContent = GetMessageContent(i);
                     var messageLength = CalculateTextLength(messageContent);
-                    AppendDataToByteList(packet,WindowDisplayMode.RightTime, messageLength, messageContent, MessageEnd);
+                    AppendDataToByteList(packet,WindowDisplayMode.RightSide, messageLength, messageContent, MessageEnd);
                 }
             }
             return packet.ToArray();
@@ -153,14 +153,14 @@ namespace DuFrame.MSGHelper
                 mstringMode.ScrollPauseTime, mstringMode.StringColor, mstringMode.contentText, 0);
 
             byte[] MessageLength = CalculateTextLength(FirstMessageContent);
-            AppendDataToByteList(packet,WindowDisplayMode.RightTime, MessageLength, FirstMessageContent, MessageEnd);
+            AppendDataToByteList(packet,WindowDisplayMode.RightSide, MessageLength, FirstMessageContent, MessageEnd);
             return packet.ToArray(); 
         }
         private void AddDigitalClockToPacket(List<byte> packet)
         {
             packet.Add((byte)WindowActionCode.ClockDisplay);
             packet.AddRange(message.ClockColor);
-            packet.Add((byte)DisplaySettingsEnums.clock.digitalClock);
+            packet.Add((byte)DUEnum.clock.digitalClock);
             AddTextSettingsToPacket(packet);
         }
         private void AddAnalogClockToPacket(List<byte> packet, int row)
@@ -168,7 +168,7 @@ namespace DuFrame.MSGHelper
             getClockByte(message.PhotographDataContent);
             packet.Add((byte)WindowActionCode.ClockDisplay);
             packet.AddRange(message.ClockColor);
-            packet.Add((byte)DisplaySettingsEnums.clock.analogClock);
+            packet.Add((byte)DUEnum.clock.analogClock);
             
             message.PhotographLength = GetHalfPictureLength();
             packet.AddRange(message.PhotographLength);
@@ -183,12 +183,8 @@ namespace DuFrame.MSGHelper
         private void AddTextSettingsToPacket(List<byte> packet)
         {
             packet.Add((byte)WindowActionCode.TextSettings);
-            //轉換給顯示專用的byte
-            var sizeConvert = judgeFontSize(message.FontSize);
             packet.Add((byte)message.FontSize);
-
-            var typeConvert = judgeFontStyle(message.FontStyle);
-            packet.Add((byte)typeConvert);
+            packet.Add((byte)message.FontStyle);
         }
         /// <summary>
         /// 列車動態位置訊息
@@ -197,7 +193,7 @@ namespace DuFrame.MSGHelper
         public byte[] TrainDynamicLocationMessage()
         {
             List<byte> packet = new List<byte>();
-            byte[] MessageContent = MessageFormattingHelper.GetDynamicMessage(
+            byte[] MessageContent = MessageFormattingHelper.GetPreRecordedPhoto(
                 mstringMode.Level , mstringMode.ScrollMode, mstringMode.ScrollSpeed, mstringMode.ScrollPauseTime
                , mstringMode.StringColor, mstringMode.GraphicStartIndex , mstringMode.GraphicNumber , mstringMode.GraphicStartIndex2
                , mstringMode.GraphicNumber2, mstringMode.GraphicColor, mstringMode.FirstStation , mstringMode.FirstStationMode
@@ -235,7 +231,7 @@ namespace DuFrame.MSGHelper
                 {
                     var messageContent = GetMessageContent(i);
                     var messageLength = CalculateTextLength(messageContent);
-                    AppendDataToByteList(packet, WindowDisplayMode.RightTime, messageLength, messageContent, MessageEnd);
+                    AppendDataToByteList(packet, WindowDisplayMode.RightSide, messageLength, messageContent, MessageEnd);
                 }
             }
             return packet.ToArray();
@@ -265,7 +261,7 @@ namespace DuFrame.MSGHelper
                 {
                     var messageContent = GetMessageContent(i);
                     var messageLength = CalculateTextLength(messageContent);
-                    AppendDataToByteList(packet, WindowDisplayMode.RightTime, messageLength, messageContent, MessageEnd);
+                    AppendDataToByteList(packet, WindowDisplayMode.RightSide, messageLength, messageContent, MessageEnd);
                 }
             }
             return packet.ToArray(); 
@@ -291,10 +287,10 @@ namespace DuFrame.MSGHelper
                     var messageLength = CalculateTextLength(messageContent);
                     AppendDataToByteList(packet, WindowDisplayMode.FullWindow, messageLength, messageContent, MessageEnd);
                 }
-            } 
+            }
             return packet.ToArray();
         }
-        
+
         #endregion
 
         #region private Mehod
@@ -304,14 +300,14 @@ namespace DuFrame.MSGHelper
         private void AppendDataToByteList(List<byte> byteList, WindowDisplayMode version, byte[] dataLength, byte[] data, byte[] endMarker)
         {
             byteList.Add((byte)version);
-            byteList.AddRange(dataLength);  
+            byteList.AddRange(dataLength);
             byteList.AddRange(data);
             byteList.AddRange(endMarker);
         }
         /// <summary>
         /// 一般文字內容的組成格式
-        /// </summary> 
-        private byte[] GetMessageContent(int index )
+        /// </summary>
+        private byte[] GetMessageContent(int index)
         {
             return MessageFormattingHelper.GetStaticTextMessage(
                  mstringMode.Level
@@ -319,10 +315,12 @@ namespace DuFrame.MSGHelper
                 , mstringMode.ScrollSpeed
                 , mstringMode.ScrollPauseTime
                 , mstringMode.StringColor
-                , mstringMode.contentText  
+                , mstringMode.contentText
                 , index
                  );
         }
+
+
         /// <summary>
         /// 位移轉換
         /// </summary>
@@ -375,9 +373,9 @@ namespace DuFrame.MSGHelper
                     {
                         int area = i * 384;
                         int[] index = new int[8];
-                        ///每八個直排的處理成一個byte 
+                        ///每八個直排的處理成一個byte
                         for (int k = 0; k < 8; k++)
-                        {   
+                        {
                             index[k] = area + k * 48 + j;
                         }
                         ///把處理完的值塞入2維陣列 
@@ -414,51 +412,6 @@ namespace DuFrame.MSGHelper
                         }
                     }
                 }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// 判斷字體大小
-        /// </summary> 
-        /// <returns></returns>
-        public DuFrame.DisplaySettingsEnums.fontSize judgeFontSize(int size)
-        {
-            try
-            {
-                switch (size)
-                {
-                    case 0: return DuFrame.DisplaySettingsEnums.fontSize.Font24x24;
-                    case 1: return DuFrame.DisplaySettingsEnums.fontSize.Font16x16;
-                    case 2: return DuFrame.DisplaySettingsEnums.fontSize.Font5x7;
-                    default: break;
-                }
-                return DuFrame.DisplaySettingsEnums.fontSize.Font16x16;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-        /// <summary>
-        /// 判斷字體風格
-        /// </summary>
-        /// <returns></returns>
-        public DuFrame.DisplaySettingsEnums.fontStyle judgeFontStyle(string type)
-        {
-            try
-            {
-                switch (type)
-                {
-                    case "明體": return DuFrame.DisplaySettingsEnums.fontStyle.明體;
-                    case "黑體": return DuFrame.DisplaySettingsEnums.fontStyle.黑體;
-                    case "楷體": return DuFrame.DisplaySettingsEnums.fontStyle.楷體;
-                    default: break;
-                }
-                return DuFrame.DisplaySettingsEnums.fontStyle.明體;
             }
             catch (Exception)
             {

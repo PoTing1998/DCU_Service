@@ -1,9 +1,19 @@
-﻿using System.Collections.Generic;
+﻿
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+
+using static DuFrame.DUEnum;
 
 namespace DuFrame.MSG
 {
 
-    public  class StringMode 
+    public class StringMode 
     {
         #region property
         protected readonly byte[] StringEnd= new byte[] { 0x1F };
@@ -56,6 +66,7 @@ namespace DuFrame.MSG
         /// <summary>
         /// 文字靜態封包格式 兩排一起傳送的 
         /// </summary>
+
         public StringMode(
             int level,
             string scrollMode,
@@ -78,6 +89,7 @@ namespace DuFrame.MSG
         /// <summary>
         /// 顯示預錄訊息的內容 
         /// </summary>
+    
         public StringMode(
             int level,
             string scrollMode,

@@ -39,6 +39,22 @@ namespace Display
             Reserved = 0x76,
             TrainDynamic = 0x83,
         }
+        public enum MessageLevel : byte
+        {
+            Level1 = 0x01, // 最高级别
+            Level2 = 0x02, // 高级别
+            Level3 = 0x03, // 低级别
+            Level4 = 0x04  // 最低级别
+        }
+
+
+        public enum StringMode
+        {
+            TextStatic  = 0X2A,
+            TextFlash = 0x2B ,
+            Pre_RecordedMessage =0X2C,
+            Pre_RecordedPicturesStatic_Dynamic =0x2D
+        }
 
         /// <summary>
         ///  77H, ClearScreen 清除畫面（blanking）， 用於立即更新訊息使用。 
@@ -67,6 +83,17 @@ namespace Display
             EmergencyMessagePlaybackCount = 0x80,
             ClockDisplay = 0x82,
             Default = 0x00
+        }
+
+        public enum ScrollMode
+        {
+            Jump = 0x61,                   // 即時顯示
+            ScrollLeft = 0x62,             // 向左捲動（右至左，常规滚动）
+            ScrollLeftWithDisappear = 0x63, // 向左捲動（消失，向左滚动消失）
+            ScrollLeftWithFadeOut = 0x64,  // 向左捲動（逐渐消失，右至左逐渐淡出）
+            ScrollDown = 0x65,             // 向下捲動
+            ScrollUp = 0x66,               // 向上捲動
+            Flash = 0x67                   // 閃爍
         }
     }
    

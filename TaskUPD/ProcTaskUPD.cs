@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Timers;
 using TaskUPD;
+using System.Xml.Linq;
 
 
 
@@ -43,7 +44,7 @@ namespace ASI.Wanda.DCU.TaskUPD
         static string sClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
         static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
-        ASI.Wanda.DCU.TaskUPD.TaskUPDHelper _taskUPDHelper;
+      //  ASI.Wanda.DCU.TaskUPD.TaskUPDHelper _taskUPDHelper;
         private static ProScheduler _proScheduler;
 
         #endregion
@@ -133,9 +134,9 @@ namespace ASI.Wanda.DCU.TaskUPD
 
 
 
-            _taskUPDHelper = new ASI.Wanda.DCU.TaskUPD.TaskUPDHelper(mProcName, serial);
-            _proScheduler = new ProScheduler(_taskUPDHelper);
-            _proScheduler.Start();  
+        //    ASI.Wanda.DCU.TaskUPD.TaskUPDHelper _taskUPDHelper = new ASI.Wanda.DCU.TaskUPD.TaskUPDHelper(mProcName, serial);
+            //_proScheduler = new ProScheduler(_taskUPDHelper);
+            //_proScheduler.Start();  
             return base.StartTask(pComputer, pProcName);
         }
 
@@ -151,7 +152,7 @@ namespace ASI.Wanda.DCU.TaskUPD
                 {
                     try
                     {
-                         _taskUPDHelper = new ASI.Wanda.DCU.TaskUPD.TaskUPDHelper(mProcName, serial);
+                        ASI.Wanda.DCU.TaskUPD.TaskUPDHelper _taskUPDHelper = new ASI.Wanda.DCU.TaskUPD.TaskUPDHelper(mProcName, serial);
 
                         string sJsonData = mSGFromTaskDMD.JsonData;
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
@@ -165,10 +166,13 @@ namespace ASI.Wanda.DCU.TaskUPD
                             string PreRecordMessageSettingTarget_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
 
                             ASI.Lib.Log.DebugLog.Log(mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{PreRecordMessageSettingSeatID}；MsgID:{PreRecordMessageSettingMsg_id}；target_du:{PreRecordMessageSettingTarget_du}; dbName1 :{PreRecordMessageSettingDbName1};dbName2 :{PreRecordMessageSettingDbName2}");
-
+                           // _taskUPDHelper.SendMessageToUrgnt("您好!下雨期間車站電聯車受風雨引響，地板較濕請小心行走，謝謝!", "Hello! During the rain, the stations electric vehicle was led by the wind and rain. Please walk carefully, thank you!", 81);
                             //傳送到面板上
-                            _taskUPDHelper.judgeDbName( PreRecordMessageSettingDbName1);
-                            
+                            _taskUPDHelper.judgeDbName(PreRecordMessageSettingDbName1);
+
+                         
+
+
                         }
                         else if (sJsonObjectName == ASI.Wanda.DCU.TaskUPD.TaskUPDHelper.Constants.SendInstantMsg)
                         {

@@ -31,7 +31,7 @@ namespace ASI.Wanda.DCU.TaskSDU
             _mSerial = serial;
         }
 
-        static DeviceInfo SplitStringToDeviceInfo(string input)
+        private DeviceInfo SplitStringToDeviceInfo(string input)
         {
             if (string.IsNullOrEmpty(input)) return null;
 
@@ -107,7 +107,7 @@ namespace ASI.Wanda.DCU.TaskSDU
         /// <summary>
         /// 左測月台碼
         /// </summary>
-        void SendMessageToDisplay2(string target_du, string dbName1, string dbName2)
+        public void SendMessageToDisplay2(string target_du, string dbName1, string dbName2)
         {
             var deviceInfo = SplitStringToDeviceInfo(target_du);
             var processor = new PacketProcessor();
@@ -208,7 +208,7 @@ namespace ASI.Wanda.DCU.TaskSDU
 
 
         #endregion
-        Display.Sequence CreateSequence(string messageContent, int sequenceNo)
+        private Display.Sequence CreateSequence(string messageContent, int sequenceNo)
         {
             var textStringBody = new TextStringBody
             {
@@ -285,7 +285,7 @@ namespace ASI.Wanda.DCU.TaskSDU
                 ASI.Lib.Log.ErrorLog.Log("Error ProcessMessage ProcessMessage", ex);
                 return null;
             }
-            #endregion
+           
         }
         /// <summary>
         /// 色碼轉換成byte
@@ -311,8 +311,8 @@ namespace ASI.Wanda.DCU.TaskSDU
                 return null;
             }
         }
-
+        #endregion
 
     }
-   
+
 }

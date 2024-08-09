@@ -29,7 +29,6 @@ namespace Display
                 FunctionCode = functionCode,
                 Sequences = sequences
             };
-
             // Generate CheckSum after all other fields are set
             packet.CheckSum = (byte)(packet.ToBytes().Sum(b => b) & 0xFF);
 
@@ -165,11 +164,7 @@ namespace Display
             return packet;
         }
 
-        public byte[] HandlePacket(Packet packet)
-        {
-            var handler = _handlerFactory.GetHandler(packet.FunctionCode);
-            return handler.HandleFunction(packet);
-        }
+    
 
         private List<StringMessage> ParseStringMessages(byte[] data)
         {

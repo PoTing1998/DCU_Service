@@ -30,7 +30,8 @@ namespace Display
 
 
             // Calculate CheckSum
-            CheckSum = (byte)(dataBytes.Sum(b => b) & 0xFF);
+            //CheckSum = (byte)(dataBytes.Sum(b => b) & 0xFF);
+            CheckSum = CalculateCheckSum(dataBytes);
             result.Add(CheckSum); // Add CheckSum
 
             return result.ToArray();
@@ -69,6 +70,21 @@ namespace Display
                 return result.ToArray();
             }
         }
+
+        private byte CalculateCheckSum(byte[] dataContent)
+        {
+            int sum = 0;
+
+            // 逐個字節相加
+            foreach (var b in dataContent)
+            {
+                sum += b;
+            }
+
+            // 返回低8位，忽略高位進位
+            return (byte)(sum & 0xFF);
+        }
+
 
     }
 }

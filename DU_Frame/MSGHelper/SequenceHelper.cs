@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using static DuFrame.DisplaySettingsEnums;
+using static DuFrame.DUEnum;
 
 namespace DuFrame.MSGHelper
 {
@@ -36,7 +36,7 @@ namespace DuFrame.MSGHelper
                 //要加判斷是否開關緊急訊息  
                 if (sequence.message.Emergency == WindowActionCode.EmergencyMessagePlaybackCount)
                 {
-                    if (sequence.message.emergencyMode == DisplaySettingsEnums.EmergencyCommand.Off)
+                    if (sequence.message.emergencyMode == DUEnum.EmergencyCommand.Off)
                     {
                         oByteList.Add((byte)sequence.message.emergencyMode);
                     }
@@ -78,11 +78,10 @@ namespace DuFrame.MSGHelper
                 }
                 var bytes = new List<byte>
                 {  
-                    (byte)DisplaySettingsEnums.WindowActionCode.TextSettings,
+                    (byte)DUEnum.WindowActionCode.TextSettings,
                     (byte)sequence.message.FontSize,
-                     byte.Parse(sequence.message.FontStyle),
-                 
-            };
+                    (byte)sequence.message.FontStyle
+                };
                 var content = bytes.Concat(result).ToArray();
                 content = content.Concat(mSequenceEnd).ToArray();
                 sequence.SequenceLength = BitConverter.GetBytes((short)content.Length);
@@ -103,7 +102,7 @@ namespace DuFrame.MSGHelper
         // 獲取不同視窗內容的 byte 長度
         private byte[] GetMsgLength(WindowDisplayMode window)
         {
-            if (sequence.message.Clock == DisplaySettingsEnums.clock.analogClock || sequence.message.Clock == DisplaySettingsEnums.clock.digitalClock)
+            if (sequence.message.Clock == DUEnum.clock.analogClock || sequence.message.Clock == DUEnum.clock.digitalClock)
             {
                 var MsgContent = new List<byte>(GetMessageContent(window));
                 sequence.SequenceContent = MsgContent.Concat(mSequenceEnd).ToArray();
@@ -114,9 +113,9 @@ namespace DuFrame.MSGHelper
                 {
                     //暫時移除 command的代碼 
                     //(byte)DUEnum.WindowActionCode.ClearScreen,  
-                    (byte)DisplaySettingsEnums.WindowActionCode.TextSettings,
+                    (byte)DUEnum.WindowActionCode.TextSettings,
                     (byte)sequence.message.FontSize,
-                    byte.Parse(sequence.message.FontStyle)
+                    (byte)sequence.message.FontStyle
                 };
                 //取得內容的byte 且加上 End以及結合前面的command
                 var MsgContent = new List<byte>(bytes.Concat(GetMessageContent(window)));
@@ -137,11 +136,11 @@ namespace DuFrame.MSGHelper
                 case WindowDisplayMode.FullWindow: 
                     return (sequence.message.Emergency == WindowActionCode.EmergencyMessagePlaybackCount) ?
                         oMessage.GenerateEmergencyPacket() : oMessage.GenerateFullWindowPacket();
-                case WindowDisplayMode.LeftPlatform:
+                case WindowDisplayMode.LeftSide:
                     return oMessage.GeneratePlatformMessageWindowPacket(); 
-                case WindowDisplayMode.LeftPlatformRightTime:
+                case WindowDisplayMode.LeftAndRight:
                     return oMessage.GeneratePlatformTimeMessageWindowPacket();
-                case WindowDisplayMode.RightTime:
+                case WindowDisplayMode.RightSide:
                     return Determine(window);
                 case WindowDisplayMode.TrainDynamic:
                     return oMessage.TrainDynamicLocationMessage();
@@ -159,12 +158,12 @@ namespace DuFrame.MSGHelper
 
             switch (windon)
             {
-                case WindowDisplayMode.RightTime:
-                    if (sequence.message.Clock == DisplaySettingsEnums.clock.analogClock || sequence.message.Clock == DisplaySettingsEnums.clock.digitalClock)
+                case WindowDisplayMode.RightSide:
+                    if (sequence.message.Clock == DUEnum.clock.analogClock || sequence.message.Clock == DUEnum.clock.digitalClock)
                         data = oMessage.GenerateClockMessageEffectWindowPacket(sequence.SequenceNo);
-                    else if (sequence.message.TopCommandType == DisplaySettingsEnums.WindowActionCode.PictureOnLeft)
+                    else if (sequence.message.TopCommandType == DUEnum.WindowActionCode.PictureOnLeft)
                         data = oMessage.GenerateTopPlatformAndTimeDisplayData();
-                    else if (sequence.message.BottomCommandType == DisplaySettingsEnums.WindowActionCode.PictureDownLeft)
+                    else if (sequence.message.BottomCommandType == DUEnum.WindowActionCode.PictureDownLeft)
                         data = oMessage.GenerateDownPlatformAndTimeDisplayData();
                     else
                         data = oMessage.GenerateTimeMessageEffectWindowPacket();
