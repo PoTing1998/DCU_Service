@@ -86,7 +86,7 @@ namespace Display
         }
     }
 
-    // 預錄圖片靜動態顯示模式  
+    // 預錄圖片靜動態顯示模式   
     public class PreRecordedGraphicBody : StringBody
     {
         public ushort GraphicStartIndex { get; set; } // Low Byte first

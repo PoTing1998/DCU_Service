@@ -4,6 +4,7 @@ using System.Text;
 using ASI.Lib.Process;
 using ASI.Lib.Config;
 using ASI.Wanda.DCU.TaskKernel;
+using System.Diagnostics;
 
 namespace ASI.Wanda.DCU.TaskKernel
 {
@@ -11,7 +12,9 @@ namespace ASI.Wanda.DCU.TaskKernel
 	{
 		static void Main(string[] args)
 		{
-			string qname = "TaskKernel";
+
+            Debugger.Launch(); // 啟動調試器
+            string qname = "TaskKernel";
 			if (args.Length == 1) qname = args[0];
                     
 			IProcess TheProc = new ProcKernel();

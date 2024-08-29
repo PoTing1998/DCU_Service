@@ -340,7 +340,7 @@ namespace Display
                 iPos -= oSeparateStringBackup.GetPixel();
             }
 
-            //用空白填補最後後續
+            //用空白填補最後後續 
             iPos -= fontPixel;
             while (iPos >= fontPixel)
             {

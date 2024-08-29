@@ -18,7 +18,7 @@ namespace ASI.Wanda.DCU.TaskMain
                 LogFile.Log(mComputerName, mProcName, astr);
                 LogFile.Display(astr);
 
-                return base.ProcEvent(pLabel, pBody);
+                return base.ProcEvent(pLabel, pBody); 
             }
             else
             {

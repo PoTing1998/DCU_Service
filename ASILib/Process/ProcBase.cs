@@ -78,7 +78,7 @@ namespace ASI.Lib.Process
 		/// <summary>
 		/// 定時回報TaskMain
 		/// </summary>
-		/// <param name="pMessage"></param>
+		/// <param name="pMessage"></param> 
 		/// <returns></returns>
 		public virtual int ProcTimerEvent(string pMessage)
 		{

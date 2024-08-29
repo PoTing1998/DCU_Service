@@ -25,7 +25,7 @@ namespace Display
             result.Add(idLength); // Add ID length
             result.AddRange(IDs); // Add IDs
             result.Add(FunctionCode); // Add FunctionCode
-            result.AddRange(lengthBytes); // Add data length
+            result.AddRange(lengthBytes); // Add data length 
             result.AddRange(dataBytes); // Add data bytes
 
 

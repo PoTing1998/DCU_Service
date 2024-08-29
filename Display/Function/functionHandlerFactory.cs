@@ -31,7 +31,7 @@ namespace Display.Function
             {
                 return handler;
             }
-            throw new InvalidOperationException($"No handler found for FunctionCode {functionCode}");
+            throw new InvalidOperationException($"找尋不到相關 FunctionCode {functionCode}");
         }
     }
 

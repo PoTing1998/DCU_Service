@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace UITest
         private string StationID;
         private string AreaID;
         private string DeviceID;
-        // 將 textStringBody 定義為類的成員變量
+        // 將 textStringBody 定義為類的成員變量 
         private TextStringBody textStringBody;
         private StringMessage stringMessage;
         private FullWindow fullWindow;
@@ -56,7 +57,7 @@ namespace UITest
             };
             var stringMessage = new StringMessage
             {
-                StringMode = 0x2A, // TextMode (Static) 
+                StringMode = 0x2A, // TextMode (Static)    
                 StringBody = textStringBody
             };
             var fullWindowMessage = new FullWindow //Display version
@@ -84,6 +85,7 @@ namespace UITest
             var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
             var serializedData = processor.SerializePacket(packet);
         }
+
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -245,31 +247,31 @@ namespace UITest
 
             ValidateMessageFont(sequence);
             textBox2.Text += messageContentHexString;
-            textBox2.Text += "========================\r\n";
+            textBox2.Text += "\r\n========================\r\n";
         }
         private void button5_Click(object sender, EventArgs e)
         {
             var processor = new PacketProcessor();
-            var startCode = new byte[] { 0x55, 0xAA };
-            var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
+            var startCode = new byte[] { 0x55, 0xAA };   
+            var function = new PassengerInfoHandler(); // Use PassengerInfoHandler  
             var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence });
             var serializedData = processor.SerializePacket(packet);
             byte[] byteArray = packet.ToBytes();
             string messageContentHexString = string.Join(" ", byteArray.Select(b => b.ToString("X2"))); // "X2" 將每個字節格式化為兩位16進制數
             textBox2.Text += messageContentHexString;
-            textBox2.Text += "========================\r\n";
+            textBox2.Text += "\r\n========================\r\n";
         }
 
-        #region private
+        #region private  
         private void data(ASI.Wanda.DCU.DB.Models.DMD.dmd_pre_record_message data)
         {
-            textBox1.Text += "字體顏色 : " + data.font_color + "\r\n"; ;
-            textBox1.Text += "字體內容 : " + data.message_content + "\r\n"; ;
-            textBox1.Text += "訊息等級 : " + data.message_priority + "\r\n"; ;
-            textBox1.Text += "訊息速度 :" + data.move_speed + "\r\n"; ;
-            textBox1.Text += "訊息間格 : " + data.Interval + "\r\n"; ;
-            textBox1.Text += "訊息字體大小 : " + data.font_size + "\r\n"; ;
-            textBox1.Text += "訊息字體風格 : " + data.font_type + "\r\n"; ;
+            textBox1.Text += "字體顏色 : " + data.font_color + "\r\n"; 
+            textBox1.Text += "字體內容 : " + data.message_content + "\r\n"; 
+            textBox1.Text += "訊息等級 : " + data.message_priority + "\r\n"; 
+            textBox1.Text += "訊息速度 :" + data.move_speed + "\r\n";
+            textBox1.Text += "訊息間格 : " + data.Interval + "\r\n";
+            textBox1.Text += "訊息字體大小 : " + data.font_size + "\r\n";
+            textBox1.Text += "訊息字體風格 : " + data.font_type + "\r\n";
 
         }
         // 用於提取文本中指定標籤後的值
@@ -394,14 +396,14 @@ namespace UITest
 
         public bool ValidateMessageLevel(byte level)
         {
-            // 將 byte 类型的 MessageLevel 转换为 MessageLevel 枚举类型，并验证是否有效
+            // 將 byte 類型的 MessageLevel 轉換為 MessageLevel enum類型，驗證是否有效
             if (Enum.IsDefined(typeof(MessageLevel), level))
             {
                 textBox2.Text += "MessageLevel 的值有效。\r\n";
                 return true;
             }
             else
-            {
+            {   
                 textBox2.Text += "MessageLevel 的值無效。\r\n";
                 return false;
             }
@@ -434,14 +436,301 @@ namespace UITest
             return true;
         }
 
+        #endregion
+        private void button6_Click(object sender, EventArgs e)
+        {
+            var ByteData = textBox5.Text;
+            //string[] portNames = SerialPort.GetPortNames(); 
+            var temp =   ConvertHexStringToByteArray(ByteData); 
+            string errorMessage;
+            var length=  temp.Length;
+            if ( ValidatePacket(temp ,out errorMessage))
+            {
+                textBox6.Text = "正確封包";
+            }
+            else
+            {
+                textBox6.Text = errorMessage;
+            }
+
+        }
+        private byte[] ConvertHexStringToByteArray(string hexString)
+        {
+            // 移除所有空格
+            hexString = hexString.Replace(" ", "");
+
+            // 轉換為 byte array
+            int length = hexString.Length;
+            byte[] byteArray = new byte[length / 2];
+            for (int i = 0; i < length; i += 2)
+            {
+                byteArray[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
+            }
+            return byteArray;
+        }
+
+
+        #region private
+        public bool ValidatePacket(byte[] receivedData, out string errorMessage)
+        {
+            int currentIndex = 0;
+            errorMessage = "";
+
+            try
+            {
+                // Step 1: 檢查起始碼 [0x55, 0xAA]
+                if (receivedData[currentIndex] != 0x55 || receivedData[currentIndex + 1] != 0xAA)
+                {
+                    errorMessage = $"StartCode mismatch at byte {currentIndex}, expected [0x55, 0xAA]";
+                    return false;
+                }
+                currentIndex += 2;
+
+                // Step 2: 檢查 ID_LENGTH 並根據其值跳過 ID 字段
+                byte idLength = receivedData[currentIndex];
+                if (idLength == 0x00)
+                {
+                    errorMessage = $"Invalid ID_LENGTH at byte {currentIndex}, cannot be 0x00";
+                    return false;
+                }
+                currentIndex++;
+
+                // 檢查 ID 長度是否合理
+                if (currentIndex + idLength > receivedData.Length || idLength < 1)
+                {
+                    errorMessage = $"ID length is invalid or exceeds data length at byte {currentIndex}";
+                    return false;
+                }
+
+                // 跳過 ID 字段，移動 currentIndex 到 FunctionCode 位置
+                currentIndex += idLength;
+
+                // Step 3: 檢查 FunctionCode 是否為 0x34
+                if (receivedData[currentIndex] != 0x34)
+                {
+                    errorMessage = $"FunctionCode mismatch at byte {currentIndex}, expected 0x34";
+                    return false;
+                }
+                currentIndex++;
+
+                // Step 4: 解析 Data_Length (2 bytes, 小端序)
+                if (currentIndex + 2 > receivedData.Length)
+                {
+                    errorMessage = $"Insufficient data for Data_Length at byte {currentIndex}";
+                    return false;
+                }
+
+                int dataLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
+                currentIndex += 2;
+
+                // Step 5: 檢查 Data_Length 到最後一個 byte 之前的長度是否匹配
+                int remainingLength = receivedData.Length - currentIndex - 1; // 扣掉最後一個 byte
+                if (dataLength != remainingLength)
+                {
+                    errorMessage = $"Data_Length mismatch at byte {currentIndex}, expected {remainingLength}, got {dataLength}";
+                    return false;
+                }
+                // Step 6: 確認下個 byte 是否為 0x01
+                if (receivedData[currentIndex] != 0x01)
+                {
+                    errorMessage = $"Expected 0x01 at byte {currentIndex}";
+                    return false;
+                }
+                currentIndex++;
+
+                // Step 7: 解析 SequenceLength (2 bytes, 小端序)
+                if (currentIndex + 2 > receivedData.Length)
+                {
+                    errorMessage = $"Insufficient data for SequenceLength at byte {currentIndex}";
+                    return false;
+                }
+
+                int sequenceLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
+                currentIndex += 2;
+
+                // Step 8: 檢查 SequenceLength 到 0x1D 的範圍 (0x1D 是 2 bytes, 小端序)
+                int sequenceEndIndex = currentIndex + sequenceLength - 2; // 2 bytes for 0x1D
+
+                if (sequenceEndIndex + 1 >= receivedData.Length)
+                {
+                    errorMessage = $"Sequence length extends beyond data length at byte {sequenceEndIndex}";
+                    return false;
+                }
+                // Step 9: 檢查是否存在清除指令 0x77，並且後面是 0x7F
+                if (currentIndex + 2 > receivedData.Length)
+                {
+                    errorMessage = $"Insufficient data for Clear Command check at byte {currentIndex}";
+                    return false;
+                }
+
+                if (receivedData[currentIndex] != 0x77 || receivedData[currentIndex + 1] != 0x7F)
+                {
+                    errorMessage = $"Expected Clear Command [0x77, 0x7F] at bytes {currentIndex} and {currentIndex + 1}";
+                    return false;
+                }
+                currentIndex += 2;
+                // Step 10: 檢查字體大小 (FontSize)
+                FontSize fontSize = (FontSize)receivedData[currentIndex];
+                if (!Enum.IsDefined(typeof(FontSize), fontSize))
+                {
+                    errorMessage = $"Invalid FontSize at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                    return false;
+                }
+                currentIndex++;
+
+                // Step 11: 檢查字體樣式 (FontStyle)
+                Display.FontStyle fontStyle = (Display.FontStyle)receivedData[currentIndex];
+                if (!Enum.IsDefined(typeof(Display.FontStyle), fontStyle))
+                {
+                    errorMessage = $"Invalid FontStyle at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                    return false;
+                }
+                currentIndex++;
+
+                // Step 12: 檢查 messageType (WindowDisplayMode)
+                WindowDisplayMode messageType = (WindowDisplayMode)receivedData[currentIndex];
+                if (!Enum.IsDefined(typeof(WindowDisplayMode), messageType))
+                {
+                    errorMessage = $"Invalid messageType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";  
+                    return false;
+                }
+                currentIndex++;
+                // Step 13: 檢查 MessageLength 之後的範圍是否有效 (2 bytes, 小端序)
+                if (currentIndex + 2 > receivedData.Length)
+                {
+                    errorMessage = $"Insufficient data for MessageLength at byte {currentIndex}";   
+                    return false;
+                }
+
+                int messageLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
+                currentIndex += 2;
+
+                int messageEndIndex = currentIndex + messageLength - 1;
+
+                if (messageEndIndex >= receivedData.Length || receivedData[messageEndIndex] != 0x1E) 
+                {
+                    errorMessage = $"Message does not end with 0x1E or length is incorrect at byte {messageEndIndex}";
+                    return false;
+                }
+
+                // Step 14: 檢查 MessageLevel (1 byte)
+                byte messageLevel = receivedData[currentIndex];
+                if (messageLevel < 0x01 || messageLevel > 0x04)
+                {
+                    errorMessage = $"Invalid MessageLevel at byte {currentIndex}, expected value between 0x01 and 0x04";
+                    return false;
+                }
+                currentIndex++;
+                // Step 15: 檢查 MessageScroll (ScrollMode, ScrollSpeed, PauseTime) 共 3 bytes
+                if (currentIndex + 3 > receivedData.Length)  
+                {
+                    errorMessage = $"Insufficient data for MessageScroll at byte {currentIndex}";
+                    return false;
+                }
+
+                byte scrollMode = receivedData[currentIndex];       // 正確地取 ScrollMode
+                byte scrollSpeed = receivedData[currentIndex + 1];  // 正確地取 ScrollSpeed
+                byte pauseTime = receivedData[currentIndex + 2];    // 正確地取 PauseTime
+                currentIndex += 3;                                  // 更新 currentIndex，跳過3個字節
+
+                // Step 16: 檢查 ScrollMode 是否符合範圍
+                ScrollMode mode = (ScrollMode)scrollMode;
+                if (!Enum.IsDefined(typeof(ScrollMode), mode))
+                {
+                    errorMessage = $"Invalid ScrollMode at byte {currentIndex - 3}, received {scrollMode:X2}";
+                    return false;
+                }
+
+                // Step 17: 檢查 ScrollSpeed 是否在合理範圍內 (0x00 ~ 0x09)
+                if (scrollSpeed > 0x09)
+                {
+                    errorMessage = $"Invalid ScrollSpeed at byte {currentIndex - 2}, received {scrollSpeed:X2}";
+                    return false;
+                }
+
+                // Step 18: 檢查 PauseTime 是否在合理範圍內 (0x00 ~ 0xFF) 
+                if (pauseTime > 0xFF)
+                {
+                    errorMessage = $"Invalid PauseTime at byte {currentIndex - 1}, received {pauseTime:X2}";
+                    return false; 
+                }
+
+                // Step 19: 檢查 StringMode 
+                if (currentIndex >= receivedData.Length)
+                {
+                    errorMessage = $"Insufficient data for StringMode at byte {currentIndex}";  
+                    return false;
+                }
+
+                StringMode stringMode = (StringMode)receivedData[currentIndex]; 
+                if (!Enum.IsDefined(typeof(StringMode), stringMode))
+                {
+                    errorMessage = $"Invalid StringMode at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                    return false;
+                }
+                currentIndex++;
+
+                // Step 20: 檢查 StringText 的內容直到 0x1F 之前
+                // 找到 0x1F 的位置，並檢查之前的字串內容
+                int endIndex = Array.IndexOf(receivedData, (byte)0x1F, currentIndex);
+
+                if (endIndex == -1)
+                {
+                    errorMessage = $"Message content does not end with 0x1F, starting at byte {currentIndex}";   
+                    return false;
+                }
+
+                // 提取訊息內容，不包含 0x1F
+                byte[] textBytes = new byte[endIndex - currentIndex];
+                Array.Copy(receivedData, currentIndex, textBytes, 0, textBytes.Length);
+
+                // 將訊息內容轉換為 BIG-5 編碼的字節數組
+                string messageText = Encoding.GetEncoding(950).GetString(textBytes);
+
+                // 在這裡可以進一步檢查 messageText 是否符合特定格式或條件
+                // if (!ValidateMessageText(messageText)) { ... }
+
+                // Step 21: 檢查 0x1F 是否正確
+                if (receivedData[endIndex] != 0x1F)
+                {
+                    errorMessage = $"Expected 0x1F at byte {endIndex}, but found {receivedData[endIndex]:X2}";
+                    return false;
+                }
+
+                currentIndex = endIndex + 1; // 移動到 0x1F 之後
+
+                // Step 22: 檢查 0x1E 是否正確
+                if (currentIndex >= receivedData.Length || receivedData[currentIndex] != 0x1E)
+                {
+                    errorMessage = $"Expected 0x1E at byte {currentIndex}, but found {receivedData[currentIndex]:X2}";
+                    return false;
+                }
+                currentIndex++;
+
+                // Step 23: 檢查 0x1D 是否正確
+                if (currentIndex >= receivedData.Length || receivedData[currentIndex] != 0x1D)
+                {
+                    errorMessage = $"Expected 0x1D at byte {currentIndex}, but found {receivedData[currentIndex]:X2}";
+                    return false;
+                }
+                currentIndex++;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Exception occurred: {ex.Message}";
+                return false;
+            }
+
+            // 如果所有檢查都通過，返回 true，錯誤信息為空
+            return true;
+        }
+
+
+
+
+
 
         #endregion
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-       
     }
 }
