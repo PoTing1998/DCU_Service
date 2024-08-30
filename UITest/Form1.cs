@@ -241,7 +241,7 @@ namespace UITest
             };
            
 
-            // 將字節數組轉換為16進制字符串並顯示
+            // 將字節數組轉換為16進制字符串並顯示  
             byte[] byteArray = sequence.ToBytes();
             string messageContentHexString = string.Join(" ", byteArray.Select(b => b.ToString("X2"))); // "X2" 將每個字節格式化為兩位16進制數
 
@@ -569,7 +569,7 @@ namespace UITest
                     return false;
                 }
                 currentIndex += 2;
-                // Step 10: 檢查字體大小 (FontSize)
+                // Step 10: 檢查字體大小 (FontSize) 
                 FontSize fontSize = (FontSize)receivedData[currentIndex];
                 if (!Enum.IsDefined(typeof(FontSize), fontSize))
                 {
@@ -612,6 +612,8 @@ namespace UITest
                     errorMessage = $"Message does not end with 0x1E or length is incorrect at byte {messageEndIndex}";
                     return false;
                 }
+
+
 
                 // Step 14: 檢查 MessageLevel (1 byte)
                 byte messageLevel = receivedData[currentIndex];
