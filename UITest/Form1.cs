@@ -23,6 +23,7 @@ namespace UITest
 {
     public partial class Form1 : Form
     {
+        #region  construct
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
         private string StationID;
@@ -86,7 +87,8 @@ namespace UITest
             var serializedData = processor.SerializePacket(packet);
         }
 
-
+        #endregion
+        #region Button
         private void button1_Click(object sender, EventArgs e)
         {
             // 獲取當前 textBox1 中的內容
@@ -261,8 +263,26 @@ namespace UITest
             textBox2.Text += messageContentHexString;
             textBox2.Text += "\r\n========================\r\n";
         }
+        private void button6_Click(object sender, EventArgs e)
+        {
+            var ByteData = textBox5.Text;
+            //string[] portNames = SerialPort.GetPortNames(); 
+            var temp = ConvertHexStringToByteArray(ByteData);
+            string errorMessage;
+            TestFunction test = new TestFunction();
+            test.ValidatePacket(temp, out errorMessage);
+            if (ValidatePacket(temp, out errorMessage))
+            {
+                textBox6.Text = "正確封包";
+            }
+            else
+            {
+                textBox6.Text = errorMessage;
+            }
 
-        #region private  
+        }
+        #endregion
+        #region 組成封包的Method
         private void data(ASI.Wanda.DCU.DB.Models.DMD.dmd_pre_record_message data)
         {
             textBox1.Text += "字體顏色 : " + data.font_color + "\r\n"; 
@@ -437,23 +457,7 @@ namespace UITest
         }
 
         #endregion
-        private void button6_Click(object sender, EventArgs e)
-        {
-            var ByteData = textBox5.Text;
-            //string[] portNames = SerialPort.GetPortNames(); 
-            var temp =   ConvertHexStringToByteArray(ByteData); 
-            string errorMessage;
-            var length=  temp.Length;
-            if ( ValidatePacket(temp ,out errorMessage))
-            {
-                textBox6.Text = "正確封包";
-            }
-            else
-            {
-                textBox6.Text = errorMessage;
-            }
-
-        }
+   
         private byte[] ConvertHexStringToByteArray(string hexString)
         {
             // 移除所有空格
@@ -470,7 +474,7 @@ namespace UITest
         }
 
 
-        #region private
+        #region private 驗證封包的方法
         public bool ValidatePacket(byte[] receivedData, out string errorMessage)
         {
             int currentIndex = 0;
@@ -612,9 +616,6 @@ namespace UITest
                     errorMessage = $"Message does not end with 0x1E or length is incorrect at byte {messageEndIndex}";
                     return false;
                 }
-
-
-
                 // Step 14: 檢查 MessageLevel (1 byte)
                 byte messageLevel = receivedData[currentIndex];
                 if (messageLevel < 0x01 || messageLevel > 0x04)
@@ -726,12 +727,6 @@ namespace UITest
             // 如果所有檢查都通過，返回 true，錯誤信息為空
             return true;
         }
-
-
-
-
-
-
         #endregion
 
     }

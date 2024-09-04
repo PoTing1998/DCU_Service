@@ -43,6 +43,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.button6 = new System.Windows.Forms.Button();
             this.textBox6 = new System.Windows.Forms.TextBox();
+            this.button7 = new System.Windows.Forms.Button();
+            this.textBox7 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // textBox1
@@ -148,10 +150,10 @@
             // 
             // textBox5
             // 
-            this.textBox5.Location = new System.Drawing.Point(866, 122);
+            this.textBox5.Location = new System.Drawing.Point(866, 145);
             this.textBox5.Multiline = true;
             this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(402, 74);
+            this.textBox5.Size = new System.Drawing.Size(276, 74);
             this.textBox5.TabIndex = 16;
             this.textBox5.Text = "55 AA 02 11 12 34 19 00 01 15 00 77 7F 22 31 71 0E 00 03 64 07 0A 2A C6 59 11 A6 " +
     "55 A6 EC 1F 1E 1D 97";
@@ -167,27 +169,46 @@
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(948, 90);
+            this.button6.Location = new System.Drawing.Point(866, 116);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(75, 23);
+            this.button6.Size = new System.Drawing.Size(119, 23);
             this.button6.TabIndex = 18;
-            this.button6.Text = "Unpacket";
+            this.button6.Text = "一般訊息Unpacket";
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // textBox6
             // 
-            this.textBox6.Location = new System.Drawing.Point(866, 242);
+            this.textBox6.Location = new System.Drawing.Point(1181, 122);
             this.textBox6.Multiline = true;
             this.textBox6.Name = "textBox6";
             this.textBox6.Size = new System.Drawing.Size(187, 32);
             this.textBox6.TabIndex = 19;
+            // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(866, 225);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(119, 23);
+            this.button7.TabIndex = 20;
+            this.button7.Text = "左側Unpacket";
+            this.button7.UseVisualStyleBackColor = true;
+            // 
+            // textBox7
+            // 
+            this.textBox7.Location = new System.Drawing.Point(866, 264);
+            this.textBox7.Multiline = true;
+            this.textBox7.Name = "textBox7";
+            this.textBox7.Size = new System.Drawing.Size(276, 74);
+            this.textBox7.TabIndex = 21;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1458, 642);
+            this.Controls.Add(this.textBox7);
+            this.Controls.Add(this.button7);
             this.Controls.Add(this.textBox6);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.label3);
@@ -227,6 +248,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.TextBox textBox6;
+        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.TextBox textBox7;
     }
 }
 
