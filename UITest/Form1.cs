@@ -270,16 +270,28 @@ namespace UITest
             var temp = ConvertHexStringToByteArray(ByteData);
             string errorMessage;
             TestFunction test = new TestFunction();
-            test.ValidatePacket(temp, out errorMessage);
-            if (ValidatePacket(temp, out errorMessage))
-            {
-                textBox6.Text = "正確封包";
-            }
-            else
-            {
-                textBox6.Text = errorMessage;
-            }
+           var result= test.ValidatePacket(temp, out errorMessage);
+            //if (!result)
+            //{
+            //    textBox6.Text = errorMessage;
+            //}
+            //else
+            //{
+            //    textBox6.Text = "正確封包";
+            //}
 
+
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+
+            var ByteData = textBox7.Text;
+            //string[] portNames = SerialPort.GetPortNames(); 
+            var temp = ConvertHexStringToByteArray(ByteData);
+            string errorMessage;
+            LeftPlatformHandlerverify test = new LeftPlatformHandlerverify();
+            var result = test.ValidatePacket(temp, out errorMessage);
         }
         #endregion
         #region 組成封包的Method
@@ -551,7 +563,7 @@ namespace UITest
 
                 int sequenceLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
                 currentIndex += 2;
-
+          
                 // Step 8: 檢查 SequenceLength 到 0x1D 的範圍 (0x1D 是 2 bytes, 小端序)
                 int sequenceEndIndex = currentIndex + sequenceLength - 2; // 2 bytes for 0x1D
 
@@ -566,7 +578,6 @@ namespace UITest
                     errorMessage = $"Insufficient data for Clear Command check at byte {currentIndex}";
                     return false;
                 }
-
                 if (receivedData[currentIndex] != 0x77 || receivedData[currentIndex + 1] != 0x7F)
                 {
                     errorMessage = $"Expected Clear Command [0x77, 0x7F] at bytes {currentIndex} and {currentIndex + 1}";
@@ -580,6 +591,7 @@ namespace UITest
                     errorMessage = $"Invalid FontSize at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
                     return false;
                 }
+
                 currentIndex++;
 
                 // Step 11: 檢查字體樣式 (FontStyle)
@@ -605,7 +617,6 @@ namespace UITest
                     errorMessage = $"Insufficient data for MessageLength at byte {currentIndex}";   
                     return false;
                 }
-
                 int messageLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
                 currentIndex += 2;
 
@@ -729,5 +740,11 @@ namespace UITest
         }
         #endregion
 
+        
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            textBox6.Text =string.Empty;    
+        }
     }
 }

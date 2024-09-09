@@ -409,7 +409,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             {
                 ASI.Lib.Log.ErrorLog.Log(mProcName, $"Exception in ConnToDMDServer scoket: {ex}");
             }
-        }
+        } 
 
         private void DisconnectExistingDMDAPI()
         {

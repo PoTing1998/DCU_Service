@@ -344,16 +344,16 @@ namespace ASI.Wanda.DCU.TaskUPD
                     _mSerial.Send(serializedDataOff);
                 }
 
-                // Optional delay and turn off if situation is 84 
-                if (situation == 84)
-                {
-                    await Task.Delay(10000); // 延遲十秒 
-                    var OffMode = new byte[] { 0x02 };
-                    var packetOff2 = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
-                    var serializedDataOff2 = processor.SerializePacket(packetOff2);
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff2));
-                    _mSerial.Send(serializedDataOff2);
-                }
+                //// Optional delay and turn off if situation is 84 
+                //if (situation == 84)
+                //{
+                //    await Task.Delay(10000); // 延遲十秒 
+                //    var OffMode = new byte[] { 0x02 };
+                //    var packetOff2 = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
+                //    var serializedDataOff2 = processor.SerializePacket(packetOff2);
+                //    ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff2));
+                //    _mSerial.Send(serializedDataOff2);
+                //}
             }
             catch (Exception ex)
             {

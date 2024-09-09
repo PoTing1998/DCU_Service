@@ -95,6 +95,13 @@ namespace Display
             ScrollUp = 0x66,               // 向上捲動
             Flash = 0x67                   // 閃爍
         }
+
+
+        public enum VersionType
+        {
+           Photo= 0x7A,
+           TIME = 0X7B
+        }
     }
    
 }

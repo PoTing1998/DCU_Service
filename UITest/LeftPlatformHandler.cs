@@ -10,14 +10,13 @@ using static Display.DisplaySettingsEnums;
 
 namespace UITest
 {
-    public class TestFunction
+    public class LeftPlatformHandlerVerify
     {
-
-        #region 判斷方式
         public bool ValidatePacket(byte[] receivedData, out string errorMessage)
         {
             int currentIndex = 0;
             errorMessage = "";
+           // , Func<byte[], byte[]> tempFunc
 
             try
             {
@@ -55,13 +54,13 @@ namespace UITest
                 {
                     errorMessage = $"[Step 7] {errorMessage}";
                     return false;
-                }   
+                }
                 if (!CheckFontStyle(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 8] {errorMessage}";
                     return false;
                 }
-               
+
                 if (!CheckMessageType(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 9] {errorMessage}";
@@ -107,9 +106,7 @@ namespace UITest
             return true;
         }
 
-        #endregion
 
-        #region 判斷邏輯
         private bool CheckStartCode(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
@@ -211,7 +208,7 @@ namespace UITest
                 errorMessage = $"Insufficient data for Clear Command check at byte {currentIndex}";
                 return false;
             }
-            if (receivedData[currentIndex]==0x77)
+            if (receivedData[currentIndex] == 0x77)
             {
                 currentIndex++;
             }
@@ -220,7 +217,7 @@ namespace UITest
                 errorMessage = $"Expected Clear Command [optional 0x77, 0x7F] at byte {currentIndex}";
                 return false;
             }
-            currentIndex ++;
+            currentIndex++;
             return true;
         }
 
@@ -253,8 +250,16 @@ namespace UITest
         private bool CheckMessageType(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
-            WindowDisplayMode messageType = (WindowDisplayMode)receivedData[currentIndex];
 
+            DisplaySettingsEnums.VersionType VersionType = (DisplaySettingsEnums.VersionType)receivedData[currentIndex];
+           
+            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.VersionType), VersionType))
+            {
+                errorMessage = $"Invalid versionType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                return false;
+            }
+            currentIndex+=5;
+            WindowDisplayMode messageType = (WindowDisplayMode)receivedData[currentIndex];
             // 檢查是否為合法的 messageType
             if (!Enum.IsDefined(typeof(WindowDisplayMode), messageType))
             {
@@ -283,7 +288,7 @@ namespace UITest
 
             int messageEndIndex = currentIndex + messageLength - 1;
 
-            if (messageEndIndex >= receivedData.Length || receivedData[messageEndIndex] != 0x1E)
+            if (messageEndIndex >= receivedData.Length || receivedData[messageEndIndex] != 0x1E) 
             {
                 errorMessage = $"Message does not end with 0x1E or length is incorrect at byte {messageEndIndex}";
                 return false;
@@ -401,8 +406,5 @@ namespace UITest
             currentIndex++;
             return true;
         }
-
-        #endregion 
-
     }
 }
