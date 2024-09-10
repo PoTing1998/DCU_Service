@@ -10,14 +10,14 @@ using static Display.DisplaySettingsEnums;
 
 namespace UITest
 {
-    public class TestFunction
+    public class LeftPlatformRightTimeHandlerVerify
     {
-
-        #region  Public Method 判斷方式
+        #region Public Method 判斷方式
         public bool ValidatePacket(byte[] receivedData, out string errorMessage)
         {
             int currentIndex = 0;
             errorMessage = "";
+            // , Func<byte[], byte[]> tempFunc
 
             try
             {
@@ -55,12 +55,13 @@ namespace UITest
                 {
                     errorMessage = $"[Step 7] {errorMessage}";
                     return false;
-                }   
+                }
                 if (!CheckFontStyle(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 8] {errorMessage}";
                     return false;
                 }
+
                 if (!CheckMessageType(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 9] {errorMessage}";
@@ -105,9 +106,7 @@ namespace UITest
 
             return true;
         }
-
         #endregion
-
         #region Private Method 判斷邏輯
         private bool CheckStartCode(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
@@ -176,6 +175,7 @@ namespace UITest
 
         private bool CheckSequenceLength(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
+
             errorMessage = "";
             if (receivedData[currentIndex] != 0x01 && receivedData[currentIndex] != 0x02)
             {
@@ -210,7 +210,7 @@ namespace UITest
                 errorMessage = $"Insufficient data for Clear Command check at byte {currentIndex}";
                 return false;
             }
-            if (receivedData[currentIndex]==0x77)
+            if (receivedData[currentIndex] == 0x77)
             {
                 currentIndex++;
             }
@@ -219,7 +219,7 @@ namespace UITest
                 errorMessage = $"Expected Clear Command [optional 0x77, 0x7F] at byte {currentIndex}";
                 return false;
             }
-            currentIndex ++;
+            currentIndex++;
             return true;
         }
 
@@ -252,18 +252,31 @@ namespace UITest
         private bool CheckMessageType(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
-            WindowDisplayMode messageType = (WindowDisplayMode)receivedData[currentIndex];
 
+            DisplaySettingsEnums.VersionType VersionType = (DisplaySettingsEnums.VersionType)receivedData[currentIndex];
+
+            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.VersionType), VersionType))
+            {
+                errorMessage = $"Invalid versionType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                return false;
+            }
+            currentIndex+=5;
+            DisplaySettingsEnums.VersionType VersionType2 = (DisplaySettingsEnums.VersionType)receivedData[currentIndex];
+            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.VersionType), VersionType2))
+            {
+                errorMessage = $"Invalid versionType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                return false;
+            }
+            currentIndex +=6;
+            WindowDisplayMode messageType = (WindowDisplayMode)receivedData[currentIndex];
             // 檢查是否為合法的 messageType
             if (!Enum.IsDefined(typeof(WindowDisplayMode), messageType))
             {
                 errorMessage = $"Invalid messageType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
                 return false;
             }
-
             // 使用工廠方法取得對應的處理器
             IMessageTypeHandler handler = MessageTypeHandlerFactory.GetHandler(messageType);
-
             // 使用處理器進行參數驗證
             return handler.Handle(receivedData, ref currentIndex, out errorMessage);
         }
@@ -271,19 +284,28 @@ namespace UITest
         private bool CheckMessageLength(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
+
+            // 檢查當前索引加上2是否超過接收到的資料長度
+            // 如果是的話，表示沒有足夠的資料來判斷訊息長度
             if (currentIndex + 2 > receivedData.Length)
             {
-                errorMessage = $"Insufficient data for MessageLength at byte {currentIndex}";
+                errorMessage = $"在位元 {currentIndex} 沒有足夠的資料來判斷訊息長度";
                 return false;
             }
+   
+            // 計算訊息的長度，從 currentIndex 的兩個 byte 組合出來的長度
             int messageLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
             currentIndex += 2;
 
+            // 計算訊息的結尾索引
             int messageEndIndex = currentIndex + messageLength - 1;
+            // 檢查訊息的結尾索引是否超過接收到的資料長度
 
+            // 或者訊息的結尾是否不是 0x1E
             if (messageEndIndex >= receivedData.Length || receivedData[messageEndIndex] != 0x1E)
             {
-                errorMessage = $"Message does not end with 0x1E or length is incorrect at byte {messageEndIndex}";
+                // 設置錯誤訊息，並返回 false
+                errorMessage = $"訊息沒有以 0x1E 結束，或在位元 {messageEndIndex} 長度不正確";
                 return false;
             }
             return true;
@@ -399,8 +421,6 @@ namespace UITest
             currentIndex++;
             return true;
         }
-
-        #endregion 
-
+        #endregion
     }
 }

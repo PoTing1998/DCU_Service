@@ -10,14 +10,14 @@ using static Display.DisplaySettingsEnums;
 
 namespace UITest
 {
-    public class LeftPlatformHandlerVerify
+    internal class TrainDynamicVerify
     {
+        #region Public Method 判斷方式
         public bool ValidatePacket(byte[] receivedData, out string errorMessage)
         {
             int currentIndex = 0;
             errorMessage = "";
-           // , Func<byte[], byte[]> tempFunc
-
+            // , Func<byte[], byte[]> tempFunc
             try
             {
                 if (!CheckStartCode(receivedData, ref currentIndex, out errorMessage))
@@ -91,9 +91,49 @@ namespace UITest
                     errorMessage = $"[Step 14] {errorMessage}";
                     return false;
                 }
-                if (!CheckEndBytes(receivedData, ref currentIndex, out errorMessage))
+                if (!CheckStringMode(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 15] {errorMessage}";
+                    return false;
+                }
+                if (!CheckPhotoIndex(receivedData ,ref currentIndex, out errorMessage))
+                {
+                    errorMessage = $"[Step 16] {errorMessage}";
+                    return false;
+                }
+                if (!CheckStringMode(receivedData, ref currentIndex, out errorMessage))
+                {
+                    errorMessage = $"[Step 17] {errorMessage}";
+                    return false;
+                }
+                if (!CheckStringText(receivedData, ref currentIndex, out errorMessage))
+                {
+                    errorMessage = $"[Step 18] {errorMessage}";
+                    return false;
+                }
+                if (!CheckStringMode(receivedData, ref currentIndex, out errorMessage))
+                {
+                    errorMessage = $"[Step 19] {errorMessage}";
+                    return false;
+                }
+                if (!CheckPhotoIndex(receivedData, ref currentIndex, out errorMessage))
+                {
+                    errorMessage = $"[Step 20] {errorMessage}";
+                    return false;
+                }
+                if (!CheckStringMode(receivedData, ref currentIndex, out errorMessage))
+                {
+                    errorMessage = $"[Step 21] {errorMessage}";
+                    return false;
+                }
+                if (!CheckStringText(receivedData, ref currentIndex, out errorMessage))
+                {
+                    errorMessage = $"[Step 22] {errorMessage}";
+                    return false;
+                }
+                if (!CheckEndBytes(receivedData, ref currentIndex, out errorMessage))
+                {
+                    errorMessage = $"[Step 23] {errorMessage}";
                     return false;
                 }
             }
@@ -105,8 +145,8 @@ namespace UITest
 
             return true;
         }
-
-
+        #endregion
+        #region Private Method 判斷邏輯
         private bool CheckStartCode(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
@@ -174,10 +214,11 @@ namespace UITest
 
         private bool CheckSequenceLength(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
+
             errorMessage = "";
-            if (receivedData[currentIndex] != 0x01)
+            if ( receivedData[currentIndex] != 0x02)
             {
-                errorMessage = $"Expected 0x01 at byte {currentIndex}";
+                errorMessage = $"Expected 0x02 at byte {currentIndex}";
                 return false;
             }
             currentIndex++;
@@ -250,15 +291,7 @@ namespace UITest
         private bool CheckMessageType(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
-
-            DisplaySettingsEnums.VersionType VersionType = (DisplaySettingsEnums.VersionType)receivedData[currentIndex];
-           
-            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.VersionType), VersionType))
-            {
-                errorMessage = $"Invalid versionType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
-                return false;
-            }
-            currentIndex+=5;
+            // 列車的版型
             WindowDisplayMode messageType = (WindowDisplayMode)receivedData[currentIndex];
             // 檢查是否為合法的 messageType
             if (!Enum.IsDefined(typeof(WindowDisplayMode), messageType))
@@ -266,10 +299,8 @@ namespace UITest
                 errorMessage = $"Invalid messageType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
                 return false;
             }
-
             // 使用工廠方法取得對應的處理器
             IMessageTypeHandler handler = MessageTypeHandlerFactory.GetHandler(messageType);
-
             // 使用處理器進行參數驗證
             return handler.Handle(receivedData, ref currentIndex, out errorMessage);
         }
@@ -277,20 +308,27 @@ namespace UITest
         private bool CheckMessageLength(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
+
+            // 檢查當前索引加上2是否超過接收到的資料長度
+            // 如果是的話，表示沒有足夠的資料來判斷訊息長度
             if (currentIndex + 2 > receivedData.Length)
             {
-                errorMessage = $"Insufficient data for MessageLength at byte {currentIndex}";
+                errorMessage = $"在位元 {currentIndex} 沒有足夠的資料來判斷訊息長度";
                 return false;
             }
 
+            // 計算訊息的長度，從 currentIndex 的兩個 byte 組合出來的長度
             int messageLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
             currentIndex += 2;
 
+            // 計算訊息的結尾索引
             int messageEndIndex = currentIndex + messageLength - 1;
-
-            if (messageEndIndex >= receivedData.Length || receivedData[messageEndIndex] != 0x1E) 
+            // 檢查訊息的結尾索引是否超過接收到的資料長度
+            // 或者訊息的結尾是否不是 0x1E
+            if (messageEndIndex >= receivedData.Length || receivedData[messageEndIndex] != 0x1E)
             {
-                errorMessage = $"Message does not end with 0x1E or length is incorrect at byte {messageEndIndex}";
+                // 設置錯誤訊息，並返回 false
+                errorMessage = $"訊息沒有以 0x1E 結束，或在位元 {messageEndIndex} 長度不正確";
                 return false;
             }
             return true;
@@ -388,6 +426,61 @@ namespace UITest
             return true;
         }
 
+        private bool CheckPhotoIndex(byte[] receivedData, ref int currentIndex, out string errorMessage)
+        {
+            errorMessage = "";
+           
+            // 檢查是否有足夠的資料來讀取 GraphicStartIndex
+            if (currentIndex + 2 > receivedData.Length)
+            {
+                errorMessage = $"Insufficient data for GraphicStartIndex at byte {currentIndex}";
+                return false;
+            }
+
+            // 讀取 GraphicStartIndex, 2 bytes (Low Byte first, High Byte second)
+            int graphicStartIndex = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
+            currentIndex += 2;
+
+            // 檢查是否有足夠的資料來讀取 GraphicNumber
+            if (currentIndex + 1 > receivedData.Length)
+            {
+                errorMessage = $"Insufficient data for GraphicNumber at byte {currentIndex}";
+                return false;
+            }
+
+            // 讀取 GraphicNumber, 1 byte
+            byte graphicNumber = receivedData[currentIndex];
+            currentIndex += 1;
+
+            // 檢查是否有足夠的資料來讀取 GraphicColor
+            if (currentIndex + 3 > receivedData.Length)
+            {
+                errorMessage = $"Insufficient data for GraphicColor at byte {currentIndex}";
+                return false;
+            }
+
+            // 讀取 GraphicColor, 3 bytes (Red, Green, Blue)
+            byte redColor = receivedData[currentIndex];
+            byte greenColor = receivedData[currentIndex + 1];
+            byte blueColor = receivedData[currentIndex + 2];
+            currentIndex += 3;
+
+            // 檢查是否有足夠的資料來檢查 0x1F 結束字節
+            if (currentIndex >= receivedData.Length || receivedData[currentIndex] != 0x1F)
+            {
+                errorMessage = $"Expected 0x1F at byte {currentIndex}, but found {receivedData[currentIndex]:X2}";
+                return false;
+            }
+
+            // 當 0x1F 存在且正確，將 currentIndex 前進 1
+            currentIndex += 1;
+
+            // 此時所有欄位都已成功讀取，返回 true 表示成功
+            return true;
+        }
+
+
+
         private bool CheckEndBytes(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
@@ -406,5 +499,6 @@ namespace UITest
             currentIndex++;
             return true;
         }
+        #endregion
     }
 }

@@ -35,39 +35,41 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBox4 = new System.Windows.Forms.TextBox();
             this.textBox5 = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.button6 = new System.Windows.Forms.Button();
+            this.Version1BT = new System.Windows.Forms.Button();
+            this.textBoxClear = new System.Windows.Forms.TextBox();
+            this.Version2BT = new System.Windows.Forms.Button();
             this.textBox6 = new System.Windows.Forms.TextBox();
-            this.button7 = new System.Windows.Forms.Button();
+            this.ClearBT = new System.Windows.Forms.Button();
             this.textBox7 = new System.Windows.Forms.TextBox();
-            this.button8 = new System.Windows.Forms.Button();
+            this.Version3BT = new System.Windows.Forms.Button();
+            this.Version4BT = new System.Windows.Forms.Button();
+            this.textBox9 = new System.Windows.Forms.TextBox();
+            this.textBox10 = new System.Windows.Forms.TextBox();
+            this.Version5BT = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(32, 93);
+            this.textBox1.Location = new System.Drawing.Point(32, 12);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(298, 122);
+            this.textBox1.Size = new System.Drawing.Size(293, 122);
             this.textBox1.TabIndex = 0;
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(450, 93);
+            this.textBox2.Location = new System.Drawing.Point(32, 217);
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
             this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox2.Size = new System.Drawing.Size(399, 455);
+            this.textBox2.Size = new System.Drawing.Size(293, 373);
             this.textBox2.TabIndex = 2;
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(356, 287);
+            this.button4.Location = new System.Drawing.Point(352, 154);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 23);
             this.button4.TabIndex = 10;
@@ -77,7 +79,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(356, 242);
+            this.button3.Location = new System.Drawing.Point(352, 109);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 9;
@@ -87,7 +89,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(356, 192);
+            this.button2.Location = new System.Drawing.Point(352, 59);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 8;
@@ -97,7 +99,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(356, 145);
+            this.button1.Location = new System.Drawing.Point(352, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 7;
@@ -107,7 +109,7 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(356, 350);
+            this.button5.Location = new System.Drawing.Point(352, 217);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 11;
@@ -115,43 +117,9 @@
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
-            // textBox3
-            // 
-            this.textBox3.Location = new System.Drawing.Point(32, 242);
-            this.textBox3.Multiline = true;
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(57, 30);
-            this.textBox3.TabIndex = 12;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(30, 218);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(91, 12);
-            this.label1.TabIndex = 13;
-            this.label1.Text = "StringBody(color)";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(169, 218);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(90, 12);
-            this.label2.TabIndex = 14;
-            this.label2.Text = "StringBody(strng)";
-            // 
-            // textBox4
-            // 
-            this.textBox4.Location = new System.Drawing.Point(186, 244);
-            this.textBox4.Multiline = true;
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(57, 30);
-            this.textBox4.TabIndex = 15;
-            // 
             // textBox5
             // 
-            this.textBox5.Location = new System.Drawing.Point(866, 145);
+            this.textBox5.Location = new System.Drawing.Point(459, 62);
             this.textBox5.Multiline = true;
             this.textBox5.Name = "textBox5";
             this.textBox5.Size = new System.Drawing.Size(276, 74);
@@ -162,76 +130,139 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(864, 95);
+            this.label3.Location = new System.Drawing.Point(457, 12);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(78, 12);
             this.label3.TabIndex = 17;
             this.label3.Text = "拆解ByteArray";
             // 
-            // button6
+            // Version1BT
             // 
-            this.button6.Location = new System.Drawing.Point(866, 116);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(119, 23);
-            this.button6.TabIndex = 18;
-            this.button6.Text = "一般訊息Unpacket";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
+            this.Version1BT.Location = new System.Drawing.Point(459, 33);
+            this.Version1BT.Name = "Version1BT";
+            this.Version1BT.Size = new System.Drawing.Size(119, 23);
+            this.Version1BT.TabIndex = 18;
+            this.Version1BT.Text = "一般訊息Unpacket";
+            this.Version1BT.UseVisualStyleBackColor = true;
+            this.Version1BT.Click += new System.EventHandler(this.Version1BT_Click);
+            // 
+            // textBoxClear
+            // 
+            this.textBoxClear.Location = new System.Drawing.Point(820, 499);
+            this.textBoxClear.Multiline = true;
+            this.textBoxClear.Name = "textBoxClear";
+            this.textBoxClear.Size = new System.Drawing.Size(187, 46);
+            this.textBoxClear.TabIndex = 19;
+            // 
+            // Version2BT
+            // 
+            this.Version2BT.Location = new System.Drawing.Point(459, 142);
+            this.Version2BT.Name = "Version2BT";
+            this.Version2BT.Size = new System.Drawing.Size(119, 23);
+            this.Version2BT.TabIndex = 20;
+            this.Version2BT.Text = "左側Unpacket";
+            this.Version2BT.UseVisualStyleBackColor = true;
+            this.Version2BT.Click += new System.EventHandler(this.Version2BT_Click);
             // 
             // textBox6
             // 
-            this.textBox6.Location = new System.Drawing.Point(1181, 122);
+            this.textBox6.Location = new System.Drawing.Point(459, 186);
             this.textBox6.Multiline = true;
             this.textBox6.Name = "textBox6";
-            this.textBox6.Size = new System.Drawing.Size(187, 46);
-            this.textBox6.TabIndex = 19;
+            this.textBox6.Size = new System.Drawing.Size(276, 74);
+            this.textBox6.TabIndex = 21;
+            this.textBox6.Text = " 55 AA 01 01 34 1F 00 01 1C 00 7F 21 31 7A FF FF 00 01 72 10 00 04 64 07 0A 2A FF" +
+    " FF FF B8 55 A4 6A BD 75 1F 1E 1D 30";
             // 
-            // button7
+            // ClearBT
             // 
-            this.button7.Location = new System.Drawing.Point(866, 225);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(119, 23);
-            this.button7.TabIndex = 20;
-            this.button7.Text = "左側Unpacket";
-            this.button7.UseVisualStyleBackColor = true;
-            this.button7.Click += new System.EventHandler(this.button7_Click);
+            this.ClearBT.Location = new System.Drawing.Point(820, 441);
+            this.ClearBT.Name = "ClearBT";
+            this.ClearBT.Size = new System.Drawing.Size(119, 23);
+            this.ClearBT.TabIndex = 22;
+            this.ClearBT.Text = "清除";
+            this.ClearBT.UseVisualStyleBackColor = true;
+            this.ClearBT.Click += new System.EventHandler(this.ClearBT_Click);
             // 
             // textBox7
             // 
-            this.textBox7.Location = new System.Drawing.Point(866, 264);
+            this.textBox7.Location = new System.Drawing.Point(459, 310);
             this.textBox7.Multiline = true;
             this.textBox7.Name = "textBox7";
             this.textBox7.Size = new System.Drawing.Size(276, 74);
-            this.textBox7.TabIndex = 21;
-            this.textBox7.Text = " 55 AA 01 01 34 1F 00 01 1C 00 7F 21 31 7A FF FF 00 01 72 10 00 04 64 07 0A 2A FF" +
-    " FF FF B8 55 A4 6A BD 75 1F 1E 1D 30";
+            this.textBox7.TabIndex = 23;
+            this.textBox7.Text = "55 AA 01 01 34 25 00 01 22 00 7F 21 31 7A 00 00 FF 01 7B FF 00 00 00 00 73 10 00 " +
+    "04 64 07 0A 2A FF FF FF B8 55 A4 6A BD 75 1F 1E 1D B2";
             // 
-            // button8
+            // Version3BT
             // 
-            this.button8.Location = new System.Drawing.Point(1181, 64);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(119, 23);
-            this.button8.TabIndex = 22;
-            this.button8.Text = "清除";
-            this.button8.UseVisualStyleBackColor = true;
-            this.button8.Click += new System.EventHandler(this.button8_Click);
+            this.Version3BT.Location = new System.Drawing.Point(459, 281);
+            this.Version3BT.Name = "Version3BT";
+            this.Version3BT.Size = new System.Drawing.Size(162, 23);
+            this.Version3BT.TabIndex = 24;
+            this.Version3BT.Text = "左側加上又時間Unpacket";
+            this.Version3BT.UseVisualStyleBackColor = true;
+            this.Version3BT.Click += new System.EventHandler(this.Version3BT_Click);
+            // 
+            // Version4BT
+            // 
+            this.Version4BT.Location = new System.Drawing.Point(459, 417);
+            this.Version4BT.Name = "Version4BT";
+            this.Version4BT.Size = new System.Drawing.Size(162, 23);
+            this.Version4BT.TabIndex = 26;
+            this.Version4BT.Text = "右側時間Unpacket";
+            this.Version4BT.UseVisualStyleBackColor = true;
+            this.Version4BT.Click += new System.EventHandler(this.Version4BT_Click);
+            // 
+            // textBox9
+            // 
+            this.textBox9.Location = new System.Drawing.Point(459, 467);
+            this.textBox9.Multiline = true;
+            this.textBox9.Name = "textBox9";
+            this.textBox9.Size = new System.Drawing.Size(276, 74);
+            this.textBox9.TabIndex = 27;
+            this.textBox9.Text = "55 AA 01 01 34 20 00 01 1D 00 7F 21 31 7B FF FF FF 0C 00 74 10 00 04 64 07 0A 2A " +
+    "FF FF FF B8 55 A4 6A BD 75 1F 1E 1D 3E";
+            // 
+            // textBox10
+            // 
+            this.textBox10.Location = new System.Drawing.Point(760, 62);
+            this.textBox10.Multiline = true;
+            this.textBox10.Name = "textBox10";
+            this.textBox10.Size = new System.Drawing.Size(276, 74);
+            this.textBox10.TabIndex = 28;
+            this.textBox10.Text = "55 AA 01 01 34 3B 00 02 38 00 77 7F 21 31 83 30 00 04 61 07 08 2A FF FF 00 B7 48 " +
+    "A6 77 1F 2D 01 00 01 FF FF 00 1F 2A FF FF 00 A5 5B D3 C2 1F 2D 02 00 01 FF FF 00" +
+    " 1F 2A FF FF 00 A5 BB AF B8 1F 1E 1D CA";
+            // 
+            // Version5BT
+            // 
+            this.Version5BT.Location = new System.Drawing.Point(760, 33);
+            this.Version5BT.Name = "Version5BT";
+            this.Version5BT.Size = new System.Drawing.Size(119, 23);
+            this.Version5BT.TabIndex = 29;
+            this.Version5BT.Text = "列車訊息Unpacket";
+            this.Version5BT.UseVisualStyleBackColor = true;
+            this.Version5BT.Click += new System.EventHandler(this.Version5BT_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1458, 642);
-            this.Controls.Add(this.button8);
+            this.ClientSize = new System.Drawing.Size(1062, 642);
+            this.Controls.Add(this.Version5BT);
+            this.Controls.Add(this.textBox10);
+            this.Controls.Add(this.textBox9);
+            this.Controls.Add(this.Version4BT);
+            this.Controls.Add(this.Version3BT);
             this.Controls.Add(this.textBox7);
-            this.Controls.Add(this.button7);
+            this.Controls.Add(this.ClearBT);
             this.Controls.Add(this.textBox6);
-            this.Controls.Add(this.button6);
+            this.Controls.Add(this.Version2BT);
+            this.Controls.Add(this.textBoxClear);
+            this.Controls.Add(this.Version1BT);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.textBox5);
-            this.Controls.Add(this.textBox4);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox3);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
@@ -255,17 +286,19 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox4;
         private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button Version1BT;
+        private System.Windows.Forms.TextBox textBoxClear;
+        private System.Windows.Forms.Button Version2BT;
         private System.Windows.Forms.TextBox textBox6;
-        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button ClearBT;
         private System.Windows.Forms.TextBox textBox7;
-        private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.Button Version3BT;
+        private System.Windows.Forms.Button Version4BT;
+        private System.Windows.Forms.TextBox textBox9;
+        private System.Windows.Forms.TextBox textBox10;
+        private System.Windows.Forms.Button Version5BT;
     }
 }
 

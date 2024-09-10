@@ -53,11 +53,13 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="IMessageType.cs" />
-    <Compile Include="LeftPlatformHandler.cs" />
-    <Compile Include="LeftPlatformRightTimeHandler.cs" />
+    <Compile Include="LeftPlatformHandlerVerify.cs" />
+    <Compile Include="LeftPlatformRightTimeHandlerVerify.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RightTimeHandlerVerify.cs" />
     <Compile Include="TestFunction.cs" />
+    <Compile Include="TrainDynamicVerify.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

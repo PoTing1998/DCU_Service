@@ -241,8 +241,6 @@ namespace UITest
                 Font = new FontSetting { Size = FontSize.Font24x24, Style = Display.FontStyle.Ming },
                 Messages = new List<IMessage> { fullWindow }
             };
-           
-
             // 將字節數組轉換為16進制字符串並顯示  
             byte[] byteArray = sequence.ToBytes();
             string messageContentHexString = string.Join(" ", byteArray.Select(b => b.ToString("X2"))); // "X2" 將每個字節格式化為兩位16進制數
@@ -263,35 +261,59 @@ namespace UITest
             textBox2.Text += messageContentHexString;
             textBox2.Text += "\r\n========================\r\n";
         }
-        private void button6_Click(object sender, EventArgs e)
+        private void Version1BT_Click(object sender, EventArgs e)
         {
             var ByteData = textBox5.Text;
             //string[] portNames = SerialPort.GetPortNames(); 
             var temp = ConvertHexStringToByteArray(ByteData);
             string errorMessage;
             TestFunction test = new TestFunction();
-           var result= test.ValidatePacket(temp, out errorMessage);
+            var result = test.ValidatePacket(temp, out errorMessage);
             //if (!result)
-            //{
-            //    textBox6.Text = errorMessage;
-            //}
+            //{   //    textBox6.Text = errorMessage;  //}
             //else
-            //{
-            //    textBox6.Text = "正確封包";
-            //}
-
-
+            //{   //    textBox6.Text = "正確封包";  //}
         }
 
-        private void button7_Click(object sender, EventArgs e)
+        private void Version2BT_Click(object sender, EventArgs e)
         {
 
-            var ByteData = textBox7.Text;
+            var ByteData = textBox6.Text;
             //string[] portNames = SerialPort.GetPortNames(); 
             var temp = ConvertHexStringToByteArray(ByteData);
             string errorMessage;
-            LeftPlatformHandlerverify test = new LeftPlatformHandlerverify();
+            LeftPlatformHandlerVerify test = new LeftPlatformHandlerVerify();
             var result = test.ValidatePacket(temp, out errorMessage);
+        }
+
+        private void ClearBT_Click(object sender, EventArgs e)
+        {
+            textBoxClear.Text = string.Empty;
+        }
+        private void Version3BT_Click(object sender, EventArgs e)
+        {
+            var ByteData = textBox7.Text;
+            var temp = ConvertHexStringToByteArray(ByteData);
+            string errorMessage;
+            LeftPlatformRightTimeHandlerVerify Verify = new LeftPlatformRightTimeHandlerVerify();
+            var result = Verify.ValidatePacket(temp, out errorMessage);
+        }
+
+        private void Version4BT_Click(object sender, EventArgs e)
+        {
+            var ByteData = textBox9.Text;
+            var temp = ConvertHexStringToByteArray(ByteData);
+            string errorMessage;
+            RightTimeHandlerVerify Verify = new RightTimeHandlerVerify();
+            var result = Verify.ValidatePacket(temp, out errorMessage);
+        }
+        private void Version5BT_Click(object sender, EventArgs e)
+        {
+            var ByteData = textBox10.Text;
+            var temp = ConvertHexStringToByteArray(ByteData);
+            string errorMessage;
+            TrainDynamicVerify Verify = new TrainDynamicVerify();
+            var result = Verify.ValidatePacket(temp, out errorMessage);
         }
         #endregion
         #region 組成封包的Method
@@ -304,7 +326,6 @@ namespace UITest
             textBox1.Text += "訊息間格 : " + data.Interval + "\r\n";
             textBox1.Text += "訊息字體大小 : " + data.font_size + "\r\n";
             textBox1.Text += "訊息字體風格 : " + data.font_type + "\r\n";
-
         }
         // 用於提取文本中指定標籤後的值
         private string ExtractValue(string source, string label)
@@ -341,7 +362,6 @@ namespace UITest
                 // 如果不符合上述條件，返回 false
                 return false;
             }
-
             // 如果所有字元都符合條件，返回 true
             return true;
         }
@@ -364,7 +384,6 @@ namespace UITest
             // 確認 StringColor 的值在合法範圍內 (00h-FFh)
             bool isColorValid = stringBody.RedColor >= 0x00 && stringBody.RedColor <= 0xFF
                                 && stringBody.GreenColor >= 0x00 && stringBody.BlueColor <= 0xFF;
-
             if (!isColorValid)
             {
                 return false; // 如果顏色不合法，返回 false
@@ -738,13 +757,9 @@ namespace UITest
             // 如果所有檢查都通過，返回 true，錯誤信息為空
             return true;
         }
+
         #endregion
 
-        
-
-        private void button8_Click(object sender, EventArgs e)
-        {
-            textBox6.Text =string.Empty;    
-        }
+    
     }
 }
