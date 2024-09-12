@@ -410,9 +410,9 @@ namespace UITest
                 errorMessage = $"Message content does not end with 0x1F, starting at byte {currentIndex}";
                 return false;
             }
-
+            
             byte[] textBytes = new byte[endIndex - currentIndex];
-            Array.Copy(receivedData, currentIndex, textBytes, 0, textBytes.Length);
+            Array.Copy(receivedData, currentIndex, textBytes, 0, textBytes.Length); 
 
             string messageText = Encoding.GetEncoding(950).GetString(textBytes);
 

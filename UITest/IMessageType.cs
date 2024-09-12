@@ -15,7 +15,7 @@ namespace UITest
     }
     #endregion
     #region    2. 為每種 messageType 實作不同的處理類別
-    public class FullWindowHandler : IMessageTypeHandler
+    public class FullWindowHandler : IMessageTypeHandler //一般訊息
     {
         public bool Handle(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
@@ -25,8 +25,8 @@ namespace UITest
             return true;
         }
     }
-
-    public class LeftPlatformHandler : IMessageTypeHandler
+    
+    public class LeftPlatformHandler : IMessageTypeHandler// 左側月台圖片的 
     {
         public bool Handle(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
@@ -62,7 +62,7 @@ namespace UITest
             return true;
         }
     }
-    public class LeftPlatformRightTimeHandler : IMessageTypeHandler
+    public class LeftPlatformRightTimeHandler : IMessageTypeHandler //左側月台碼 加上右側時間
     {
         public bool Handle(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
@@ -136,7 +136,7 @@ namespace UITest
         }
     }
 
-    public class rightTimeHandler : IMessageTypeHandler
+    public class rightTimeHandler : IMessageTypeHandler //右側時間
     {
         public bool Handle(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
@@ -191,23 +191,34 @@ namespace UITest
         }
     }
 
-    public class TrainDynamicHandler : IMessageTypeHandler
+    public class TrainDynamicHandler : IMessageTypeHandler //列車動態
     {
         public bool Handle(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
-            //  TrainDynamic messageType 沒有額外參數，只需增加索引即可
+            //  TrainDynamic messageType 沒有額外參數，只需增加索引即可 
+            currentIndex++; 
+            return true;
+        }
+    }
+
+    public class UrgentHandler : IMessageTypeHandler  //緊急訊息  
+    {
+        public bool Handle(byte[] receivedData, ref int currentIndex, out string errorMessage)
+        {
+            errorMessage = "";
+            //function code 不同因此 不列入考慮
             currentIndex++;
             return true;
         }
     }
     #endregion
-    #region  3. 判斷版型的類型
+    #region  3. 判斷版型的類型 
     public class MessageTypeHandlerFactory
     {
         public static IMessageTypeHandler GetHandler(WindowDisplayMode messageType)
         {
-            switch (messageType)
+            switch (messageType)  
             {
                 case WindowDisplayMode.FullWindow:
                     return new FullWindowHandler();
@@ -218,7 +229,7 @@ namespace UITest
                 case WindowDisplayMode.RightTime:
                     return new rightTimeHandler();
                 case WindowDisplayMode.TrainDynamic:
-                    return new TrainDynamicHandler();
+                    return new TrainDynamicHandler(); 
                 default:
                     throw new ArgumentException($"No handler found for messageType: {messageType}");
             }

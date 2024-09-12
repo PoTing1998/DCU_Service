@@ -10,7 +10,7 @@ using static Display.DisplaySettingsEnums;
 
 namespace UITest
 {
-    public class TestFunction
+    public class FullWindowHandlerVerify
     {
 
         #region  Public Method 判斷方式
@@ -21,76 +21,91 @@ namespace UITest
 
             try
             {
+                // 檢查封包起始碼是否正確
                 if (!CheckStartCode(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 1] {errorMessage}";
                     return false;
                 }
+                // 檢查 ID 和長度是否正確
                 if (!CheckIDLength(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 2] {errorMessage}";
                     return false;
                 }
+                // 檢查功能碼是否正確
                 if (!CheckFunctionCode(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 3] {errorMessage}";
                     return false;
                 }
+                // 檢查數據長度是否正確
                 if (!CheckDataLength(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 4] {errorMessage}";
                     return false;
                 }
+                // 檢查序列長度是否正確
                 if (!CheckSequenceLength(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 5] {errorMessage}";
                     return false;
                 }
+                // 檢查清除命令是否正確
                 if (!CheckClearCommand(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 6] {errorMessage}";
                     return false;
                 }
+                // 檢查字體大小是否正確
                 if (!CheckFontSize(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 7] {errorMessage}";
                     return false;
-                }   
+                }
+                // 檢查字體樣式是否正確
                 if (!CheckFontStyle(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 8] {errorMessage}";
                     return false;
                 }
+                // 檢查訊息類型是否正確
                 if (!CheckMessageType(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 9] {errorMessage}";
                     return false;
                 }
+                // 檢查訊息長度是否正確 
                 if (!CheckMessageLength(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 10] {errorMessage}";
                     return false;
                 }
+                // 檢查訊息等級是否正確
                 if (!CheckMessageLevel(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 11] {errorMessage}";
                     return false;
                 }
+                // 檢查訊息是否具有滾動效果
                 if (!CheckMessageScroll(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 12] {errorMessage}";
                     return false;
                 }
+                // 檢查字串模式是否正確
                 if (!CheckStringMode(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 13] {errorMessage}";
                     return false;
                 }
+                // 檢查字串內容是否正確
                 if (!CheckStringText(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 14] {errorMessage}";
                     return false;
                 }
+                // 檢查封包結束字節是否正確
                 if (!CheckEndBytes(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 15] {errorMessage}";
@@ -108,7 +123,7 @@ namespace UITest
 
         #endregion
 
-        #region Private Method 判斷邏輯
+        #region Private Method 判斷邏輯 
         private bool CheckStartCode(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
@@ -177,7 +192,7 @@ namespace UITest
         private bool CheckSequenceLength(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
-            if (receivedData[currentIndex] != 0x01 && receivedData[currentIndex] != 0x02)
+            if (receivedData[currentIndex] != 0x01 && receivedData[currentIndex] != 0x02) //上下排顯示器的顯示
             {
                 errorMessage = $"Expected 0x01 or 0x02 at byte {currentIndex}";
                 return false;
@@ -216,7 +231,7 @@ namespace UITest
             }
             if (currentIndex >= receivedData.Length || receivedData[currentIndex] != 0x7F)
             {
-                errorMessage = $"Expected Clear Command [optional 0x77, 0x7F] at byte {currentIndex}";
+                errorMessage = $"Expected Clear Command [optional 0x77, 0x7F] at byte {currentIndex}"; //啟動command 字體格式
                 return false;
             }
             currentIndex ++;
@@ -267,7 +282,6 @@ namespace UITest
             // 使用處理器進行參數驗證
             return handler.Handle(receivedData, ref currentIndex, out errorMessage);
         }
-
         private bool CheckMessageLength(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
@@ -275,7 +289,7 @@ namespace UITest
             {
                 errorMessage = $"Insufficient data for MessageLength at byte {currentIndex}";
                 return false;
-            }
+            } 
             int messageLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
             currentIndex += 2;
 
@@ -288,7 +302,7 @@ namespace UITest
             }
             return true;
         }
-
+        
         private bool CheckMessageLevel(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
@@ -301,7 +315,6 @@ namespace UITest
             currentIndex++;
             return true;
         }
-
         private bool CheckMessageScroll(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
@@ -345,7 +358,6 @@ namespace UITest
                 errorMessage = $"Insufficient data for StringMode at byte {currentIndex}";
                 return false;
             }
-
             StringMode stringMode = (StringMode)receivedData[currentIndex];
             if (!Enum.IsDefined(typeof(StringMode), stringMode))
             {
@@ -376,7 +388,6 @@ namespace UITest
                 errorMessage = $"Expected 0x1F at byte {endIndex}, but found {receivedData[endIndex]:X2}";
                 return false;
             }
-
             currentIndex = endIndex + 1;
             return true;
         }

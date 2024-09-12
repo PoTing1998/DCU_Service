@@ -264,56 +264,88 @@ namespace UITest
         private void Version1BT_Click(object sender, EventArgs e)
         {
             var ByteData = textBox5.Text;
-            //string[] portNames = SerialPort.GetPortNames(); 
+            // 將十六進制字串轉換為字節陣列
             var temp = ConvertHexStringToByteArray(ByteData);
+            // 驗證封包是否符合
             string errorMessage;
-            TestFunction test = new TestFunction();
+            FullWindowHandlerVerify test = new FullWindowHandlerVerify();
             var result = test.ValidatePacket(temp, out errorMessage);
-            //if (!result)
-            //{   //    textBox6.Text = errorMessage;  //}
-            //else
-            //{   //    textBox6.Text = "正確封包";  //}
+            //根據結果更新畫面
+            if (!result) { textBoxResult.Text = "錯誤封包\n" + errorMessage; }
+            else { textBoxResult.Text = "正確封包"; }
         }
 
         private void Version2BT_Click(object sender, EventArgs e)
         {
 
             var ByteData = textBox6.Text;
-            //string[] portNames = SerialPort.GetPortNames(); 
+            // 將十六進制字串轉換為字節陣列
             var temp = ConvertHexStringToByteArray(ByteData);
+            // 驗證封包是否符合
             string errorMessage;
             LeftPlatformHandlerVerify test = new LeftPlatformHandlerVerify();
             var result = test.ValidatePacket(temp, out errorMessage);
+            //根據結果更新畫面
+            if (!result) { textBoxResult.Text = "錯誤封包\n" + errorMessage; }
+            else { textBoxResult.Text = "正確封包"; }
         }
 
-        private void ClearBT_Click(object sender, EventArgs e)
-        {
-            textBoxClear.Text = string.Empty;
-        }
         private void Version3BT_Click(object sender, EventArgs e)
         {
             var ByteData = textBox7.Text;
+            // 將十六進制字串轉換為字節陣列
             var temp = ConvertHexStringToByteArray(ByteData);
+            // 驗證封包是否符合
             string errorMessage;
             LeftPlatformRightTimeHandlerVerify Verify = new LeftPlatformRightTimeHandlerVerify();
             var result = Verify.ValidatePacket(temp, out errorMessage);
+            //根據結果更新畫面
+            if (result == false) { textBoxResult.Text = "錯誤封包\n" + errorMessage; }
+            else { textBoxResult.Text = "正確封包"; }
         }
 
         private void Version4BT_Click(object sender, EventArgs e)
         {
             var ByteData = textBox9.Text;
+            // 將十六進制字串轉換為字節陣列
             var temp = ConvertHexStringToByteArray(ByteData);
+            // 驗證封包是否符合
             string errorMessage;
             RightTimeHandlerVerify Verify = new RightTimeHandlerVerify();
             var result = Verify.ValidatePacket(temp, out errorMessage);
+            //根據結果更新畫面
+            if (result == false) { textBoxResult.Text = "錯誤封包\n" + errorMessage; }
+            else { textBoxResult.Text = "正確封包"; }
         }
         private void Version5BT_Click(object sender, EventArgs e)
         {
             var ByteData = textBox10.Text;
+            // 將十六進制字串轉換為字節陣列
             var temp = ConvertHexStringToByteArray(ByteData);
+            // 驗證封包是否符合
             string errorMessage;
             TrainDynamicVerify Verify = new TrainDynamicVerify();
             var result = Verify.ValidatePacket(temp, out errorMessage);
+            //根據結果更新畫面
+            if (result == false) { textBoxResult.Text = "錯誤封包\n" + errorMessage; }
+            else { textBoxResult.Text = "正確封包"; }
+        }
+        private void Version6BT_Click(object sender, EventArgs e)
+        {
+            var ByteData = textBox11.Text;
+            // 將十六進制字串轉換為字節陣列
+            var temp = ConvertHexStringToByteArray(ByteData);
+            // 驗證封包是否符合
+            string errorMessage;
+            UrgentHandlerVerify Verify = new UrgentHandlerVerify();
+            var result = Verify.ValidatePacket(temp, out errorMessage);
+            //根據結果更新畫面
+            if (result == false) { textBoxResult.Text = "錯誤封包\n" + errorMessage; }
+            else { textBoxResult.Text = "正確封包"; }
+        }
+        private void ClearBT_Click(object sender, EventArgs e)
+        {
+            textBoxResult.Text = string.Empty;
         }
         #endregion
         #region 組成封包的Method
@@ -395,7 +427,7 @@ namespace UITest
             return isTextValid;
 
         }
-
+        //驗證滾動模式是否正確
         public bool ValidateMessageScroll( ScrollInfo fullWindow)
         {
             // 驗證 MessageScroll 的字節數是否正確
@@ -488,7 +520,6 @@ namespace UITest
         }
 
         #endregion
-   
         private byte[] ConvertHexStringToByteArray(string hexString)
         {
             // 移除所有空格
@@ -503,8 +534,6 @@ namespace UITest
             }
             return byteArray;
         }
-
-
         #region private 驗證封包的方法
         public bool ValidatePacket(byte[] receivedData, out string errorMessage)
         {
@@ -757,9 +786,8 @@ namespace UITest
             // 如果所有檢查都通過，返回 true，錯誤信息為空
             return true;
         }
-
         #endregion
 
-    
+      
     }
 }

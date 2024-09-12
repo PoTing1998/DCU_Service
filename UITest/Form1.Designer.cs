@@ -38,7 +38,7 @@
             this.textBox5 = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.Version1BT = new System.Windows.Forms.Button();
-            this.textBoxClear = new System.Windows.Forms.TextBox();
+            this.textBoxResult = new System.Windows.Forms.TextBox();
             this.Version2BT = new System.Windows.Forms.Button();
             this.textBox6 = new System.Windows.Forms.TextBox();
             this.ClearBT = new System.Windows.Forms.Button();
@@ -48,6 +48,8 @@
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.textBox10 = new System.Windows.Forms.TextBox();
             this.Version5BT = new System.Windows.Forms.Button();
+            this.textBox11 = new System.Windows.Forms.TextBox();
+            this.Version6BT = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBox1
@@ -146,13 +148,13 @@
             this.Version1BT.UseVisualStyleBackColor = true;
             this.Version1BT.Click += new System.EventHandler(this.Version1BT_Click);
             // 
-            // textBoxClear
+            // textBoxResult
             // 
-            this.textBoxClear.Location = new System.Drawing.Point(820, 499);
-            this.textBoxClear.Multiline = true;
-            this.textBoxClear.Name = "textBoxClear";
-            this.textBoxClear.Size = new System.Drawing.Size(187, 46);
-            this.textBoxClear.TabIndex = 19;
+            this.textBoxResult.Location = new System.Drawing.Point(820, 499);
+            this.textBoxResult.Multiline = true;
+            this.textBoxResult.Name = "textBoxResult";
+            this.textBoxResult.Size = new System.Drawing.Size(187, 46);
+            this.textBoxResult.TabIndex = 19;
             // 
             // Version2BT
             // 
@@ -245,11 +247,33 @@
             this.Version5BT.UseVisualStyleBackColor = true;
             this.Version5BT.Click += new System.EventHandler(this.Version5BT_Click);
             // 
+            // textBox11
+            // 
+            this.textBox11.Location = new System.Drawing.Point(760, 245);
+            this.textBox11.Multiline = true;
+            this.textBox11.Name = "textBox11";
+            this.textBox11.Size = new System.Drawing.Size(276, 74);
+            this.textBox11.TabIndex = 30;
+            this.textBox11.Text = "55 AA 01 01 38 20 00 01 01 1C 00 77 79 02 80 FF 7F 21 32 71 10 00 01 64 07 0A 2A " +
+    "FF 00 00 B8 55 A4 6A BD 75 1F 1E 1D 28";
+            // 
+            // Version6BT
+            // 
+            this.Version6BT.Location = new System.Drawing.Point(760, 200);
+            this.Version6BT.Name = "Version6BT";
+            this.Version6BT.Size = new System.Drawing.Size(162, 23);
+            this.Version6BT.TabIndex = 31;
+            this.Version6BT.Text = "緊急訊息Unpacket";
+            this.Version6BT.UseVisualStyleBackColor = true;
+            this.Version6BT.Click += new System.EventHandler(this.Version6BT_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1062, 642);
+            this.Controls.Add(this.Version6BT);
+            this.Controls.Add(this.textBox11);
             this.Controls.Add(this.Version5BT);
             this.Controls.Add(this.textBox10);
             this.Controls.Add(this.textBox9);
@@ -259,7 +283,7 @@
             this.Controls.Add(this.ClearBT);
             this.Controls.Add(this.textBox6);
             this.Controls.Add(this.Version2BT);
-            this.Controls.Add(this.textBoxClear);
+            this.Controls.Add(this.textBoxResult);
             this.Controls.Add(this.Version1BT);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.textBox5);
@@ -289,7 +313,7 @@
         private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button Version1BT;
-        private System.Windows.Forms.TextBox textBoxClear;
+        private System.Windows.Forms.TextBox textBoxResult;
         private System.Windows.Forms.Button Version2BT;
         private System.Windows.Forms.TextBox textBox6;
         private System.Windows.Forms.Button ClearBT;
@@ -299,6 +323,8 @@
         private System.Windows.Forms.TextBox textBox9;
         private System.Windows.Forms.TextBox textBox10;
         private System.Windows.Forms.Button Version5BT;
+        private System.Windows.Forms.TextBox textBox11;
+        private System.Windows.Forms.Button Version6BT;
     }
 }
 

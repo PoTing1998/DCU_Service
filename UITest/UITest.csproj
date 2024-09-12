@@ -58,8 +58,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RightTimeHandlerVerify.cs" />
-    <Compile Include="TestFunction.cs" />
+    <Compile Include="FullWindowHandlerVerify.cs" />
     <Compile Include="TrainDynamicVerify.cs" />
+    <Compile Include="UrgentHandlerVerify.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
