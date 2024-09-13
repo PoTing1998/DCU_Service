@@ -1,6 +1,7 @@
 ﻿using Display;
 
 using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,9 +11,9 @@ using static Display.DisplaySettingsEnums;
 
 namespace UITest
 {
-    public class LeftPlatformRightTimeHandlerVerify
+    internal class RightTimeHandlerVerify
     {
-        #region Public Method 判斷方式
+        #region  Public Method 判斷方式
         public bool ValidatePacket(byte[] receivedData, out string errorMessage)
         {
             int currentIndex = 0;
@@ -175,7 +176,6 @@ namespace UITest
 
         private bool CheckSequenceLength(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
-
             errorMessage = "";
             if (receivedData[currentIndex] != 0x01 && receivedData[currentIndex] != 0x02)
             {
@@ -253,21 +253,14 @@ namespace UITest
         {
             errorMessage = "";
 
-            DisplaySettingsEnums.VersionType VersionType = (DisplaySettingsEnums.VersionType)receivedData[currentIndex];
+            DisplaySettingsEnums.CommandType CommandType = (DisplaySettingsEnums.CommandType)receivedData[currentIndex];
 
-            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.VersionType), VersionType))
+            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.CommandType), CommandType))
             {
-                errorMessage = $"Invalid versionType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                errorMessage = $"Invalid CommandType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
                 return false;
             }
-            currentIndex+=5;
-            DisplaySettingsEnums.VersionType VersionType2 = (DisplaySettingsEnums.VersionType)receivedData[currentIndex];
-            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.VersionType), VersionType2))
-            {
-                errorMessage = $"Invalid versionType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
-                return false;
-            }
-            currentIndex +=6;
+            currentIndex += 6;
             WindowDisplayMode messageType = (WindowDisplayMode)receivedData[currentIndex];
             // 檢查是否為合法的 messageType
             if (!Enum.IsDefined(typeof(WindowDisplayMode), messageType))
@@ -292,7 +285,7 @@ namespace UITest
                 errorMessage = $"在位元 {currentIndex} 沒有足夠的資料來判斷訊息長度";
                 return false;
             }
-   
+
             // 計算訊息的長度，從 currentIndex 的兩個 byte 組合出來的長度
             int messageLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
             currentIndex += 2;
@@ -421,6 +414,7 @@ namespace UITest
             currentIndex++;
             return true;
         }
+
         #endregion
     }
 }

@@ -50,6 +50,10 @@
             this.Version5BT = new System.Windows.Forms.Button();
             this.textBox11 = new System.Windows.Forms.TextBox();
             this.Version6BT = new System.Windows.Forms.Button();
+            this.Version7BT = new System.Windows.Forms.Button();
+            this.textBox12 = new System.Windows.Forms.TextBox();
+            this.Version8BT = new System.Windows.Forms.Button();
+            this.textBox13 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // textBox1
@@ -150,10 +154,10 @@
             // 
             // textBoxResult
             // 
-            this.textBoxResult.Location = new System.Drawing.Point(820, 499);
+            this.textBoxResult.Location = new System.Drawing.Point(319, 322);
             this.textBoxResult.Multiline = true;
             this.textBoxResult.Name = "textBoxResult";
-            this.textBoxResult.Size = new System.Drawing.Size(187, 46);
+            this.textBoxResult.Size = new System.Drawing.Size(134, 238);
             this.textBoxResult.TabIndex = 19;
             // 
             // Version2BT
@@ -178,7 +182,7 @@
             // 
             // ClearBT
             // 
-            this.ClearBT.Location = new System.Drawing.Point(820, 441);
+            this.ClearBT.Location = new System.Drawing.Point(334, 281);
             this.ClearBT.Name = "ClearBT";
             this.ClearBT.Size = new System.Drawing.Size(119, 23);
             this.ClearBT.TabIndex = 22;
@@ -249,7 +253,7 @@
             // 
             // textBox11
             // 
-            this.textBox11.Location = new System.Drawing.Point(760, 245);
+            this.textBox11.Location = new System.Drawing.Point(760, 187);
             this.textBox11.Multiline = true;
             this.textBox11.Name = "textBox11";
             this.textBox11.Size = new System.Drawing.Size(276, 74);
@@ -259,7 +263,7 @@
             // 
             // Version6BT
             // 
-            this.Version6BT.Location = new System.Drawing.Point(760, 200);
+            this.Version6BT.Location = new System.Drawing.Point(760, 142);
             this.Version6BT.Name = "Version6BT";
             this.Version6BT.Size = new System.Drawing.Size(162, 23);
             this.Version6BT.TabIndex = 31;
@@ -267,11 +271,55 @@
             this.Version6BT.UseVisualStyleBackColor = true;
             this.Version6BT.Click += new System.EventHandler(this.Version6BT_Click);
             // 
+            // Version7BT
+            // 
+            this.Version7BT.Location = new System.Drawing.Point(760, 281);
+            this.Version7BT.Name = "Version7BT";
+            this.Version7BT.Size = new System.Drawing.Size(236, 23);
+            this.Version7BT.TabIndex = 33;
+            this.Version7BT.Text = "顯示在上排左側 24(h)x48(wUnpacket";
+            this.Version7BT.UseVisualStyleBackColor = true;
+            this.Version7BT.Click += new System.EventHandler(this.Version7BT_Click);
+            // 
+            // textBox12
+            // 
+            this.textBox12.Location = new System.Drawing.Point(760, 310);
+            this.textBox12.Multiline = true;
+            this.textBox12.Name = "textBox12";
+            this.textBox12.Size = new System.Drawing.Size(276, 74);
+            this.textBox12.TabIndex = 32;
+            this.textBox12.Text = "55 AA 01 01 34 27 00 01 24 00 7F 21 31 7D 31 00 00 FF 01 31 7B FF 00 00 0C 00 74 " +
+    "10 00 04 64 07 0A 2A FF FF FF B8 55 A4 6A BD 75 1F 1E 1D 26";
+            // 
+            // Version8BT
+            // 
+            this.Version8BT.Location = new System.Drawing.Point(760, 417);
+            this.Version8BT.Name = "Version8BT";
+            this.Version8BT.Size = new System.Drawing.Size(236, 23);
+            this.Version8BT.TabIndex = 34;
+            this.Version8BT.Text = "顯示在下排左側 24(h)x48(wUnpacket";
+            this.Version8BT.UseVisualStyleBackColor = true;
+            this.Version8BT.Click += new System.EventHandler(this.Version8BT_Click);
+            // 
+            // textBox13
+            // 
+            this.textBox13.Location = new System.Drawing.Point(760, 467);
+            this.textBox13.Multiline = true;
+            this.textBox13.Name = "textBox13";
+            this.textBox13.Size = new System.Drawing.Size(276, 74);
+            this.textBox13.TabIndex = 35;
+            this.textBox13.Text = "55 AA 01 01 34 26 00 02 23 00 7F 21 31 7E 31 00 FF 00 31 7B 00 00 FF 0C 00 74 10 " +
+    "00 04 64 07 0A 2A FF 00 00 B8 55 A4 6A BD 75 1F 1E 1D 28";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1062, 642);
+            this.Controls.Add(this.textBox13);
+            this.Controls.Add(this.Version8BT);
+            this.Controls.Add(this.Version7BT);
+            this.Controls.Add(this.textBox12);
             this.Controls.Add(this.Version6BT);
             this.Controls.Add(this.textBox11);
             this.Controls.Add(this.Version5BT);
@@ -325,6 +373,10 @@
         private System.Windows.Forms.Button Version5BT;
         private System.Windows.Forms.TextBox textBox11;
         private System.Windows.Forms.Button Version6BT;
+        private System.Windows.Forms.Button Version7BT;
+        private System.Windows.Forms.TextBox textBox12;
+        private System.Windows.Forms.Button Version8BT;
+        private System.Windows.Forms.TextBox textBox13;
     }
 }
 

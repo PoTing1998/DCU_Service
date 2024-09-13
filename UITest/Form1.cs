@@ -16,6 +16,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using UITest.Verify;
+
 using static Display.DisplaySettingsEnums;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
@@ -292,9 +294,9 @@ namespace UITest
 
         private void Version3BT_Click(object sender, EventArgs e)
         {
-            var ByteData = textBox7.Text;
-            // 將十六進制字串轉換為字節陣列
-            var temp = ConvertHexStringToByteArray(ByteData);
+            var ByteData = textBox7.Text; 
+            // 將十六進制字串轉換為字節陣列 
+            var temp = ConvertHexStringToByteArray(ByteData); 
             // 驗證封包是否符合
             string errorMessage;
             LeftPlatformRightTimeHandlerVerify Verify = new LeftPlatformRightTimeHandlerVerify();
@@ -336,8 +338,34 @@ namespace UITest
             // 將十六進制字串轉換為字節陣列
             var temp = ConvertHexStringToByteArray(ByteData);
             // 驗證封包是否符合
+            string errorMessage; 
+            UrgentHandlerVerify Verify = new UrgentHandlerVerify(); 
+            var result = Verify.ValidatePacket(temp, out errorMessage);
+            //根據結果更新畫面
+            if (result == false) { textBoxResult.Text = "錯誤封包\n" + errorMessage; } 
+            else { textBoxResult.Text = "正確封包"; }
+        }
+        private void Version7BT_Click(object sender, EventArgs e)
+        {
+            var ByteData = textBox12.Text;
+            // 將十六進制字串轉換為字節陣列
+            var temp = ConvertHexStringToByteArray(ByteData);
+            // 驗證封包是否符合
             string errorMessage;
-            UrgentHandlerVerify Verify = new UrgentHandlerVerify();
+            IdentifierStatusImageTopLeft24x48HandlerVerify Verify = new IdentifierStatusImageTopLeft24x48HandlerVerify();
+            var result = Verify.ValidatePacket(temp, out errorMessage);
+            //根據結果更新畫面
+            if (result == false) { textBoxResult.Text = "錯誤封包\n" + errorMessage; }
+            else { textBoxResult.Text = "正確封包"; }
+        }
+        private void Version8BT_Click(object sender, EventArgs e)
+        {
+            var ByteData = textBox13.Text;
+            // 將十六進制字串轉換為字節陣列
+            var temp = ConvertHexStringToByteArray(ByteData);
+            // 驗證封包是否符合
+            string errorMessage;
+            StandardTimeBottomLeftHandlerVerify Verify = new StandardTimeBottomLeftHandlerVerify();
             var result = Verify.ValidatePacket(temp, out errorMessage);
             //根據結果更新畫面
             if (result == false) { textBoxResult.Text = "錯誤封包\n" + errorMessage; }
@@ -371,7 +399,7 @@ namespace UITest
                 return source.Substring(startIndex, endIndex - startIndex).Trim();
             }
             return string.Empty;
-        }
+        }  
 
         // 驗證 StringText 是否符合 ASCII 或中文 BIG-5 編碼
         private bool ValidateStringText(string text)
@@ -786,8 +814,10 @@ namespace UITest
             // 如果所有檢查都通過，返回 true，錯誤信息為空
             return true;
         }
+
+
         #endregion
 
-      
+    
     }
 }

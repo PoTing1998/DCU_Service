@@ -8,104 +8,88 @@ using System.Threading.Tasks;
 
 using static Display.DisplaySettingsEnums;
 
-namespace UITest
+namespace UITest.Verify
 {
-    internal class UrgentHandlerVerify
+    internal class StandardTimeBottomLeftHandlerVerify
     {
-
-        #region  Public Method 判斷方式
+        #region Public Method 判斷方式
         public bool ValidatePacket(byte[] receivedData, out string errorMessage)
         {
             int currentIndex = 0;
             errorMessage = "";
-
             try
             {
-                // 檢查封包起始碼是否正確
                 if (!CheckStartCode(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 1] {errorMessage}";
                     return false;
                 }
-                // 檢查 ID 和長度是否正確
                 if (!CheckIDLength(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 2] {errorMessage}";
                     return false;
                 }
-                // 檢查功能碼是否正確
                 if (!CheckFunctionCode(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 3] {errorMessage}";
                     return false;
                 }
-                // 檢查數據長度是否正確
                 if (!CheckDataLength(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 4] {errorMessage}";
                     return false;
                 }
-                // 檢查序列長度是否正確
                 if (!CheckSequenceLength(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 5] {errorMessage}";
                     return false;
                 }
-                // 檢查清除命令是否正確
                 if (!CheckClearCommand(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 6] {errorMessage}";
                     return false;
                 }
-                // 檢查字體大小是否正確
                 if (!CheckFontSize(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 7] {errorMessage}";
                     return false;
                 }
-                // 檢查字體樣式是否正確
                 if (!CheckFontStyle(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 8] {errorMessage}";
                     return false;
                 }
-                // 檢查訊息類型是否正確
+
                 if (!CheckMessageType(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 9] {errorMessage}";
                     return false;
                 }
-                // 檢查訊息長度是否正確 
                 if (!CheckMessageLength(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 10] {errorMessage}";
                     return false;
                 }
-                // 檢查訊息等級是否正確
                 if (!CheckMessageLevel(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 11] {errorMessage}";
                     return false;
                 }
-                // 檢查訊息是否具有滾動效果
                 if (!CheckMessageScroll(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 12] {errorMessage}";
                     return false;
                 }
-                // 檢查字串模式是否正確
                 if (!CheckStringMode(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 13] {errorMessage}";
                     return false;
                 }
-                // 檢查字串內容是否正確
                 if (!CheckStringText(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 14] {errorMessage}";
                     return false;
                 }
-                // 檢查封包結束字節是否正確
                 if (!CheckEndBytes(receivedData, ref currentIndex, out errorMessage))
                 {
                     errorMessage = $"[Step 15] {errorMessage}";
@@ -120,10 +104,8 @@ namespace UITest
 
             return true;
         }
-
         #endregion
-
-        #region Private Method 判斷邏輯 
+        #region Private Method 判斷邏輯
         private bool CheckStartCode(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
@@ -159,9 +141,9 @@ namespace UITest
         private bool CheckFunctionCode(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
-            if (receivedData[currentIndex] != 0x38)
+            if (receivedData[currentIndex] != 0x34)
             {
-                errorMessage = $"FunctionCode mismatch at byte {currentIndex}, expected 0x38";
+                errorMessage = $"FunctionCode mismatch at byte {currentIndex}, expected 0x34";
                 return false;
             }
             currentIndex++;
@@ -191,26 +173,21 @@ namespace UITest
 
         private bool CheckSequenceLength(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
+
             errorMessage = "";
-            //緊急訊息 會在上下排之前判斷使否開啟   判斷的code 是0x01跟0x02
-            if (receivedData[currentIndex] != 0x01 && receivedData[currentIndex] != 0x02) //開啟訊號
+            if (receivedData[currentIndex] != 0x01 && receivedData[currentIndex] != 0x02)
             {
                 errorMessage = $"Expected 0x01 or 0x02 at byte {currentIndex}";
                 return false;
             }
             currentIndex++;
-            if (receivedData[currentIndex] != 0x01 && receivedData[currentIndex] != 0x02) //上下排顯示器的顯示
-            {
-                errorMessage = $"Expected 0x01 or 0x02 at byte {currentIndex}";
-                return false;
-            }
-            currentIndex++;
+
             if (currentIndex + 2 > receivedData.Length)
             {
                 errorMessage = $"Insufficient data for SequenceLength at byte {currentIndex}";
                 return false;
             }
-         
+
             int sequenceLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
             currentIndex += 2;
 
@@ -235,35 +212,6 @@ namespace UITest
             {
                 currentIndex++;
             }
-            //增加緊急訊息代碼 代號˙79
-            if (receivedData[currentIndex] != 0x79)
-            {
-                errorMessage = $"Expected Clear Command [optional 0x77, 0x79] at byte {currentIndex}";
-                return false;
-            }
-            currentIndex++;
-            //顯示器的燈號模式
-            if (receivedData[currentIndex] != 0x01 && receivedData[currentIndex] !=0x02 && receivedData[currentIndex]!= 0x03)
-            {
-                errorMessage = $"Expected  at byte {currentIndex}";
-                return false;
-            }
-            currentIndex++;
-            //顯示器的啟動次數 代號為0x80
-            if (receivedData[currentIndex] != 0x80)
-            {
-                errorMessage = $"Expected  at byte {currentIndex}";
-                return false;
-            }
-            currentIndex++;
-            // 目前為無限播放 0xff
-            if (receivedData[currentIndex] != 0xFF)
-            {
-                errorMessage = $"Expected  at byte {currentIndex}";
-                return false;
-            }
-            currentIndex++;
-
             if (currentIndex >= receivedData.Length || receivedData[currentIndex] != 0x7F)
             {
                 errorMessage = $"Expected Clear Command [optional 0x77, 0x7F] at byte {currentIndex}";
@@ -302,37 +250,91 @@ namespace UITest
         private bool CheckMessageType(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
-            WindowDisplayMode messageType = (WindowDisplayMode)receivedData[currentIndex];
+            //判斷左邊的版行
+            DisplaySettingsEnums.CommandType commandType = (DisplaySettingsEnums.CommandType)receivedData[currentIndex];
 
+            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.CommandType), commandType))
+            {
+                errorMessage = $"Invalid CommandType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                return false;
+            }
+            currentIndex++;
+            //判斷左側圖塊 是否開啟 以及是否符合定義
+            // 判斷 SwitchMode 是否有效
+            if (receivedData[currentIndex] != 0x30 && receivedData[currentIndex] != 0x31)
+            {
+                errorMessage = $"Invalid SwitchMode at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                return false;
+            }
+            currentIndex++;
+            //判斷顏色
+            var RedColor = receivedData[currentIndex ];
+            var GreenColor = receivedData[currentIndex +1];
+            var BlueColor = receivedData[currentIndex + 2];
+            // 檢查 RGB 範圍，RGB 值應該在 0 到 255 之間
+            if (RedColor < 0 || RedColor > 255 || GreenColor < 0 || GreenColor > 255 || BlueColor < 0 || BlueColor > 255)
+            {
+                errorMessage = $"Invalid RGB values: Red={RedColor}, Green={GreenColor}, Blue={BlueColor}. Each should be between 0 and 255.";
+                return false;
+            }
+            currentIndex += 3;
+            //判斷 右側時間是否開啟  
+            if (receivedData[currentIndex] != 0x30 && receivedData[currentIndex] != 0x31)
+            {
+                errorMessage = $"Invalid SwitchMode at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                return false;
+            }
+            currentIndex++;
+            // 2024 / 9/12 待修改
+
+
+            //判斷右邊的版行
+            DisplaySettingsEnums.CommandType CommandType2 = (DisplaySettingsEnums.CommandType)receivedData[currentIndex];
+            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.CommandType), CommandType2))
+            {
+                errorMessage = $"Invalid CommandType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                return false;
+            }
+            currentIndex += 6;
+
+            WindowDisplayMode messageType = (WindowDisplayMode)receivedData[currentIndex];
             // 檢查是否為合法的 messageType
             if (!Enum.IsDefined(typeof(WindowDisplayMode), messageType))
             {
                 errorMessage = $"Invalid messageType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
                 return false;
             }
-
             // 使用工廠方法取得對應的處理器
             IMessageTypeHandler handler = MessageTypeHandlerFactory.GetHandler(messageType);
-
             // 使用處理器進行參數驗證
             return handler.Handle(receivedData, ref currentIndex, out errorMessage);
         }
+
         private bool CheckMessageLength(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
+
+            // 檢查當前索引加上2是否超過接收到的資料長度
+            // 如果是的話，表示沒有足夠的資料來判斷訊息長度
             if (currentIndex + 2 > receivedData.Length)
             {
-                errorMessage = $"Insufficient data for MessageLength at byte {currentIndex}";
+                errorMessage = $"在位元 {currentIndex} 沒有足夠的資料來判斷訊息長度";
                 return false;
             }
+
+            // 計算訊息的長度，從 currentIndex 的兩個 byte 組合出來的長度
             int messageLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
             currentIndex += 2;
 
+            // 計算訊息的結尾索引
             int messageEndIndex = currentIndex + messageLength - 1;
+            // 檢查訊息的結尾索引是否超過接收到的資料長度
 
+            // 或者訊息的結尾是否不是 0x1E
             if (messageEndIndex >= receivedData.Length || receivedData[messageEndIndex] != 0x1E)
             {
-                errorMessage = $"Message does not end with 0x1E or length is incorrect at byte {messageEndIndex}";
+                // 設置錯誤訊息，並返回 false
+                errorMessage = $"訊息沒有以 0x1E 結束，或在位元 {messageEndIndex} 長度不正確";
                 return false;
             }
             return true;
@@ -350,6 +352,7 @@ namespace UITest
             currentIndex++;
             return true;
         }
+
         private bool CheckMessageScroll(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
@@ -393,6 +396,7 @@ namespace UITest
                 errorMessage = $"Insufficient data for StringMode at byte {currentIndex}";
                 return false;
             }
+
             StringMode stringMode = (StringMode)receivedData[currentIndex];
             if (!Enum.IsDefined(typeof(StringMode), stringMode))
             {
@@ -423,6 +427,7 @@ namespace UITest
                 errorMessage = $"Expected 0x1F at byte {endIndex}, but found {receivedData[endIndex]:X2}";
                 return false;
             }
+
             currentIndex = endIndex + 1;
             return true;
         }
@@ -445,8 +450,9 @@ namespace UITest
             currentIndex++;
             return true;
         }
+        #endregion
 
-        #endregion 
+
 
     }
 }

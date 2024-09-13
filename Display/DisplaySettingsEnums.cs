@@ -85,23 +85,74 @@ namespace Display
             Default = 0x00
         }
 
+        /// <summary>
+        /// 定義文字滾動模式。
+        /// </summary>
         public enum ScrollMode
         {
-            Jump = 0x61,                   // 即時顯示
-            ScrollLeft = 0x62,             // 向左捲動（右至左，常规滚动）
-            ScrollLeftWithDisappear = 0x63, // 向左捲動（消失，向左滚动消失）
-            ScrollLeftWithFadeOut = 0x64,  // 向左捲動（逐渐消失，右至左逐渐淡出）
-            ScrollDown = 0x65,             // 向下捲動
-            ScrollUp = 0x66,               // 向上捲動
-            Flash = 0x67                   // 閃爍
+            /// <summary>
+            /// 即時顯示（61H）
+            /// </summary>
+            Jump = 0x61,
+
+            /// <summary>
+            /// 向左捲動（右至左，常規滾動）（62H）
+            /// </summary>
+            ScrollLeft = 0x62,
+
+            /// <summary>
+            /// 向左捲動（消失，右至左滾動後消失）（63H）
+            /// </summary>
+            ScrollLeftWithDisappear = 0x63,
+
+            /// <summary>
+            /// 向左捲動（逐漸消失，右至左逐漸淡出）（64H）
+            /// </summary>
+            ScrollLeftWithFadeOut = 0x64,
+
+            /// <summary>
+            /// 向下捲動（65H）
+            /// </summary>
+            ScrollDown = 0x65,
+
+            /// <summary>
+            /// 向上捲動（66H）
+            /// </summary>
+            ScrollUp = 0x66,
+
+            /// <summary>
+            /// 閃爍（67H）
+            /// </summary>
+            Flash = 0x67
         }
 
 
-        public enum VersionType
+        /// <summary>
+        /// 定義用於 SPDU/SCUD 系統中顯示圖片、時間資訊以及模式切換的命令類型。
+        /// </summary>
+        public enum CommandType
         {
-           Photo= 0x7A,
-           TIME = 0X7B
+            /// <summary>
+            /// 表示用於圖片顯示的命令 (0x7A)。
+            /// </summary>
+            圖片顯示 = 0x7A,
+
+            /// <summary>
+            /// 表示用於時間顯示的命令 (0x7B)。
+            /// </summary>
+            時間顯示 = 0x7B,
+
+            /// <summary>
+            /// 表示用於切換顯示模式的命令 (0x7D)。
+            /// </summary>
+            模式切換 = 0x7D,
+
+            /// <summary>
+            /// 表示用於切換時間顯示模式的命令 (0x7E)。
+            /// </summary>
+            時間切換 = 0x7E
         }
+
     }
-   
+
 }

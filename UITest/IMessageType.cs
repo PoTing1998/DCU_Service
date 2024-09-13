@@ -201,17 +201,6 @@ namespace UITest
             return true;
         }
     }
-
-    public class UrgentHandler : IMessageTypeHandler  //緊急訊息  
-    {
-        public bool Handle(byte[] receivedData, ref int currentIndex, out string errorMessage)
-        {
-            errorMessage = "";
-            //function code 不同因此 不列入考慮
-            currentIndex++;
-            return true;
-        }
-    }
     #endregion
     #region  3. 判斷版型的類型 
     public class MessageTypeHandlerFactory

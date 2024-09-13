@@ -253,11 +253,11 @@ namespace UITest
         {
             errorMessage = "";
 
-            DisplaySettingsEnums.VersionType VersionType = (DisplaySettingsEnums.VersionType)receivedData[currentIndex];
+            DisplaySettingsEnums.CommandType CommandType = (DisplaySettingsEnums.CommandType)receivedData[currentIndex];
            
-            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.VersionType), VersionType))
+            if (!Enum.IsDefined(typeof(DisplaySettingsEnums.CommandType), CommandType))
             {
-                errorMessage = $"Invalid versionType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
+                errorMessage = $"Invalid CommandType at byte {currentIndex}, received {receivedData[currentIndex]:X2}";
                 return false;
             }
             currentIndex+=5;
