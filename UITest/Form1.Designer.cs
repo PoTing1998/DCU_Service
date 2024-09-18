@@ -58,7 +58,7 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(32, 12);
+            this.textBox1.Location = new System.Drawing.Point(20, 12);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(293, 122);
@@ -66,7 +66,7 @@
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(32, 217);
+            this.textBox2.Location = new System.Drawing.Point(20, 156);
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
             this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -154,10 +154,10 @@
             // 
             // textBoxResult
             // 
-            this.textBoxResult.Location = new System.Drawing.Point(319, 322);
+            this.textBoxResult.Location = new System.Drawing.Point(319, 324);
             this.textBoxResult.Multiline = true;
             this.textBoxResult.Name = "textBoxResult";
-            this.textBoxResult.Size = new System.Drawing.Size(134, 238);
+            this.textBoxResult.Size = new System.Drawing.Size(134, 165);
             this.textBoxResult.TabIndex = 19;
             // 
             // Version2BT

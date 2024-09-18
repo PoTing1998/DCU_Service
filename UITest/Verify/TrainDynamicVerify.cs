@@ -17,7 +17,6 @@ namespace UITest
         {
             int currentIndex = 0;
             errorMessage = "";
-            // , Func<byte[], byte[]> tempFunc
             try
             {
                 if (!CheckStartCode(receivedData, ref currentIndex, out errorMessage))

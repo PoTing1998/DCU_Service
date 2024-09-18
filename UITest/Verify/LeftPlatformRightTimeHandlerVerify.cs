@@ -292,7 +292,6 @@ namespace UITest
                 errorMessage = $"在位元 {currentIndex} 沒有足夠的資料來判斷訊息長度";
                 return false;
             }
-   
             // 計算訊息的長度，從 currentIndex 的兩個 byte 組合出來的長度
             int messageLength = receivedData[currentIndex] | (receivedData[currentIndex + 1] << 8);
             currentIndex += 2;

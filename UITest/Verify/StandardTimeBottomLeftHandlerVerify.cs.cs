@@ -309,11 +309,10 @@ namespace UITest.Verify
             // 使用處理器進行參數驗證
             return handler.Handle(receivedData, ref currentIndex, out errorMessage);
         }
-
+        
         private bool CheckMessageLength(byte[] receivedData, ref int currentIndex, out string errorMessage)
         {
             errorMessage = "";
-
             // 檢查當前索引加上2是否超過接收到的資料長度
             // 如果是的話，表示沒有足夠的資料來判斷訊息長度
             if (currentIndex + 2 > receivedData.Length)

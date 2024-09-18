@@ -213,7 +213,6 @@ namespace UITest
                 {
                     textBox2.Text += "MessageType 的值有效。\r\n";
                     textBox2.Text += $"MessageType: {fullWindow.MessageType}\r\n";
-          
                 }
                 else
                 {
@@ -338,7 +337,7 @@ namespace UITest
             // 將十六進制字串轉換為字節陣列
             var temp = ConvertHexStringToByteArray(ByteData);
             // 驗證封包是否符合
-            string errorMessage; 
+            string errorMessage;
             UrgentHandlerVerify Verify = new UrgentHandlerVerify(); 
             var result = Verify.ValidatePacket(temp, out errorMessage);
             //根據結果更新畫面
@@ -411,14 +410,12 @@ namespace UITest
                 {
                     continue;
                 }
-
                 // 判斷是否是中文 BIG-5 編碼範圍內的字元
                 byte[] bytes = Encoding.GetEncoding(950).GetBytes(c.ToString());
                 if (bytes.Length == 2)
                 {
                     continue;
                 }
-
                 // 如果不符合上述條件，返回 false
                 return false;
             }
@@ -426,12 +423,11 @@ namespace UITest
             return true;
         }
 
-
         // 驗證 StringMessage 是否符合規則
         private bool ValidateStringMessage(StringMessage stringMessage)
         {
             // 檢查 StringMode 是否在合法範圍內
-            if (stringMessage.StringMode != 0x2A && stringMessage.StringMode != 0x2B)
+            if (stringMessage.StringMode != 0x2A && stringMessage.StringMode != 0x2B) 
             {
                 return false;
             }
