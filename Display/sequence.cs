@@ -10,7 +10,7 @@ namespace Display
 {
     public class Sequence
     {
-        public byte SequenceNo { get; set; }
+        public byte SequenceNo { get; set; } //判斷上下行
         public List<IMessage> Messages { get; set; } = new List<IMessage>();
         public byte SequenceEnd { get; set; } = 0x1D; // 1Dh
         public FontSetting Font { get; set; }

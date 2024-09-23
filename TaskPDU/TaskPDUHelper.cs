@@ -66,13 +66,16 @@ namespace ASI.Wanda.DCU.TaskPDU
             }
         }
         #region  版型的操作    
-        public void SendMessageToDisplay(string target_du, string dbName1, string dbName2)
+        public void SendMessageToDisplay(string target_du, string dbName1, string dbName2 ,out string Result ,out byte[] DataByte)
         {
+            Result = "";
+            DataByte = null;
             try
             {
                 var deviceInfo = SplitStringToDeviceInfo(target_du);
-               ASI.Lib.Log.DebugLog.Log(_mProcName + "deviceInfo", $" received a message {deviceInfo.Station}  {deviceInfo.Location}  {deviceInfo.DeviceWithNumber}");
-                if (deviceInfo != null)
+                ASI.Lib.Log.DebugLog.Log(_mProcName + "deviceInfo", $" received a message {deviceInfo.Station}  {deviceInfo.Location}  {deviceInfo.DeviceWithNumber}");
+                
+                if (deviceInfo != null) 
                 {
                     var message_id = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
                     // Add your code here to use message_id   
@@ -121,11 +124,13 @@ namespace ASI.Wanda.DCU.TaskPDU
                     ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
 
                     _mSerial.Send(serializedData);
+                    Result = "成功失敗";
                 }
             }
             catch (Exception ex)
             {
                 ASI.Lib.Log.ErrorLog.Log(_mProcName, ex.ToString());
+                Result = "傳送失敗";
             }
 
         }

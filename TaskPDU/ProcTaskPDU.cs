@@ -138,9 +138,16 @@ namespace ASI.Wanda.DCU.TaskPDU
 
                                 if (dbName1 == "dmd_pre_record_message")
                                 {
+                                    string result = ""; 
                                     ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_pre_record_message");
+
+                                    byte[] SerialiazedData = new byte[] { };
                                     //傳送到面板上
-                                    taskPDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
+                                    taskPDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result , out SerialiazedData);
+
+                                    serial.Send(SerialiazedData);
+
+                                    ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_pre_record_message"+ result);
                                 }
                                 else
                                 {
@@ -187,7 +194,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                     // 假設sJsonData已經是十六進位字串格式，直接解析
                     var sHexString = sJsonData;
                     byte[] dataBytes = HexStringToBytes(sJsonData);
-                    if (dataBytes.Length >= 10) // 確保有足夠長度的陣列   
+                    if (dataBytes.Length >= 10) // 確保有足夠長度的陣列
                     {
                         ProcessDataBytes(dataBytes);
                     }
