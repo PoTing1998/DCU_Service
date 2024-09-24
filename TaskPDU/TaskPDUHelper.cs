@@ -112,7 +112,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                     };
                     var sequence1 = new Display.Sequence
                     {
-                        SequenceNo = 1,
+                        SequenceNo = 1, 
                         Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
                         Messages = new List<IMessage> { fullWindowMessage }
                     };
@@ -178,13 +178,21 @@ namespace ASI.Wanda.DCU.TaskPDU
             var packet = processor.CreatePacket(startCode, new List<byte> { 0x01 }, function.FunctionCode, new List<Sequence> { sequence1 });
             var serializedData = processor.SerializePacket(packet);
             ASI.Lib.Log.DebugLog.Log(_mProcName + "送到看板上", "Serialized display packet: " + BitConverter.ToString(serializedData));
-            _mSerial.Send(serializedData);
+         
         }
         /// <summary>
-        /// 緊急訊息   
-        /// </summary>    指定ID   0703 
-        public async void SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
+        // 處理訊息
+        /// </summary>
+        /// <param name="FireContentChinese"></param>
+        /// <param name="FireContentEnglish"></param>
+        /// <param name="situation"></param>
+        /// <returns></returns>
+        public async Task<Tuple<byte[], byte[], byte[]>> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
         {
+            byte[] serializedDataChinese = new byte[] { };
+            byte[] serializedDataEnglish = new byte[] { };
+            byte[] serializedDataOff = new byte[] { };  // 新增存放關閉訊息的序列化數據
+
             try
             {
                 // 設定警示的視為固定內容  
@@ -192,48 +200,34 @@ namespace ASI.Wanda.DCU.TaskPDU
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
 
-                // Send Chinese Message 
+                // 序列化中文訊息
                 var sequence1 = CreateSequence(FireContentChinese, 1);
                 var packet1 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
-                var serializedData1 = processor.SerializePacket(packet1);
-                ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData1));
+                serializedDataChinese = processor.SerializePacket(packet1);
 
-                var temp = _mSerial.Send(serializedData1);
-                ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + _mProcName, temp.ToString());
-                // Send English Message 
+                // 序列化英文訊息
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
                 var packet2 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
-                var serializedData2 = processor.SerializePacket(packet2);
-                ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData2));
+                serializedDataEnglish = processor.SerializePacket(packet2);
 
-                _mSerial.Send(serializedData2);
                 // Optional delay and turn off if situation is 84  
                 if (situation == 84)
                 {
                     await Task.Delay(10000); // 延遲十秒   
                     var OffMode = new byte[] { 0x02 };
                     var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
-                    var serializedDataOff = processor.SerializePacket(packetOff);
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
-                    _mSerial.Send(serializedDataOff);
-                }
-
-                // Optional delay and turn off if situation is 84 
-                if (situation == 84)
-                {
-                    await Task.Delay(10000); // 延遲十秒 
-                    var OffMode = new byte[] { 0x02 };
-                    var packetOff2 = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
-                    var serializedDataOff2 = processor.SerializePacket(packetOff2);
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff2));
-                    _mSerial.Send(serializedDataOff2);
+                    serializedDataOff = processor.SerializePacket(packetOff);
                 }
             }
             catch (Exception ex)
             {
                 ASI.Lib.Log.ErrorLog.Log("SendMessageToUrgnt", ex);
             }
+
+            // 返回中文、英文和關閉訊息的序列化數據
+            return Tuple.Create(serializedDataChinese, serializedDataEnglish, serializedDataOff);
         }
+
         /// <summary>
         /// 顯示器的畫面開啟
         /// </summary>
@@ -243,7 +237,7 @@ namespace ASI.Wanda.DCU.TaskPDU
             var processor   = new PacketProcessor();
             var function    = new PowerControlHandler();
             var Open        = new byte[] { 0x3A, 0X00 };
-            var packetOpen   = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Open);
+            var packetOpen  = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Open);
             var serializedDataOpen = processor.SerializePacket(packetOpen);
             _mSerial.Send(serializedDataOpen);
             ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
@@ -275,13 +269,13 @@ namespace ASI.Wanda.DCU.TaskPDU
             var stringMessage = new StringMessage
             {
                 StringMode = 0x2A, // TextMode (Static) 
-                StringBody = textStringBody
+                StringBody = textStringBody  
             };
             var urgentMessage = new Urgent // Display version  
             {
                 UrgntMessageType = 0x79, // message
                 MessageType = 0x71,
-                MessageLevel = 0x01, // level
+                MessageLevel = 0x01, // level 
                 MessageScroll = new ScrollInfo { ScrollMode = 0x64, ScrollSpeed = 07, PauseTime = 10 },
                 MessageContent = new List<StringMessage> { stringMessage }
             };
@@ -298,7 +292,7 @@ namespace ASI.Wanda.DCU.TaskPDU
 
         #region 資料庫的method
         /// <summary>
-        /// 更新DMDPreRecordMessage資料表  
+        /// 更新DMDPreRecordMessage資料表   
         /// </summary>
         /// <returns></returns>    
         private static dmd_pre_record_message ProcessMessage(Guid messageID)
@@ -306,9 +300,8 @@ namespace ASI.Wanda.DCU.TaskPDU
             try
             {
                 return dmdPreRecordMessage.SelectMSGSetting(messageID);
-
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
                 ASI.Lib.Log.ErrorLog.Log("Error ProcessMessage ProcessMessage", ex);
                 return null;
@@ -326,16 +319,11 @@ namespace ASI.Wanda.DCU.TaskPDU
             {
                 var ConfigDate = ASI.Wanda.DCU.DB.Tables.System.sysConfig.SelectColor(colorName);
                 ASI.Lib.Log.DebugLog.Log(_mProcName, ConfigDate.config_value.ToString());
-                //var colors = DataConversion.FromHex(ConfigDate);
-                //foreach (var color in colors)
-                //{
-                //    ASI.Lib.Log.DebugLog.Log(_mProcName, color.ToString());
-                //}
                 return DataConversion.FromHex(ConfigDate.config_value);
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log("Error ProcessMessage ProcessMessageColor", ex);
+                ASI.Lib.Log.ErrorLog.Log("Error ProcessMessage ProcessMessageColor", ex);  
                 return null;
             }
         }
@@ -356,19 +344,20 @@ namespace ASI.Wanda.DCU.TaskPDU
                 int currentMonth = DateTime.Now.Month;
                 int currentDay = DateTime.Now.Day;
                 int currentHour = DateTime.Now.Hour;
-
-                // 使用 List 儲存不啟動節能模式的日期
+                
+                // 使用 List 儲存不啟動節能模式的日期 
                 var nonEcoDates = new List<(int Month, int Day)>();
 
-                foreach (string day in notEcoDays)
+                foreach (string day in notEcoDays) 
                 {
                     if (day.Length == 4)
                     {
                         int month = int.Parse(day.Substring(0, 2));
-                        int dayOfMonth = int.Parse(day.Substring(2, 2));
-                        nonEcoDates.Add((month, dayOfMonth));
 
-                        // 檢查當前日期是否在不啟動節能模式的日期列表中
+                        int dayOfMonth = int.Parse(day.Substring(2, 2));
+                        nonEcoDates.Add((month, dayOfMonth)); 
+
+                        // 檢查當前日期是否在不啟動節能模式的日期列表中 
                         if (month == currentMonth && dayOfMonth == currentDay)
                         {
                             // 當前日期不啟動節能模式
@@ -377,16 +366,16 @@ namespace ASI.Wanda.DCU.TaskPDU
                     }
                     else
                     {
-                        // 處理長度不是 4 的情況，代表日期格式錯誤
-                        Console.WriteLine("無效的日期格式：" + day);
-                        continue;
-                    }
-
+                        // 處理長度不是 4 的情況，代表日期格式錯誤 
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, "無效的日期格式：" + day);
+                        continue; 
+                    } 
+                    
                     // 檢查開關顯示器的時間
                     string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    if (autoPlayTimes.Length == 2 && autoEcoTimes.Length == 2)
+                   
+                    if (autoPlayTimes.Length == 2 && autoEcoTimes.Length == 2) 
                     {
                         int autoPlayStartHour = int.Parse(autoPlayTimes[0]);
                         int autoPlayEndHour = int.Parse(autoPlayTimes[1]);
@@ -398,8 +387,6 @@ namespace ASI.Wanda.DCU.TaskPDU
                             // 關閉顯示器
                             Console.WriteLine("關閉顯示器");
                             PowerSettingOff();
-
-
                         }
                         else if (currentHour >= autoEcoStartHour && currentHour <= autoEcoEndHour)
                         {

@@ -343,17 +343,6 @@ namespace ASI.Wanda.DCU.TaskUPD
                     ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
                     _mSerial.Send(serializedDataOff);
                 }
-
-                //// Optional delay and turn off if situation is 84 
-                //if (situation == 84)
-                //{
-                //    await Task.Delay(10000); // 延遲十秒 
-                //    var OffMode = new byte[] { 0x02 };
-                //    var packetOff2 = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
-                //    var serializedDataOff2 = processor.SerializePacket(packetOff2);
-                //    ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff2));
-                //    _mSerial.Send(serializedDataOff2);
-                //}
             }
             catch (Exception ex)
             {
@@ -377,8 +366,8 @@ namespace ASI.Wanda.DCU.TaskUPD
                     // 獲取當前日期的月和日以及現在的時間（時和分）
                     int currentMonth = DateTime.Now.Month;
                     int currentDay = DateTime.Now.Day;
-                    int currentHour = DateTime.Now.Hour;
-                    int currentMinute = DateTime.Now.Minute;
+                    int currentHour = DateTime.Now.Hour; 
+                    int currentMinute = DateTime.Now.Minute; 
                     // 使用 List 儲存不啟動節能模式的日期
                     var nonEcoDates = new List<(int Month, int Day)>();
 
@@ -515,7 +504,7 @@ namespace ASI.Wanda.DCU.TaskUPD
 
         #region  資料庫的操作
         /// <summary>
-        /// 更新DMDPreRecordMessage資料表  
+        /// 更新DMDPreRecordMessage資料表    
         /// </summary>
         /// <returns></returns>    
         private static dmd_pre_record_message ProcessMessage(Guid messageID)

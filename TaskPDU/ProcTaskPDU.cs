@@ -6,6 +6,7 @@ using ASI.Wanda.DCU.ProcMsg;
 using ASI.Wanda.DMD.ProcMsg;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 
@@ -15,7 +16,7 @@ namespace ASI.Wanda.DCU.TaskPDU
     {
         #region constructor
         static int mSEQ = 0; // 計算累進發送端的次數  
-        ASI.Lib.Comm.SerialPort.SerialPortLib serial = null;
+        ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
 
         /// <summary>
         /// 讀取火災資料
@@ -43,7 +44,6 @@ namespace ASI.Wanda.DCU.TaskPDU
             {
                 return 0;
             }
-          
             else if (pLabel == MSGFromTaskDMD.Label)
             {
                 return ProMsgFromDMD(pBody);
@@ -58,8 +58,6 @@ namespace ASI.Wanda.DCU.TaskPDU
             }
             return base.ProcEvent(pLabel, pBody);
         }
-
-
         /// <summary>
         /// 啟始處理DCU模組執行程序
         /// </summary>
@@ -70,25 +68,24 @@ namespace ASI.Wanda.DCU.TaskPDU
         {
             mTimerTick = 30;
             mProcName = "TaskPDU";
-           
             string dbIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
             string dbPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
             string dbName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
             string dbUserID = "postgres";
             string dbPassword = "postgres";
             string currentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
-            ///serialPort的開啟 
+            //serialPort的開啟 
             var iComPort = ConfigApp.Instance.GetConfigSetting("PDUComPort"); ;
             var iBaudrate = ConfigApp.Instance.GetConfigSetting("PDUBaudrate"); ;
-            serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
+            _mSerial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
             string connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
-            serial.ConnectionString = connectionString;
-            serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
-            serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
+            _mSerial.ConnectionString = connectionString;
+            _mSerial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
+            _mSerial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
             int result = -1; // 默認為錯誤狀態
             try
             {
-                result = serial.Open();
+                result = _mSerial.Open();
                 if (result != 0)
                 {
                     ASI.Lib.Log.ErrorLog.Log(mProcName, "打開串口失敗");
@@ -124,7 +121,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                     {
                         string sJsonData = mSGFromTaskDMD.JsonData;
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-                        var taskPDUHelper = new ASI.Wanda.DCU.TaskPDU.TaskPDUHelper(mProcName, serial);
+                        var taskPDUHelper = new ASI.Wanda.DCU.TaskPDU.TaskPDUHelper(mProcName, _mSerial);
                         switch (sJsonObjectName)
                         {
                             case ASI.Wanda.DCU.TaskPDU.Constants.SendPreRecordMsg:
@@ -138,14 +135,14 @@ namespace ASI.Wanda.DCU.TaskPDU
 
                                 if (dbName1 == "dmd_pre_record_message")
                                 {
-                                    string result = ""; 
+                                    string result = "";  
                                     ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_pre_record_message");
 
                                     byte[] SerialiazedData = new byte[] { };
-                                    //傳送到面板上
+                                    //傳送到面板上 
                                     taskPDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result , out SerialiazedData);
 
-                                    serial.Send(SerialiazedData);
+                                    _mSerial.Send(SerialiazedData); 
 
                                     ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_pre_record_message"+ result);
                                 }
@@ -177,6 +174,8 @@ namespace ASI.Wanda.DCU.TaskPDU
            
             return -1;
         }
+
+        #region 處理訊息
         /// <summary>
         /// 處理TaskPA的訊息
         /// </summary>
@@ -266,29 +265,50 @@ namespace ASI.Wanda.DCU.TaskPDU
             }
         }
 
-
-        private void ProcessDataBytes(byte[] dataBytes)
+        private async Task ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
-            var taskUPDHelper = new ASI.Wanda.DCU.TaskPDU.TaskPDUHelper(mProcName, serial);
+            var taskUPDHelper = new ASI.Wanda.DCU.TaskPDU.TaskPDUHelper(mProcName, _mSerial);
+            Tuple<byte[], byte[], byte[]> serializedData;
+
             switch (dataByteAtIndex8)
             {
                 case 0x81:
-                    taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
+                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
+                    SendSerializedData(serializedData.Item1, "Serialized display packet (Chinese)"); // 發送中文訊息
+                    SendSerializedData(serializedData.Item2, "Serialized display packet (English)"); // 發送英文訊息
                     break;
                 case 0x82:
-                    taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
+                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
+                    SendSerializedData(serializedData.Item1, "Serialized display packet (Chinese)"); // 發送中文訊息
+                    SendSerializedData(serializedData.Item2, "Serialized display packet (English)"); // 發送英文訊息
                     break;
                 case 0x83:
-                    taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
+                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
+                    SendSerializedData(serializedData.Item1, "Serialized display packet (Chinese)"); // 發送中文訊息
+                    SendSerializedData(serializedData.Item2, "Serialized display packet (English)"); // 發送英文訊息
                     break;
                 case 0x84:
-                    taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
+                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
+                    SendSerializedData(serializedData.Item3, "Serialized display packet (Chinese)"); // 關閉訊息
+                    
                     break;
                 default:
-                    ASI.Lib.Log.DebugLog.Log(mProcName + " ", $"{mProcName} unknown byte value at index 9: {dataByteAtIndex8.ToString("X2")}");
+                    ASI.Lib.Log.DebugLog.Log(mProcName + " ", $"{mProcName} unknown byte value at index 8: {dataByteAtIndex8.ToString("X2")}");
                     break;
             }
+        }
+
+        private void SendSerializedData(byte[] serializedData, string logMessage)
+        {
+            // 記錄日誌
+            ASI.Lib.Log.DebugLog.Log(mProcName + " SendMessageToUrgnt", logMessage + ": " + BitConverter.ToString(serializedData));
+
+            // 發送數據
+            var temp = _mSerial.Send(serializedData);
+
+            // 記錄是否發送成功
+            ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + mProcName, temp.ToString());
         }
         private void ProcessByteAtIndex2(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
@@ -346,17 +366,17 @@ namespace ASI.Wanda.DCU.TaskPDU
             ASI.Lib.Log.DebugLog.Log($"{mProcName} 在 {sRcvTime} 收到來自 TaskPA 的錯誤消息：{errorLog}", sJsonData);
         }
 
-
+        #endregion
         #region serialport
         void SerialPort_DisconnectedEvent(string source) //斷線處理  
         {
             try
             {
-                serial.Close();
-                serial = null;
-                serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
-                serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
-                serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
+                _mSerial.Close();
+                _mSerial = null;
+                _mSerial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
+                _mSerial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
+                _mSerial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
             }
             catch (Exception)
             {

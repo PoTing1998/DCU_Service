@@ -13,7 +13,7 @@ namespace Display
         public byte SequenceNo { get; set; } //判斷上下行
         public List<IMessage> Messages { get; set; } = new List<IMessage>();
         public byte SequenceEnd { get; set; } = 0x1D; // 1Dh
-        public FontSetting Font { get; set; }
+        public FontSetting Font { get; set; } 
         public byte ClearCommand { get; set; } = 0x77;
         public byte UrgentCommand { get; set; }
         public bool IsUrgent { get; set; } // 新增一個屬性來表示是否緊急
