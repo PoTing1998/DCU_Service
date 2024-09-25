@@ -163,7 +163,6 @@ namespace ASI.Wanda.DCU.TaskPDU
                 GreenColor = 0xFF,
                 BlueColor = 0xFF,
                 PhotoIndex = 1,
-
                 MessageContent = new List<StringMessage> { stringMessage }
             };
             var sequence1 = new Display.Sequence
@@ -181,7 +180,7 @@ namespace ASI.Wanda.DCU.TaskPDU
          
         }
         /// <summary>
-        // 處理訊息
+        /// 處理訊息
         /// </summary>
         /// <param name="FireContentChinese"></param>
         /// <param name="FireContentEnglish"></param>
@@ -213,7 +212,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                 // Optional delay and turn off if situation is 84  
                 if (situation == 84)
                 {
-                    await Task.Delay(10000); // 延遲十秒   
+                    await Task.Delay(10000); // 延遲十秒
                     var OffMode = new byte[] { 0x02 };
                     var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
                     serializedDataOff = processor.SerializePacket(packetOff);
@@ -240,10 +239,10 @@ namespace ASI.Wanda.DCU.TaskPDU
             var packetOpen  = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Open);
             var serializedDataOpen = processor.SerializePacket(packetOpen);
             _mSerial.Send(serializedDataOpen);
-            ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
+            ASI.Lib.Log.DebugLog.Log(_mProcName + "顯示畫面開啟", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
         }
         /// <summary>
-        /// 顯示器的畫面關閉
+        /// 顯示器的畫面關閉 
         /// </summary>
         public void PowerSettingOff()
         {
@@ -254,9 +253,15 @@ namespace ASI.Wanda.DCU.TaskPDU
             var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
             var serializedDataOff = processor.SerializePacket(packetOff);
             _mSerial.Send(serializedDataOff);
-            ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
         }
         #endregion
+        /// <summary>
+        /// 建立緊急訊息的封包  放入訊息內容以及上下排
+        /// </summary>
+        /// <param name="messageContent"></param>
+        /// <param name="sequenceNo"></param>
+        /// <returns></returns>
         Display.Sequence CreateSequence(string messageContent, int sequenceNo)
         {
             var textStringBody = new TextStringBody
@@ -268,7 +273,7 @@ namespace ASI.Wanda.DCU.TaskPDU
             };
             var stringMessage = new StringMessage
             {
-                StringMode = 0x2A, // TextMode (Static) 
+                StringMode = 0x2A, // TextMode (Static)  
                 StringBody = textStringBody  
             };
             var urgentMessage = new Urgent // Display version  
@@ -290,31 +295,14 @@ namespace ASI.Wanda.DCU.TaskPDU
         }
 
 
-        #region 資料庫的method
-        /// <summary>
-        /// 更新DMDPreRecordMessage資料表   
-        /// </summary>
-        /// <returns></returns>    
-        private static dmd_pre_record_message ProcessMessage(Guid messageID)
-        {
-            try
-            {
-                return dmdPreRecordMessage.SelectMSGSetting(messageID);
-            }
-            catch (Exception ex) 
-            {
-                ASI.Lib.Log.ErrorLog.Log("Error ProcessMessage ProcessMessage", ex);
-                return null;
-            }
-
-        }
+        #region 資料庫的method   
         /// <summary>
         /// 色碼轉換成byte
         /// </summary>
         /// <param name="colorName"></param>
         /// <returns></returns>
         private  byte[] ProcessMEssageColor(string colorName)
-        {
+        { 
             try
             {
                 var ConfigDate = ASI.Wanda.DCU.DB.Tables.System.sysConfig.SelectColor(colorName);
@@ -361,7 +349,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                         if (month == currentMonth && dayOfMonth == currentDay)
                         {
                             // 當前日期不啟動節能模式
-                            continue;
+                            continue; 
                         }
                     }
                     else
@@ -371,10 +359,10 @@ namespace ASI.Wanda.DCU.TaskPDU
                         continue; 
                     } 
                     
-                    // 檢查開關顯示器的時間
+                    // 檢查開關顯示器的時間   
                     string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                   
+                    
                     if (autoPlayTimes.Length == 2 && autoEcoTimes.Length == 2) 
                     {
                         int autoPlayStartHour = int.Parse(autoPlayTimes[0]);
@@ -385,26 +373,25 @@ namespace ASI.Wanda.DCU.TaskPDU
                         if (currentHour >= autoPlayStartHour && currentHour <= autoPlayEndHour)
                         {
                             // 關閉顯示器
-                            Console.WriteLine("關閉顯示器");
+                            ASI.Lib.Log.DebugLog.Log(_mProcName, "關閉顯示器"); 
                             PowerSettingOff();
                         }
                         else if (currentHour >= autoEcoStartHour && currentHour <= autoEcoEndHour)
                         {
-                            // 開啟顯示器
-                            Console.WriteLine("開啟顯示器");
-                            PowerSettingOpen();
+                            // 開啟顯示器  
+                            ASI.Lib.Log.DebugLog.Log(_mProcName, "開啟顯示器");
+                            PowerSettingOpen(); 
                         }
                     }
                 }
             }
             else
             {
-                // 不需要做任何處理
+                // 不需要做任何處理  
             }
 
             return null;
         }
-
         #endregion
     }
 }

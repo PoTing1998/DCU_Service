@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 using System.Xml;
 using System.Timers;
-using TaskUPD;
+
 using System.Xml.Linq;
 
 
@@ -44,8 +44,8 @@ namespace ASI.Wanda.DCU.TaskUPD
         static string sClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
         static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
-      //  ASI.Wanda.DCU.TaskUPD.TaskUPDHelper _taskUPDHelper;
-        private static ProScheduler _proScheduler;
+
+        private static PowerSettingManager _proScheduler;
 
         #endregion
 
@@ -132,11 +132,11 @@ namespace ASI.Wanda.DCU.TaskUPD
                 return -1; // Return immediately if any exception occurs
             }
 
+            // 獲取 PowerSettingManager 的實例
+            PowerSettingManager manager = PowerSettingManager.GetInstance();
 
-
-        //    ASI.Wanda.DCU.TaskUPD.TaskUPDHelper _taskUPDHelper = new ASI.Wanda.DCU.TaskUPD.TaskUPDHelper(mProcName, serial);
-            //_proScheduler = new ProScheduler(_taskUPDHelper);
-            //_proScheduler.Start();  
+            // 呼叫 PowerSetting 方法
+            manager.PowerSetting("LG01");
             return base.StartTask(pComputer, pProcName);
         }
 

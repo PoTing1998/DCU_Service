@@ -152,12 +152,12 @@ namespace ASI.Wanda.DCU.TaskUPD
                     if (message_layout != null)
                     {
                         string color = message_layout.font_color;
-                        // var fontColor = ProcessColor(color);
+                         var fontColor = ProcessColor(color);
                         //取得各項參數
                         var processor = new PacketProcessor();
                         var content = "萬大線";
 
-                        var fontColor = new byte[] { 0XFF, 0XFF, 0XFF };
+                       // var fontColor = new byte[] { 0XFF, 0XFF, 0XFF };
                         var textStringBody = new TextStringBody
                         {
                             RedColor = fontColor[0],
@@ -181,7 +181,7 @@ namespace ASI.Wanda.DCU.TaskUPD
                                 PauseTime = 10
                             },
                             MessageContent = new List<StringMessage> { stringMessage }
-                        };
+                        }; 
                         var sequence1 = new Display.Sequence
                         {
                             SequenceNo = 1,
@@ -189,24 +189,22 @@ namespace ASI.Wanda.DCU.TaskUPD
                             Messages = new List<IMessage> { fullWindowMessage }
                         };
                         var startCode = new byte[] { 0x55, 0xAA };
-                        var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
+                        var function = new PassengerInfoHandler(); // Use PassengerInfoHandler  
                         var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
-                        var serializedData = processor.SerializePacket(packet);
+                        var serializedData = processor.SerializePacket(packet); 
                         ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
                         _mSerial.Send(serializedData);
                     }
                 }
                 else if (dbName1 == "dmd_schedule")
                 {
-
                     var ID = ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedule.SelectScheduleISEnable();
                     var Message = ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedulePlayList.GetPlayingItemId(ID, _stationID, _deviceID);
                     message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(messageIdTest);
                     if (message_layout != null)
                     {
                         string color = message_layout.font_color;
-
-                        //     var fontColor = ProcessColor(color);
+                        //   var fontColor = ProcessColor(color);
                         //取得各項參數
                         var processor = new PacketProcessor();
                         var fontColor = new byte[] { 0XFF, 0XFF, 0XFF };
@@ -222,7 +220,7 @@ namespace ASI.Wanda.DCU.TaskUPD
                             StringMode = 0x2A, // TextMode (Static) 
                             StringBody = textStringBody
                         };
-                        var fullWindowMessage = new FullWindow //Display version
+                        var fullWindowMessage = new FullWindow //Display version 
                         {
                             MessageType = 0x71, // FullWindow message 
                             MessageLevel = (byte)message_layout.message_priority, //  level
@@ -453,7 +451,7 @@ namespace ASI.Wanda.DCU.TaskUPD
             };
             var stringMessage = new StringMessage
             {
-                StringMode = 0x2A, // TextMode (Static) 
+                StringMode = 0x2A, // TextMode (Static)  
                 StringBody = textStringBody
             };
             var urgentMessage = new Urgent // Display version  
