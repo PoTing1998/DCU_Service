@@ -31,7 +31,6 @@
             components = new System.ComponentModel.Container();
             this.ServiceName = "Service1";
         }
-
         #endregion
     }
 }

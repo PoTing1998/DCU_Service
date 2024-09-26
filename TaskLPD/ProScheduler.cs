@@ -36,7 +36,7 @@ public class PowerSettingManager
     // 計時器觸發的事件，其他類別也可以調用
     private void OnTimedEvent(Object source, ElapsedEventArgs e)
     {
-        // 可以在這裡定義不同的業務邏輯，或是讓具體類別來調用 PowerSetting  
+        // 可以在這裡定義不同的業務邏輯，或是讓具體類別來調用 PowerSetting
         Console.WriteLine("計時器觸發，每小時執行一次 PowerSetting");
     }
 
@@ -89,25 +89,25 @@ public class PowerSettingManager
                     // 判斷當前時間是否在播放時間範圍內
                     if (currentTime >= playStartTime && currentTime < ecoStartTime)
                     {
-                         ASI.Lib.Log.DebugLog.Log(_mProcName, "當前時間符合播放條件，開始播放"); 
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, "當前時間符合播放條件，開始播放");
 
                         PowerSettingOpen(); // 如果在播放時間內，打開顯示器
                     }
                     else
                     {
                         ASI.Lib.Log.DebugLog.Log(_mProcName, "當前時間進入節能模式，停止播放");
-                        
+
                         PowerSettingOff(); // 如果不在播放時間內，關閉顯示器
                     }
-                    
+
                 }
             }
         }
         else
         {
-          
+
             ASI.Lib.Log.DebugLog.Log(_mProcName, "節能模式關閉，始終保持播放");
-           // PowerSettingOpen();
+            // PowerSettingOpen();
         }
         PowerSettingOff(); // 如果不符合任何條件，關閉顯示器
         return null;  // 如果條件不滿足，則不進行播放
@@ -115,14 +115,14 @@ public class PowerSettingManager
 
     private void PowerSettingOff()
     {
-        // 關閉顯示器的邏輯 
+        // 關閉顯示器的邏輯
         var startCode = new byte[] { 0x55, 0xAA };
         var processor = new PacketProcessor();
         var function = new PowerControlHandler();
-        var Off = new byte[] { 0x3A, 0x01 }; 
+        var Off = new byte[] { 0x3A, 0X01 };
         var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
         var serializedDataOff = processor.SerializePacket(packetOff);
-       // _mSerial.Send(serializedDataOff); 
+        // _mSerial.Send(serializedDataOff);
         ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
     }
 
@@ -135,10 +135,7 @@ public class PowerSettingManager
         var Open = new byte[] { 0x3A, 0X00 };
         var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Open);
         var serializedDataOpen = processor.SerializePacket(packetOpen);
-       // _mSerial.Send(serializedDataOpen);
+        // _mSerial.Send(serializedDataOpen);
         ASI.Lib.Log.DebugLog.Log(_mProcName + "顯示畫面開啟", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
     }
-
-
-
 }

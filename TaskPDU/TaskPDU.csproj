@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProScheduler.cs" />
     <Compile Include="TaskPDUHelper.cs" />
     <Compile Include="ProcTaskPDU.cs" />
     <Compile Include="Program.cs" />

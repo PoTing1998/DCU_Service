@@ -163,9 +163,6 @@ namespace Display
 
             return packet;
         }
-
-    
-
         private List<StringMessage> ParseStringMessages(byte[] data)
         {
             var strings = new List<StringMessage>();
@@ -189,7 +186,7 @@ namespace Display
                         };
                         break;
                     
-                    case 0x2C: // PreRecordedText
+                    case 0x2C: // PreRecordedText 
                         body = new PreRecordedTextBody
                         {
                             IndexNumber = BitConverter.ToUInt16(data, index + 1),
@@ -199,7 +196,7 @@ namespace Display
                         };
                         break;
 
-                    case 0x2D: // PreRecordedGraphic
+                    case 0x2D: // PreRecordedGraphic 
                         body = new PreRecordedGraphicBody
                         {
                             GraphicStartIndex = BitConverter.ToUInt16(data, index + 1),
@@ -222,7 +219,7 @@ namespace Display
                 };
 
                 strings.Add(stringMessage); 
-                index += 4 + body.ToBytes().Length; // Move to next StringMessage
+                index += 4 + body.ToBytes().Length; // Move to next StringMessage 
             }
 
             return strings;
