@@ -33,11 +33,11 @@ public class PowerSettingManager
         return _instance;
     }
 
-    // 計時器觸發的事件，其他類別也可以調用
+    // 計時器觸發的事件，其他類別也可以調用 
     private void OnTimedEvent(Object source, ElapsedEventArgs e)
     {
         // 可以在這裡定義不同的業務邏輯，或是讓具體類別來調用 PowerSetting
-        Console.WriteLine("計時器觸發，每小時執行一次 PowerSetting");
+        // Console.WriteLine("計時器觸發，每小時執行一次 PowerSetting");
     }
 
     public dmdPowerSetting PowerSetting(string stationID)
@@ -52,7 +52,6 @@ public class PowerSettingManager
         if (stationData.eco_mode == "ON")
         {
             var nonEcoDates = new List<(int Month, int Day)>();
-
             foreach (string day in notEcoDays)
             {
                 if (day.Length == 4)
@@ -96,7 +95,6 @@ public class PowerSettingManager
                     else
                     {
                         ASI.Lib.Log.DebugLog.Log(_mProcName, "當前時間進入節能模式，停止播放");
-
                         PowerSettingOff(); // 如果不在播放時間內，關閉顯示器
                     }
 
@@ -108,6 +106,7 @@ public class PowerSettingManager
 
             ASI.Lib.Log.DebugLog.Log(_mProcName, "節能模式關閉，始終保持播放");
             // PowerSettingOpen();
+
         }
         PowerSettingOff(); // 如果不符合任何條件，關閉顯示器
         return null;  // 如果條件不滿足，則不進行播放

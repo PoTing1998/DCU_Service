@@ -378,7 +378,7 @@ namespace ASI.Wanda.DCU.TaskPDU
                         }
                         else if (currentHour >= autoEcoStartHour && currentHour <= autoEcoEndHour)
                         {
-                            // 開啟顯示器  
+                            // 開啟顯示器
                             ASI.Lib.Log.DebugLog.Log(_mProcName, "開啟顯示器");
                             PowerSettingOpen(); 
                         }

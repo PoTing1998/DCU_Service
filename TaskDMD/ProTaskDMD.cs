@@ -9,6 +9,7 @@ using ASI.Wanda.DMD.TaskDMD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Timers;
 
 
@@ -30,20 +31,11 @@ namespace ASI.Wanda.DCU.TaskDMD
         /// </summary>
         private bool mIsConnectedToDMD = false;
 
-        private Timer _connectionTimer;
+    
         private const int ConnectionInterval = 10000; // 每10秒
 
 
-        // <summary>
-        /// 初始化並開始定時連線
-        /// </summary>
-        public void StartConnectionProcess()
-        {
-            _connectionTimer = new System.Timers.Timer(ConnectionInterval);
-            _connectionTimer.Elapsed += OnTimedEvent;
-            _connectionTimer.AutoReset = true; // 確保定時器重複執行
-            _connectionTimer.Enabled = true;
-        }
+      
 
         public string mDMDServerConnStr = "";
         /// <summary>
@@ -297,7 +289,9 @@ namespace ASI.Wanda.DCU.TaskDMD
         }
         private void DMD_API_DisconnectedEvent(string source)
         {
-
+            ASI.Lib.Log.DebugLog.Log(mProcName, "與 DMD Server 的連接已斷開，將嘗試重新連接。");
+            _isConnected = false;  // 標記為未連接
+            ConnToDMDServer();     // 斷線後立即重試連接
         }
         /// <summary>
         /// 結束處理DMD模組執行程序
@@ -377,40 +371,66 @@ namespace ASI.Wanda.DCU.TaskDMD
             }
             return -1;
         }
-
+        private int _initialDelay = 2000;    // 重試延遲時間（毫秒）
+        private bool _isConnecting = false;  // 標記當前是否在連接過程中
+        private bool _isConnected = false;   // 標記是否已連接成功
         /// <summary>
         /// 與DMD Server連線 
         /// </summary>
-        private void ConnToDMDServer()
+        public void ConnToDMDServer()
         {
-            try
+            if (_isConnected)
             {
-                DisconnectExistingDMDAPI();
+                ASI.Lib.Log.DebugLog.Log(mProcName, "已經成功連接 DMD Server，不需要重複連接。");
+                return;
+            }
 
-                mDMD_API = new ASI.Wanda.DMD.DMD_API();
-                mDMD_API.ReceivedEvent += DMD_API_ReceivedEvent;
-                mDMD_API.DisconnectedEvent += DMD_API_DisconnectedEvent;
-                mDMDServerConnStr = ConfigApp.Instance.GetConfigSetting("DMD_Server");
-                StartConnectionProcess();
-                int iResult = mDMD_API.Initial(mDMDServerConnStr);
-                if (iResult == 0)
+            if (_isConnecting)
+            {
+                ASI.Lib.Log.DebugLog.Log(mProcName, "目前正在嘗試連接 DMD Server，請稍後再試。");
+                return;
+            }
+
+            _isConnecting = true;  // 開始連接過程
+
+            while (!_isConnected)   // 當未連接成功時，持續嘗試連接
+            {
+                try
                 {
-                    mIsConnectedToDMD = true;
-                    ASI.Lib.Log.DebugLog.Log(mProcName, "與DMD Server的scoket開啟成功");
-                    LastHeartbeatTime = DateTime.Now;
+                    DisconnectExistingDMDAPI();  // 斷開已存在的連接
+
+                    mDMD_API = new ASI.Wanda.DMD.DMD_API();
+                    mDMD_API.ReceivedEvent += DMD_API_ReceivedEvent;
+                    mDMD_API.DisconnectedEvent += DMD_API_DisconnectedEvent; // 監聽斷線事件
+
+                    mDMDServerConnStr = ConfigApp.Instance.GetConfigSetting("DMD_Server");
+
+                    int iResult = mDMD_API.Initial(mDMDServerConnStr);
+                    if (iResult == 0)
+                    {
+                        // 連接成功
+                        _isConnected = true;
+                        _isConnecting = false;  // 停止連接狀態標記
+                        ASI.Lib.Log.DebugLog.Log(mProcName, "與 DMD Server 的 socket 開啟成功");
+                        LastHeartbeatTime = DateTime.Now;
+                    }
+                    else
+                    {
+                        // 連接失敗，記錄日誌，並等待後重試
+                        ASI.Lib.Log.DebugLog.Log(mProcName, $"與 DMD Server 的連接失敗，返回值: {iResult}，將在 {_initialDelay / 1000} 秒後重試。");
+                        Thread.Sleep(_initialDelay); // 延遲後重試
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    mIsConnectedToDMD = false;
-                    ASI.Lib.Log.DebugLog.Log(mProcName, $"與DMD Server的scoket開啟失敗，DCU_Server: {mDMDServerConnStr}");
+                    // 捕捉連接異常並記錄，等待後重試
+                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"連接 DMD Server 發生例外: {ex.Message}，將在 {_initialDelay / 1000} 秒後重試。");
+                    Thread.Sleep(_initialDelay); // 延遲後重試
                 }
             }
-            catch (Exception ex)
-            {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, $"Exception in ConnToDMDServer scoket: {ex}");
-            }
-        } 
+        }
 
+        //判斷DMD_API 的
         private void DisconnectExistingDMDAPI()
         {
             if (mDMD_API != null)

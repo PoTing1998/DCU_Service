@@ -271,7 +271,7 @@ namespace ASI.Wanda.DMD
             {
                 mSocket = new Lib.Comm.Socket.SocketLib
                 {
-                    ConnectionString = connStr
+                    ConnectionString = connStr 
                 };
 
                 mSocket.ReceivedEvent += Socket_ReceivedEvent;
