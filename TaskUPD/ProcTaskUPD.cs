@@ -45,7 +45,7 @@ namespace ASI.Wanda.DCU.TaskUPD
         static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
 
-        private static PowerSettingManager _proScheduler;
+     
 
         #endregion
 
@@ -132,11 +132,6 @@ namespace ASI.Wanda.DCU.TaskUPD
                 return -1; // Return immediately if any exception occurs
             }
 
-            // 獲取 PowerSettingManager 的實例
-            PowerSettingManager manager = PowerSettingManager.GetInstance();
-
-            // 呼叫 PowerSetting 方法
-            manager.PowerSetting("LG01");
             return base.StartTask(pComputer, pProcName);
         }
 
@@ -169,10 +164,6 @@ namespace ASI.Wanda.DCU.TaskUPD
                            // _taskUPDHelper.SendMessageToUrgnt("您好!下雨期間車站電聯車受風雨引響，地板較濕請小心行走，謝謝!", "Hello! During the rain, the stations electric vehicle was led by the wind and rain. Please walk carefully, thank you!", 81);
                             //傳送到面板上
                             _taskUPDHelper.judgeDbName(PreRecordMessageSettingDbName1);
-
-                         
-
-
                         }
                         else if (sJsonObjectName == ASI.Wanda.DCU.TaskUPD.TaskUPDHelper.Constants.SendInstantMsg)
                         {

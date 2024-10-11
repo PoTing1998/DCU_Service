@@ -13,12 +13,12 @@ namespace ASI.Wanda.DCU.TaskKernel
 		static void Main(string[] args)
 		{
 
-            Debugger.Launch(); // 啟動調試器
+           
             string qname = "TaskKernel";
 			if (args.Length == 1) qname = args[0];
                     
 			IProcess TheProc = new ProcKernel();
-			//if (TheProc.StartTask(System.Environment.MachineName, qname) >= 0)
+			
 			if (TheProc.StartTask(ConfigApp.Instance.HostName, qname) >= 0)
 			{
 				TheProc.Run();

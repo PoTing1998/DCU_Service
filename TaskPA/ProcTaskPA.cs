@@ -81,8 +81,23 @@ namespace ASI.Wanda.DCU.TaskPA
             var iBaudrate = ConfigApp.Instance.GetConfigSetting("PABaudrate"); 
             string connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
             serial.ConnectionString = connectionString;
-            var result = serial.Open();
-      
+            int result = -1; // Default to an error state
+            try
+            {
+                result = serial.Open();
+                if (result != 0)
+                {
+                    ASI.Lib.Log.ErrorLog.Log(mProcName, "Serial port open failed");
+                    return result; // Return immediately if the serial port failed to open
+                }
+              
+            }
+            catch (System.Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log(mProcName, $"例外發生! {ex.Message}");
+                return -1; // Return immediately if any exception occurs
+            }
+
             return base.StartTask(pComputer, pProcName);
 
         }
