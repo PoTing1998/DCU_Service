@@ -61,18 +61,18 @@ namespace ASI.Wanda.DMD.TaskDMD
                 ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex);
             }
         }
-        public void SendToTaskPDU(int msgType, int msgID, string jsonData)
+        public void SendToTaskCDU(int msgType, int msgID, string jsonData)
         {
             try
             {
                 var sendPreRecordMessage = new JsonObject.DCU.FromDMD.SendPreRecordMessage(Enum.Station.OCC);
       
-                var MSGFromTaskPDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskpdu"));
+                var MSGFromTaskCDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskcdu"));
                 //組相對應的封包 
-                MSGFromTaskPDU.MessageType = msgType;
-                MSGFromTaskPDU.MessageID = msgID;
-                MSGFromTaskPDU.JsonData = jsonData;
-                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPDU);
+                MSGFromTaskCDU.MessageType = msgType;
+                MSGFromTaskCDU.MessageID = msgID;
+                MSGFromTaskCDU.JsonData = jsonData;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskCDU);
             }
             catch (System.Exception ex)
             {
@@ -492,7 +492,6 @@ namespace ASI.Wanda.DMD.TaskDMD
                         upd_time        = item.upd_time,
                     })
                     .ToList();
-
                 ///遍歷轉換後的列表，進行更新操作
                 foreach (var item in convertedList)
                 {
@@ -506,7 +505,6 @@ namespace ASI.Wanda.DMD.TaskDMD
                        item.auto_eco_time
                     );
                 }
-
                 return convertedList.Cast<DCU.DB.Tables.DMD.dmdPowerSetting>();
             }
             catch (Exception updateException)

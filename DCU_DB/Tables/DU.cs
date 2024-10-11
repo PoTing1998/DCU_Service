@@ -23,7 +23,6 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
               );
         }
 
-
         public static void DCUID(string Id)
         {
             var temp =
@@ -31,6 +30,17 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
                  .SingleOrDefault();
         }
 
+        /// <summary>
+        /// 根據提供的 `du_id` 和 `is_back` 條件，選擇符合的顯示器面向資料，並返回其 `panel_id`。
+        /// </summary>
+        /// <param name="du_id">顯示器的識別碼，用於篩選指定顯示器。</param>
+        /// <param name="is_back">布林值，表示是否選取顯示器的背面 (true 為背面，false 為前面)。</param>
+        /// <returns>返回符合條件的顯示器 `panel_id` 值。</returns>
+        public static int GetPanelIDByDuAndOrientation(string du_id, bool is_back)
+        {
+            var data = SelectWhere(string.Format("WHERE du_id = '{0}' and is_back = '{1}'", du_id, is_back)).SingleOrDefault();
+            return data.panel_id;
+        }
     }
 
     public class duMessageSetup : ASI.Wanda.DCU.DB.Tables.Table<du_message_setup>
@@ -105,8 +115,9 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
         {
             Update(ID, WindowDisplayMode);
         }
-
-
     }
+
+    
+
 
 }

@@ -13,7 +13,7 @@ using ASI.Wanda.DCU.DB.Tables.DMD;
 using System.Text.RegularExpressions;
 using ASI.Lib.Config;
 
-namespace ASI.Wanda.DCU.TaskPDU
+namespace ASI.Wanda.DCU.TaskCDU
 {
     
     public static class Constants
@@ -26,8 +26,9 @@ namespace ASI.Wanda.DCU.TaskPDU
         public const string SendPowerTimeSetting            = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.PowerTimeSetting";
         public const string SendGroupSetting                = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.GroupSetting";
         public const string SendParameterSetting            = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.ParameterSetting";
+  
 
-      
+
     }
     public class DeviceInfo
     {
@@ -35,12 +36,14 @@ namespace ASI.Wanda.DCU.TaskPDU
         public string Location { get; set; }
         public string DeviceWithNumber { get; set; }
     }
-    public class TaskPDUHelper
+    public class TaskCDUHelper
     {
+        public const string _mDU_ID = "LG01_CDU_01";
+        public  bool is_back = true;
         static string StationID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
-        public TaskPDUHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
+        public TaskCDUHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
         {
             _mProcName = mProcName;
             _mSerial = serial;
@@ -66,74 +69,234 @@ namespace ASI.Wanda.DCU.TaskPDU
             }
         }
         #region  版型的操作    
-        public void SendMessageToDisplay(string target_du, string dbName1, string dbName2 ,out string Result ,out byte[] DataByte)
+        public class DisplayMessageResult
         {
-            Result = "";
-            DataByte = null;
+            public string Result { get; set; }
+            public byte[] DataByte { get; set; }
+        }
+
+        /// <summary>
+        /// 發送訊息至顯示器的主函式。
+        /// </summary>
+        /// <param name="targetDu">目標設備單元標識符。</param>
+        /// <param name="dbName1">資料庫名稱 1。</param>
+        /// <param name="dbName2">資料庫名稱 2。</param>
+        /// <param name="result">操作結果輸出參數。</param>
+        /// <param name="dataByte">封包資料輸出參數。</param>
+        public void SendMessageToDisplay(string targetDu, string dbName1, string dbName2, out string result, out byte[] dataByte)
+        {
+            // 創建並傳送顯示訊息，取得結果
+            var sendResult = CreateAndSendMessage(targetDu, dbName1, dbName2);
+            result = sendResult.Result;
+            dataByte = sendResult.DataByte;
+        }
+
+        /// <summary>
+        /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。
+        /// </summary>
+        /// <param name="targetDu">目標設備單元標識符。</param>
+        /// <param name="dbName1">資料庫名稱 1。</param>
+        /// <param name="dbName2">資料庫名稱 2。</param>
+        /// <returns>包含操作結果與封包資料的 DisplayMessageResult 物件。</returns>
+        private DisplayMessageResult CreateAndSendMessage(string targetDu, string dbName1, string dbName2)
+        {
+            var result = new DisplayMessageResult { Result = "傳送失敗：未知錯誤", DataByte = null };
+
             try
             {
-                var deviceInfo = SplitStringToDeviceInfo(target_du);
-                ASI.Lib.Log.DebugLog.Log(_mProcName + "deviceInfo", $" received a message {deviceInfo.Station}  {deviceInfo.Location}  {deviceInfo.DeviceWithNumber}");
-                
-                if (deviceInfo != null) 
-                {
-                    var message_id = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
-                    // Add your code here to use message_id   
-                    var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id);
+                // 驗證輸入參數
+                ValidateInput(targetDu);
 
-                    var fontColor = ProcessMEssageColor(message_layout.font_color);
-                    //取得各項參數   
-                    var processor = new PacketProcessor();
+                // 解析 targetDu 並取得設備資訊
+                var deviceInfo = GetDeviceInfo(targetDu);
 
-                    var textStringBody = new TextStringBody
-                    {
-                        RedColor = fontColor[0],
-                        GreenColor = fontColor[1],
-                        BlueColor = fontColor[2],
-                        StringText = message_layout.message_content
-                    };
-                    var stringMessage = new StringMessage
-                    {
-                        StringMode = 0x2A, // TextMode (Static) 
-                        StringBody = textStringBody
-                    };
+                // 從資料庫中取得當前播放的消息 ID 與佈局
+                var messageId = GetPlayingItemId(deviceInfo);
+                var messageLayout = GetMessageLayout(messageId);
 
-                    var fullWindowMessage = new FullWindow //Display version
-                    {
-                        MessageType = 0x71, // FullWindow message 
-                        MessageLevel = (byte)message_layout.message_priority, //  level
-                        MessageScroll = new ScrollInfo
-                        {
-                            ScrollMode = 0x64,
-                            ScrollSpeed = (byte)message_layout.move_speed,
-                            PauseTime = 10
-                        },
-                        MessageContent = new List<StringMessage> { stringMessage }
-                    };
-                    var sequence1 = new Display.Sequence
-                    {
-                        SequenceNo = 1, 
-                        Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
-                        Messages = new List<IMessage> { fullWindowMessage }
-                    };
+                // 建立文字訊息主體與全屏顯示消息
+                var textStringBody = CreateTextStringBody(messageLayout);
+                var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
 
-                    var startCode = new byte[] { 0x55, 0xAA };
-                    var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
-                    var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
-                    var serializedData = processor.SerializePacket(packet);
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
+                // 建立顯示序列與封包
+                var sequence = CreateDisplaySequence(fullWindowMessage);
+                var packet = CreatePacket(_mDU_ID, sequence);
 
-                    _mSerial.Send(serializedData);
-                    Result = "成功失敗";
-                }
+                // 序列化並傳送封包
+                result.DataByte = SerializeAndSendPacket(packet);
+                result.Result = "成功傳送";
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex.ToString());
-                Result = "傳送失敗";
+                // 異常處理
+                HandleError(ex, ref result);
             }
 
+            return result;
         }
+
+        /// <summary>
+        /// 驗證輸入的目標設備單元標識符是否為空值。
+        /// </summary>
+        /// <param name="targetDu">目標設備單元標識符。</param>
+        private void ValidateInput(string targetDu)
+        {
+            if (string.IsNullOrEmpty(targetDu))
+                throw new ArgumentNullException(nameof(targetDu), "目標設備單元標識符不能為空。");
+        }
+
+        /// <summary>
+        /// 根據目標設備標識符解析設備資訊。
+        /// </summary>
+        /// <param name="targetDu">目標設備單元標識符。</param>
+        /// <returns>解析後的設備資訊物件。</returns>
+        private DeviceInfo GetDeviceInfo(string targetDu)
+        {
+            var deviceInfo = SplitStringToDeviceInfo(targetDu);
+            if (deviceInfo == null)
+                throw new InvalidOperationException("無法從 targetDu 中解析設備資訊。");
+            return deviceInfo;
+        }
+
+        /// <summary>
+        /// 根據設備資訊從資料庫中取得當前正在播放的消息 ID。
+        /// </summary>
+        /// <param name="deviceInfo">設備資訊物件。</param>
+        /// <returns>當前播放的消息 ID。</returns>
+        private Guid GetPlayingItemId(DeviceInfo deviceInfo)
+        {
+            var messageId = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
+            if (messageId == null)
+                throw new InvalidOperationException("無法從資料庫中取得正在播放的消息 ID。");
+            return messageId;
+        }
+
+        /// <summary>
+        /// 根據消息 ID 取得消息的佈局內容。
+        /// </summary>
+        /// <param name="messageId">消息 ID。</param>
+        /// <returns>消息佈局物件。</returns>
+        private dmd_pre_record_message GetMessageLayout(Guid messageId)
+        {
+            var messageLayout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(messageId);
+            if (messageLayout == null)
+                throw new InvalidOperationException($"無法找到消息 ID 為 {messageId} 的消息佈局。");
+            return messageLayout;
+        }
+        
+        /// <summary>
+        /// 創建文字訊息主體，包含 RGB 顏色與顯示文字內容。
+        /// </summary>
+        /// <param name="messageLayout">消息佈局物件。</param>
+        /// <returns>TextStringBody 文字訊息主體物件。</returns>
+        private TextStringBody CreateTextStringBody(dmd_pre_record_message messageLayout)
+        {
+            var fontColor = ProcessMessageColor(messageLayout.font_color);
+            if (fontColor == null || fontColor.Length != 3)
+                throw new InvalidOperationException("無法處理消息顏色或 RGB 值無效。");
+
+            return new TextStringBody
+            {
+                RedColor = fontColor[0],
+                GreenColor = fontColor[1],
+                BlueColor = fontColor[2],
+                StringText = messageLayout.message_content
+            };
+        }
+
+        /// <summary>
+        /// 創建全屏顯示的消息物件，包括消息內容、滾動資訊及優先級。
+        /// </summary>
+        /// <param name="textStringBody">文字訊息主體物件。</param>
+        /// <param name="messageLayout">消息佈局物件。</param>
+        /// <returns>FullWindow 全屏消息物件。</returns>
+        private FullWindow CreateFullWindowMessage(TextStringBody textStringBody, dmd_pre_record_message messageLayout)
+        {
+            return new FullWindow
+            {
+                MessageType = 0x71,
+                MessageLevel = (byte)messageLayout.message_priority,
+                MessageScroll = new ScrollInfo
+                {
+                    ScrollMode = 0x64,
+                    ScrollSpeed = (byte)messageLayout.move_speed,
+                    PauseTime = 10
+                },
+                MessageContent = new List<StringMessage> { new StringMessage { StringMode = 0x2A, StringBody = textStringBody } }
+            };
+        }
+
+        /// <summary>
+        /// 建立顯示序列物件，設定序列號、字體與消息內容。
+        /// </summary>
+        /// <param name="fullWindowMessage">全屏消息物件。</param>
+        /// <returns>顯示序列物件。</returns>
+        private Display.Sequence CreateDisplaySequence(FullWindow fullWindowMessage)
+        {
+            return new Display.Sequence
+            {
+                SequenceNo = 1,
+                Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
+                Messages = new List<IMessage> { fullWindowMessage }
+            };
+        }
+
+        /// <summary>
+        /// 根據設備資訊與顯示序列建立資料封包。
+        /// </summary>
+        /// <param name="sequence">顯示序列物件。</param>
+        /// <returns>資料封包物件。</returns>
+        private Packet CreatePacket( string  DU_ID, Display.Sequence sequence)
+        {
+            var startCode = new byte[] { 0x55, 0xAA };
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, true);
+
+            var processor = new PacketProcessor();
+            return processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
+        }
+
+        /// <summary>
+        /// 序列化封包並透過串口傳送封包資料。
+        /// </summary>
+        /// <param name="packet">要傳送的資料封包。</param>
+        /// <returns>序列化的字節陣列。</returns>
+        private byte[] SerializeAndSendPacket(Packet packet)
+        {
+            var processor = new PacketProcessor();
+            var serializedData = processor.SerializePacket(packet);
+
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
+
+            _mSerial.Send(serializedData);
+            return serializedData;
+        }
+
+        /// <summary>
+        /// 捕獲並處理異常，記錄相應的錯誤日誌。
+        /// </summary>
+        /// <param name="ex">捕獲的異常物件。</param>
+        /// <param name="result">包含操作結果的 DisplayMessageResult 物件。</param>
+        private void HandleError(Exception ex, ref DisplayMessageResult result)
+        {
+            switch (ex)
+            {
+                case ArgumentNullException argEx:
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, $"參數錯誤: {argEx.Message}");
+                    result.Result = "傳送失敗：參數錯誤";
+                    break;
+                case InvalidOperationException opEx:
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, $"操作異常: {opEx.Message}");
+                    result.Result = "傳送失敗：操作異常";
+                    break;
+                default:
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, $"未知錯誤: {ex}");
+                    result.Result = "傳送失敗：未知錯誤";
+                    break;
+            }
+        }
+
+
         /// <summary>
         /// 左測月台碼
         /// </summary>
@@ -293,15 +456,13 @@ namespace ASI.Wanda.DCU.TaskPDU
                 Messages = new List<IMessage> { urgentMessage }
             };
         }
-
-
         #region 資料庫的method   
         /// <summary>
         /// 色碼轉換成byte
         /// </summary>
         /// <param name="colorName"></param>
         /// <returns></returns>
-        private  byte[] ProcessMEssageColor(string colorName)
+        private  byte[] ProcessMessageColor(string colorName)
         { 
             try
             {

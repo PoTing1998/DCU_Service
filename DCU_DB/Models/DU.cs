@@ -16,21 +16,30 @@ namespace ASI.Wanda.DCU.DB.Models.DU
             set;
         }
         [Key]
-        public string panel_id
+        public int panel_id
         {
             get;
             set;
         }
+        /// <summary>
+        /// 顯示器的id
+        /// </summary>
         public string du_id
         {
             get;
             set;
         }
+        /// <summary>
+        /// 顯示器的正反面
+        /// </summary>
         public bool is_back
         {
             get;
             set;
         }
+        /// <summary>
+        /// 顯示器狀態
+        /// </summary>
         public int status
         {
             get;
@@ -516,5 +525,7 @@ namespace ASI.Wanda.DCU.DB.Models.DU
             get;set;
         }
     }
+
+ 
 
 }

@@ -14,11 +14,11 @@
 	<add key="Process" value="TaskDMD" />
 	<add key="Process" value="TaskPA" />
   	<add key="Process" value="TaskUPD" />
-	<add key="Process" value="TaskPDU" />
+	<add key="Process" value="TaskCDU" />
 	<add key="Process" value="TaskSDU" />
 	<add key="Process" value="TaskLPD" />
-	<add key="PDUComPort" value="28" />
-	<add key="PDUBaudrate" value="38400" />
+	<add key="CDUComPort" value="28" />
+	<add key="CDUBaudrate" value="38400" />
 	<add key="UPDComPort" value="4" />
 	<add key="UPDBaudrate" value="38400" />
 	<add key="LPDComPort" value="2" />

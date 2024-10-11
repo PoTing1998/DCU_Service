@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 
 
-namespace ASI.Wanda.DCU.TaskPDU
+namespace ASI.Wanda.DCU.TaskCDU
 {
-    public class ProcTaskPDU : ProcBase
+    public class ProcTaskCDU : ProcBase
     {
         #region constructor
         static int mSEQ = 0; // 計算累進發送端的次數  
@@ -67,7 +67,7 @@ namespace ASI.Wanda.DCU.TaskPDU
         public override int StartTask(string pComputer, string pProcName)
         {
             mTimerTick = 30;
-            mProcName = "TaskPDU";
+            mProcName = "TaskCDU";      
             string dbIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
             string dbPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
             string dbName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
@@ -75,8 +75,8 @@ namespace ASI.Wanda.DCU.TaskPDU
             string dbPassword = "postgres";
             string currentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
             //serialPort的開啟 
-            var iComPort = ConfigApp.Instance.GetConfigSetting("PDUComPort"); ;
-            var iBaudrate = ConfigApp.Instance.GetConfigSetting("PDUBaudrate"); ;
+            var iComPort = ConfigApp.Instance.GetConfigSetting("CDUComPort"); ;
+            var iBaudrate = ConfigApp.Instance.GetConfigSetting("CDUBaudrate"); ;
             _mSerial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
             string connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
             _mSerial.ConnectionString = connectionString;
@@ -121,10 +121,10 @@ namespace ASI.Wanda.DCU.TaskPDU
                     {
                         string sJsonData = mSGFromTaskDMD.JsonData;
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-                        var taskPDUHelper = new ASI.Wanda.DCU.TaskPDU.TaskPDUHelper(mProcName, _mSerial);
+                        var taskCDUHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(mProcName, _mSerial);
                         switch (sJsonObjectName)
                         {
-                            case ASI.Wanda.DCU.TaskPDU.Constants.SendPreRecordMsg:
+                            case ASI.Wanda.DCU.TaskCDU.Constants.SendPreRecordMsg:
                                 string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
                                 string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
                                 string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
@@ -140,7 +140,7 @@ namespace ASI.Wanda.DCU.TaskPDU
 
                                     byte[] SerialiazedData = new byte[] { };
                                     //傳送到面板上 
-                                    taskPDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result , out SerialiazedData);
+                                    taskCDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result , out SerialiazedData);
 
                                     _mSerial.Send(SerialiazedData); 
 
@@ -153,8 +153,8 @@ namespace ASI.Wanda.DCU.TaskPDU
                                 }
                                 break;
 
-                            case ASI.Wanda.DCU.TaskPDU.Constants.SendPowerTimeSetting:
-                                taskPDUHelper.PowerSetting(Station_ID);
+                            case ASI.Wanda.DCU.TaskCDU.Constants.SendPowerTimeSetting:
+                                taskCDUHelper.PowerSetting(Station_ID);
                                 break;
                         }
 
@@ -268,7 +268,7 @@ namespace ASI.Wanda.DCU.TaskPDU
         private async Task ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
-            var taskUPDHelper = new ASI.Wanda.DCU.TaskPDU.TaskPDUHelper(mProcName, _mSerial);
+            var taskUPDHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(mProcName, _mSerial);
             Tuple<byte[], byte[], byte[]> serializedData;
 
             switch (dataByteAtIndex8)

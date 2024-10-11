@@ -62,7 +62,7 @@ namespace ASI.Wanda.DCU.TaskPA
         /// <param name="msgType"></param>   
         /// <param name="msgID"></param>    
         /// <param name="jsonData"></param> 
-        static public void SendToTaskPDU(int msgType, int msgID, string ContentDataBytes)
+        static public void SendToTaskCDU(int msgType, int msgID, string ContentDataBytes)
         {
             try
             {

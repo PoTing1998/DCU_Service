@@ -155,7 +155,7 @@ namespace ASI.Wanda.DCU.TaskPA
                 ASI.Lib.Log.DebugLog.Log("發送到 PA 的封包內容第二次", sHexString.ToString());
 
                 // 發送到各個看板
-                PAHelper.SendToTaskPDU(2, 1, msg.JsonContent);
+                PAHelper.SendToTaskCDU(2, 1, msg.JsonContent);
                 PAHelper.SendToTaskSDU(2, 1, msg.JsonContent);
                 PAHelper.SendToTaskUPD(2, 1, msg.JsonContent);
                 PAHelper.SendToTaskLPD(2, 1, msg.JsonContent);
