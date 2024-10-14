@@ -15,16 +15,16 @@ namespace ASI.Wanda.DCU.TaskPA
     {
 
         /// <summary> 
-        /// 將PA的資料 傳給UPD看板 
+        /// 將PA的資料 傳給PUP看板 
         /// </summary>
         /// <param name="msgType"></param>   
         /// <param name="msgID"></param>    
         /// <param name="jsonData"></param> 
-        static public void SendToTaskUPD(int msgType, int msgID, string ContentDataBytes)
+        static public void SendToTaskPUP(int msgType, int msgID, string ContentDataBytes)
         {
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskUPD"));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskPUP"));
                 MSGFromTaskPA.MessageType = msgType;
                 MSGFromTaskPA.MessageID = msgID;
                 MSGFromTaskPA.JsonData = ContentDataBytes;
@@ -78,16 +78,16 @@ namespace ASI.Wanda.DCU.TaskPA
             }
         }
         /// <summary> 
-        /// 將PA的資料 傳給LPD看板 
+        /// 將PA的資料 傳給PDN看板 
         /// </summary>
         /// <param name="msgType"></param>   
         /// <param name="msgID"></param>    
         /// <param name="jsonData"></param> 
-        static public void SendToTaskLPD(int msgType, int msgID, string ContentDataBytes)
+        static public void SendToTaskPDN(int msgType, int msgID, string ContentDataBytes)
         {
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskLPD"));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskPDN"));
                 MSGFromTaskPA.MessageType = msgType;
                 MSGFromTaskPA.MessageID = msgID;
                 MSGFromTaskPA.JsonData = ContentDataBytes;
@@ -99,7 +99,7 @@ namespace ASI.Wanda.DCU.TaskPA
             }
         }
         /// <summary> 
-        /// 將PA的資料 傳給UPD看板 
+        /// 將PA的資料 傳給PUP看板 
         /// </summary>
         /// <param name="msgType"></param>   
         /// <param name="msgID"></param>    
@@ -108,7 +108,7 @@ namespace ASI.Wanda.DCU.TaskPA
         {
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskUPD"));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskPUP"));
                 MSGFromTaskPA.MessageType = msgType;
                 MSGFromTaskPA.MessageID = msgID;
                 MSGFromTaskPA.JsonData = ContentDataBytes;

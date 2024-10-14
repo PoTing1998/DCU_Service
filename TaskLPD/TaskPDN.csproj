@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{EF86CF63-6868-4CE0-BE6C-DEF082B7EDD0}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>TaskLPD</RootNamespace>
-    <AssemblyName>TaskLPD</AssemblyName>
+    <RootNamespace>TaskPDN</RootNamespace>
+    <AssemblyName>TaskPDN</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -45,8 +45,8 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProTaskLPD.cs" />
-    <Compile Include="TaskLPDHelper.cs" />
+    <Compile Include="ProTaskPDN.cs" />
+    <Compile Include="TaskPDNHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

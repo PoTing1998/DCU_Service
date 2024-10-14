@@ -170,10 +170,10 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUPreRecordMessage();
                             var RecordMessage = new ASI.Wanda.DCU.Message.Message( ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendPreRecordMessage));
-                            DMDHelper.SendToTaskUPD(2,1, RecordMessage.JsonContent);
+                            DMDHelper.SendToTaskPUP(2,1, RecordMessage.JsonContent);
                             DMDHelper.SendToTaskCDU(2, 1, RecordMessage.JsonContent);
                             DMDHelper.SendToTaskSDU(2, 1, RecordMessage.JsonContent);
-                            DMDHelper.SendToTaskLPD(2, 1, RecordMessage.JsonContent);
+                            DMDHelper.SendToTaskPDN(2, 1, RecordMessage.JsonContent);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendInstantMsg: //即時訊息 
                             //收到封包
@@ -187,10 +187,10 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.UpdateDCUPlayList();
                             DMDHelper.UpdataDCUInstantMessage();
                             var InstantMessage = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendInstantMessage));
-                            DMDHelper.SendToTaskUPD(2, 1, InstantMessage.JsonContent);
+                            DMDHelper.SendToTaskPUP(2, 1, InstantMessage.JsonContent);
                             DMDHelper.SendToTaskCDU(2, 1, InstantMessage.JsonContent);
                             DMDHelper.SendToTaskSDU(2, 1, InstantMessage.JsonContent);
-                            DMDHelper.SendToTaskLPD(2, 1, InstantMessage.JsonContent);
+                            DMDHelper.SendToTaskPDN(2, 1, InstantMessage.JsonContent);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendScheduleSetting: //訊息排程
                             var oJsonObjectSendScheduleSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendScheduleSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
@@ -204,10 +204,10 @@ namespace ASI.Wanda.DCU.TaskDMD
                             DMDHelper.UpdataDCUPreRecordMessage();                                             
                             //收到封包
                             var ScheduleSetting = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sendScheduleSetting));
-                            DMDHelper.SendToTaskUPD(2, 1, ScheduleSetting.JsonContent);
+                            DMDHelper.SendToTaskPUP(2, 1, ScheduleSetting.JsonContent);
                             DMDHelper.SendToTaskCDU(2, 1, ScheduleSetting.JsonContent);
                             DMDHelper.SendToTaskSDU(2, 1, ScheduleSetting.JsonContent);
-                            DMDHelper.SendToTaskLPD(2, 1, ScheduleSetting.JsonContent);
+                            DMDHelper.SendToTaskPDN(2, 1, ScheduleSetting.JsonContent);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMessageSetting: //預錄訊息設定 
                             break;
@@ -221,10 +221,10 @@ namespace ASI.Wanda.DCU.TaskDMD
                             PowerTimeSetting.seatID = oJsonObjectPowerTimeSetting.seatID;
                             PowerTimeSetting.SqlCommand = oJsonObjectPowerTimeSetting.SqlCommand;
                             var PowerSetting = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(PowerTimeSetting));
-                            DMDHelper.SendToTaskUPD(2, 1, PowerSetting.JsonContent);
+                            DMDHelper.SendToTaskPUP(2, 1, PowerSetting.JsonContent);
                             DMDHelper.SendToTaskCDU(2, 1, PowerSetting.JsonContent);
                             DMDHelper.SendToTaskSDU(2, 1, PowerSetting.JsonContent);
-                            DMDHelper.SendToTaskLPD(2, 1, PowerSetting.JsonContent);
+                            DMDHelper.SendToTaskPDN(2, 1, PowerSetting.JsonContent);
                             break;
                         case ASI.Wanda.DMD.TaskDMD.Constants.SendGroupSetting: //群組設定
                             DMDHelper.HandleAckMessage(DMDServerMessage);

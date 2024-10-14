@@ -273,7 +273,7 @@ namespace ASI.Wanda.DCU.ProcMsg
     /// <summary>
     /// Server內部傳送訊息物件，從TaskDCU發出
     /// </summary>
-    public class MSGFromTaskUPD : MSGPacketBase
+    public class MSGFromTaskPUP : MSGPacketBase
     {
         public const string Label = "MSG_FROM_TASK_UPD";
 
@@ -292,7 +292,7 @@ namespace ASI.Wanda.DCU.ProcMsg
         /// </summary>
         public string JsonData { set; get; }
 
-        public MSGFromTaskUPD(MSGFrameBase pFrame) : base(pFrame)
+        public MSGFromTaskPUP(MSGFrameBase pFrame) : base(pFrame)
         {
             mLabel = Label;
             priority = System.Messaging.MessagePriority.Normal;

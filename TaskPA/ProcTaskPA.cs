@@ -43,7 +43,7 @@ namespace ASI.Wanda.DCU.TaskPA
             }
             else if (pLabel == ProcMsg.MSGFromTaskPDU.Label)
             {
-                ProMsgFromUPD(pBody);
+                ProMsgFromPUP(pBody);
             }
           
             return base.ProcEvent(pLabel, pBody);
@@ -172,8 +172,8 @@ namespace ASI.Wanda.DCU.TaskPA
                 // 發送到各個看板
                 PAHelper.SendToTaskCDU(2, 1, msg.JsonContent);
                 PAHelper.SendToTaskSDU(2, 1, msg.JsonContent);
-                PAHelper.SendToTaskUPD(2, 1, msg.JsonContent);
-                PAHelper.SendToTaskLPD(2, 1, msg.JsonContent);
+                PAHelper.SendToTaskPUP(2, 1, msg.JsonContent);
+                PAHelper.SendToTaskPDN(2, 1, msg.JsonContent);
 
                 serial.Send(dataBytes); // 重新發送
             }
@@ -237,13 +237,13 @@ namespace ASI.Wanda.DCU.TaskPA
         /// <summary>
         /// 處理TaskPDU的訊息  
         /// </summary> 
-        private int ProMsgFromUPD(string pMessage)
+        private int ProMsgFromPUP(string pMessage)
         {
             string sLog = "";
          
             try
             {
-                MSGFromTaskUPD mSGFromTaskDCU = new MSGFromTaskUPD(new MSGFrameBase(""));
+                MSGFromTaskPUP mSGFromTaskDCU = new MSGFromTaskPUP(new MSGFrameBase(""));
 
                 if (mSGFromTaskDCU.UnPack(pMessage) > 0)
                 {
@@ -293,7 +293,7 @@ namespace ASI.Wanda.DCU.TaskPA
             {
                 ASI.Lib.Log.ErrorLog.Log(mProcName, ex); 
             }
-            ASI.Lib.Log.DebugLog.Log("收到TaskUPD回傳資料", pMessage.ToString());
+            ASI.Lib.Log.DebugLog.Log("收到TaskPUP回傳資料", pMessage.ToString());
 
             return -1;
         }

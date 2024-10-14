@@ -16,9 +16,9 @@ using static Display.DisplaySettingsEnums;
 
 using static System.Net.Mime.MediaTypeNames;
 
-namespace ASI.Wanda.DCU.TaskUPD
+namespace ASI.Wanda.DCU.TaskPUP
 {
-    public class TaskUPDHelper
+    public class TaskPUPHelper
     {
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
@@ -36,7 +36,7 @@ namespace ASI.Wanda.DCU.TaskUPD
             public const string SendGroupSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting";
             public const string SendParameterSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ParameterSetting";
         }
-        public TaskUPDHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
+        public TaskPUPHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
         {
             _mProcName = mProcName;
             _mSerial = serial;

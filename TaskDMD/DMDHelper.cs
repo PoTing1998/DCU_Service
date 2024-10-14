@@ -44,17 +44,17 @@ namespace ASI.Wanda.DMD.TaskDMD
         }
 
         ///傳送到內部MSG 
-        public void SendToTaskUPD(int msgType, int msgID, string jsonData)
+        public void SendToTaskPUP(int msgType, int msgID, string jsonData)
         {
             try
             {
 
-                var MSGFromTaskUPD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskupd"));
+                var MSGFromTaskPUP = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskpup"));
                 //組相對應的封包 
-                MSGFromTaskUPD.MessageType = msgType;
-                MSGFromTaskUPD.MessageID = msgID;
-                MSGFromTaskUPD.JsonData = jsonData;
-                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskUPD);
+                MSGFromTaskPUP.MessageType = msgType;
+                MSGFromTaskPUP.MessageID = msgID;
+                MSGFromTaskPUP.JsonData = jsonData;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPUP);
             }
             catch (System.Exception ex)
             {
@@ -95,16 +95,16 @@ namespace ASI.Wanda.DMD.TaskDMD
                 ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex);
             }
         }
-        public void SendToTaskLPD(int msgType, int msgID, string jsonData)
+        public void SendToTaskPDN(int msgType, int msgID, string jsonData)
         {
             try
             {
-                var MSGFromTaskLPD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertasklpd"));
+                var MSGFromTaskPDN = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskpdn"));
                 //組相對應的封包 
-                MSGFromTaskLPD.MessageType = msgType;
-                MSGFromTaskLPD.MessageID = msgID;
-                MSGFromTaskLPD.JsonData = jsonData;
-                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskLPD);
+                MSGFromTaskPDN.MessageType = msgType;
+                MSGFromTaskPDN.MessageID = msgID;
+                MSGFromTaskPDN.JsonData = jsonData;
+                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPDN);
             }
             catch (System.Exception ex)
             {

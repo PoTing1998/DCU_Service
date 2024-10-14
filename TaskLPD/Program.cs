@@ -8,16 +8,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ASI.Wanda.DCU.TaskLPD
+namespace ASI.Wanda.DCU.TaskPDN
 {
     class Program
     {
         static void Main(string[] args)
         {
-            string qname = "TaskLPD";
+            string qname = "TaskPDN";
             if (args.Length == 1) qname = args[0];
 
-            IProcess TheProc = new ProcTaskLPD();
+            IProcess TheProc = new ProcTaskPDN();
             if (TheProc.StartTask(ConfigApp.Instance.HostName, qname) >= 0)
             {
                 TheProc.Run();

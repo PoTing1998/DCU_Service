@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{98C11A37-FB95-49A9-A32F-35710870B4DE}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>TaskUPD</RootNamespace>
-    <AssemblyName>TaskUPD</AssemblyName>
+    <RootNamespace>TaskPUP</RootNamespace>
+    <AssemblyName>TaskPUP</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -44,10 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ProcTaskUPD.cs" />
+    <Compile Include="ProcTaskPUP.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TaskUPDHelper.cs" />
+    <Compile Include="TaskPUPHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

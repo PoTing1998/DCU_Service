@@ -7,16 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ASI.Wanda.DCU.TaskUPD
+namespace ASI.Wanda.DCU.TaskPUP
 {
     class Program
     {
         static void Main(string[] args)
         {
-            string qname = "TaskUPD";
+            string qname = "TaskPUP";
             if (args.Length == 1) qname = args[0];
 
-            IProcess TheProc = new ProcTaskUPD();
+            IProcess TheProc = new ProcTaskPUP();
             if (TheProc.StartTask(ConfigApp.Instance.HostName, qname) >= 0)
             {
                 TheProc.Run();

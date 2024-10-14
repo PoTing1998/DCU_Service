@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using ASI.Wanda.DCU.DB.Models.DMD;
 using ASI.Wanda.DCU.DB.Tables.DMD;
 
-namespace ASI.Wanda.DCU.TaskLPD
+namespace ASI.Wanda.DCU.TaskPDN
 {
     class DeviceInfo
     {
@@ -21,12 +21,12 @@ namespace ASI.Wanda.DCU.TaskLPD
         public string AreaID { get; set; }
         public string DeviceID { get; set; }
     }
-    public class TaskLPDHelper
+    public class TaskPDNHelper
     {
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
 
-        public TaskLPDHelper(string mProcName, SerialPortLib mSerial )
+        public TaskPDNHelper(string mProcName, SerialPortLib mSerial )
         {
             _mProcName = mProcName;
             _mSerial = mSerial;
