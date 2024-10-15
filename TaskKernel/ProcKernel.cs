@@ -38,7 +38,7 @@ namespace ASI.Wanda.DCU.TaskKernel
             if (aevent.UnPack(pBody) > 0)
             {
                 string astr = "Rcving from " + aevent.Frame.Source + " : " + pLabel;
-                LogFile.Log(mComputerName, mProcName, astr);
+                LogFile.Log(mComputerName, _mProcName, astr);
                 LogFile.Display(astr);
 
                 return base.ProcEvent(pLabel, pBody);
@@ -46,7 +46,7 @@ namespace ASI.Wanda.DCU.TaskKernel
             else
             {
                 string astr = "Rcving error : " + pBody;
-                LogFile.Log(mComputerName, mProcName, "Rcving error : " + pBody);
+                LogFile.Log(mComputerName, _mProcName, "Rcving error : " + pBody);
                 LogFile.Display(astr);
 
                 return -1;
@@ -99,7 +99,7 @@ namespace ASI.Wanda.DCU.TaskKernel
 
                 if (taskmain_info.Domain != null)
                 {
-                    MSGHealth ahealth = new MSGHealth(new MSGFrameBase(mProcName, "TaskMain"));
+                    MSGHealth ahealth = new MSGHealth(new MSGFrameBase(_mProcName, "TaskMain"));
                     ahealth.HealthFlag = true;
                     MSQueue.SendMessage(ahealth);
                 }
@@ -142,11 +142,11 @@ namespace ASI.Wanda.DCU.TaskKernel
         {
             if (ProcessLib.StartProcess(pInfo) > 0)
             {
-                LogFile.Log(mComputerName, mProcName, "Start Process " + pInfo.Name + " Success");
+                LogFile.Log(mComputerName, _mProcName, "Start Process " + pInfo.Name + " Success");
                 return 1;
             }
 
-            LogFile.Log(mComputerName, mProcName, "Start Process " + pInfo.Name + " Fail");
+            LogFile.Log(mComputerName, _mProcName, "Start Process " + pInfo.Name + " Fail");
             return -1;
         }
 
@@ -165,11 +165,11 @@ namespace ASI.Wanda.DCU.TaskKernel
 
             if (ProcessLib.StopProcess(pInfo) > 0)
             {
-                LogFile.Log(mComputerName, mProcName, "Stop Process Success " + pInfo.Name);
+                LogFile.Log(mComputerName, _mProcName, "Stop Process Success " + pInfo.Name);
                 return 1;
             }
 
-            LogFile.Log(mComputerName, mProcName, "Stop Process Fail " + pInfo.Name);
+            LogFile.Log(mComputerName, _mProcName, "Stop Process Fail " + pInfo.Name);
             return -1;
         }
 

@@ -11,7 +11,7 @@ namespace ASI.Lib.Process
 	public abstract class ProcBase : IProcess
 	{
 		protected string mComputerName;
-		protected string mProcName;
+		protected string _mProcName;
 		protected ASI.Lib.Comm.MSMQ.MsgQueLib mRcvQueue;
 		protected bool mStopFlag = false;
 		protected Thread mTimerThread;
@@ -33,13 +33,13 @@ namespace ASI.Lib.Process
 			{
 				try
 				{
-					MSGTimer msg = new MSGTimer(new MSGFrameBase(mProcName, mProcName));
+					MSGTimer msg = new MSGTimer(new MSGFrameBase(_mProcName, _mProcName));
 					msg.TimeNow = DateTime.Now;
 					SendMessage(msg);
 				}
 				catch (System.Exception ex)
 				{
-					ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
+					ASI.Lib.Log.ErrorLog.Log(_mProcName, ex);
 				}
 
 				Thread.Sleep((mTimerTick - (DateTime.Now.Second % mTimerTick) + 1) * 1000);
@@ -87,7 +87,7 @@ namespace ASI.Lib.Process
 			MSGTimer oMSGTimer = new MSGTimer(new MSGFrameBase(""));
 			if (oMSGTimer.UnPack(pMessage) > 0)
 			{
-				MSGHealth oMSGHealth = new MSGHealth(new MSGFrameBase(mProcName, "TaskMain"));
+				MSGHealth oMSGHealth = new MSGHealth(new MSGFrameBase(_mProcName, "TaskMain"));
 				oMSGHealth.HealthFlag = true;
 				SendMessage(oMSGHealth);
 
@@ -131,19 +131,19 @@ namespace ASI.Lib.Process
 				mComputerName = Config.ConfigApp.Instance.GetConfigSetting(Config.ConfigApp.HOST_NAME);
             }
 			
-			mProcName = pProcName;
+			_mProcName = pProcName;
 
 			//if (utyMsgQueue.IsExist(pComputer + pProcName))
 
 			try
 			{
-				ASI.Lib.Comm.MSMQ.MsgQueLib.Delete(mComputerName + mProcName);
-				ASI.Lib.Comm.MSMQ.MsgQueLib.Create(mComputerName, mComputerName + mProcName);
+				ASI.Lib.Comm.MSMQ.MsgQueLib.Delete(mComputerName + _mProcName);
+				ASI.Lib.Comm.MSMQ.MsgQueLib.Create(mComputerName, mComputerName + _mProcName);
 
 				mRcvQueue = new ASI.Lib.Comm.MSMQ.MsgQueLib();
-				if (mRcvQueue.Open(mComputerName + mProcName, false) <= 0)
+				if (mRcvQueue.Open(mComputerName + _mProcName, false) <= 0)
 				{					
-					ASI.Lib.Log.ErrorLog.Log(mProcName, $"開啟MSMQ失敗!名稱:[{mComputerName + mProcName}]");
+					ASI.Lib.Log.ErrorLog.Log(_mProcName, $"開啟MSMQ失敗!名稱:[{mComputerName + _mProcName}]");
 					return -1;
 				}
 
@@ -158,12 +158,12 @@ namespace ASI.Lib.Process
 				mLastHealth = DateTime.Now;
 
 				mTimerThread.Start("");
-				ASI.Lib.Log.LogFile.Log(mComputerName, mProcName, "Start to run");
+				ASI.Lib.Log.LogFile.Log(mComputerName, _mProcName, "Start to run");
 				return 1;
 			}
 			catch (System.Exception ex)
 			{
-				ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
+				ASI.Lib.Log.ErrorLog.Log(_mProcName, ex);
 				return -1;
 			}
 		}
@@ -172,7 +172,7 @@ namespace ASI.Lib.Process
 		{
 			mStopFlag = true;
 			mRcvQueue.Close();
-			ASI.Lib.Comm.MSMQ.MsgQueLib.Delete(mComputerName + mProcName);
+			ASI.Lib.Comm.MSMQ.MsgQueLib.Delete(mComputerName + _mProcName);
 
 			try
 			{
@@ -180,7 +180,7 @@ namespace ASI.Lib.Process
 			}
 			catch { }
 
-			ASI.Lib.Log.LogFile.Log(mComputerName, mProcName, "Stop");
+			ASI.Lib.Log.LogFile.Log(mComputerName, _mProcName, "Stop");
 		}
 
 		public void Run()
@@ -195,13 +195,13 @@ namespace ASI.Lib.Process
 						MSGSimple oMSGSimple = new MSGSimple(new MSGFrameBase(""));
 						if (oMSGSimple.UnPack(sBody) > 0)
 						{
-							Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss - ") + mProcName + " : " + oMSGSimple.mLabel);
+							Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss - ") + _mProcName + " : " + oMSGSimple.mLabel);
 
 							if (oMSGSimple.mLabel != MSGTimer.Label &&
 								oMSGSimple.mLabel != MSGHealth.Label &&
 								!oMSGSimple.Content.Contains("LINKTEST"))
 							{
-								ASI.Lib.Log.LogFile.Log(mComputerName, mProcName, sBody);
+								ASI.Lib.Log.LogFile.Log(mComputerName, _mProcName, sBody);
 							}
 
 							ProcEvent(oMSGSimple.mLabel, sBody);
@@ -209,7 +209,7 @@ namespace ASI.Lib.Process
 					}
 					catch (Exception ex)
 					{
-						ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
+						ASI.Lib.Log.ErrorLog.Log(_mProcName, ex);
 					}
 				}
 			}

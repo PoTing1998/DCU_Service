@@ -24,7 +24,7 @@ namespace ASI.Wanda.DCU.TaskPA
         {
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskPUP"));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskpup"));
                 MSGFromTaskPA.MessageType = msgType;
                 MSGFromTaskPA.MessageID = msgID;
                 MSGFromTaskPA.JsonData = ContentDataBytes;
@@ -45,7 +45,7 @@ namespace ASI.Wanda.DCU.TaskPA
         {
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskSDU"));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertasksdu"));
                 MSGFromTaskPA.MessageType = msgType;
                 MSGFromTaskPA.MessageID = msgID;
                 MSGFromTaskPA.JsonData = ContentDataBytes;
@@ -66,7 +66,7 @@ namespace ASI.Wanda.DCU.TaskPA
         {
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskLPD"));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskcdu"));
                 MSGFromTaskPA.MessageType = msgType;
                 MSGFromTaskPA.MessageID = msgID;
                 MSGFromTaskPA.JsonData = ContentDataBytes;
@@ -87,7 +87,7 @@ namespace ASI.Wanda.DCU.TaskPA
         {
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskPDN"));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskpdn"));
                 MSGFromTaskPA.MessageType = msgType;
                 MSGFromTaskPA.MessageID = msgID;
                 MSGFromTaskPA.JsonData = ContentDataBytes;
@@ -99,7 +99,7 @@ namespace ASI.Wanda.DCU.TaskPA
             }
         }
         /// <summary> 
-        /// 將PA的資料 傳給PUP看板 
+        /// 將PA的資料 傳給DMD看板 
         /// </summary>
         /// <param name="msgType"></param>   
         /// <param name="msgID"></param>    
@@ -108,7 +108,7 @@ namespace ASI.Wanda.DCU.TaskPA
         {
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskPUP"));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA(new MSGFrameBase("TaskPA", "dcuservertaskdmd"));
                 MSGFromTaskPA.MessageType = msgType;
                 MSGFromTaskPA.MessageID = msgID;
                 MSGFromTaskPA.JsonData = ContentDataBytes;

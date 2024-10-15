@@ -4,14 +4,19 @@ using ASI.Lib.Log;
 using ASI.Lib.Process;
 using ASI.Wanda.DCU.ProcMsg;
 using ASI.Wanda.DMD.ProcMsg;
+using Display.Function;
+using Display;
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 
 
 namespace ASI.Wanda.DCU.TaskCDU
 {
+
     public class ProcTaskCDU : ProcBase
     {
         #region constructor
@@ -31,6 +36,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
 
         static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
+        static string _mDU_ID = "LG01_CDU_01";
         #endregion
         /// <summary>
         /// 處理DMD模組執行程序所收到之訊息 
@@ -67,7 +73,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         public override int StartTask(string pComputer, string pProcName)
         {
             mTimerTick = 30;
-            mProcName = "TaskCDU";      
+            _mProcName = "TaskCDU";      
             string dbIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
             string dbPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
             string dbName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
@@ -88,19 +94,19 @@ namespace ASI.Wanda.DCU.TaskCDU
                 result = _mSerial.Open();
                 if (result != 0)
                 {
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, "打開串口失敗");
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, "打開串口失敗");
                     return result; // 如果串口打開失敗，立即返回
                 }
                 // 初始化資料庫連線
                 if (!ASI.Wanda.DCU.DB.Manager.Initializer(dbIP, dbPort, dbName, dbUserID, dbPassword, currentUserID))
                 {
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗! {dbIP}:{dbPort};userid={dbUserID}");
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, $"資料庫連線失敗! {dbIP}:{dbPort};userid={dbUserID}");
                     return -1; // 如果資料庫初始化失敗，立即返回
                 }
             }
             catch (System.Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, $"發生例外! {ex.Message}");
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"發生例外! {ex.Message}");
                 return -1; // 如果發生任何例外，立即返回
             }
 
@@ -121,7 +127,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     {
                         string sJsonData = mSGFromTaskDMD.JsonData;
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-                        var taskCDUHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(mProcName, _mSerial);
+                        var taskCDUHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(_mProcName, _mSerial);
                         switch (sJsonObjectName)
                         {
                             case ASI.Wanda.DCU.TaskCDU.Constants.SendPreRecordMsg:
@@ -131,12 +137,12 @@ namespace ASI.Wanda.DCU.TaskCDU
                                 string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
                                 string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
 
-                                ASI.Lib.Log.DebugLog.Log(mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
 
                                 if (dbName1 == "dmd_pre_record_message")
                                 {
                                     string result = "";  
-                                    ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_pre_record_message");
+                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
 
                                     byte[] SerialiazedData = new byte[] { };
                                     //傳送到面板上 
@@ -144,17 +150,24 @@ namespace ASI.Wanda.DCU.TaskCDU
 
                                     _mSerial.Send(SerialiazedData); 
 
-                                    ASI.Lib.Log.DebugLog.Log(mProcName, "處理 dmd_pre_record_message"+ result);
+                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message"+ result);
                                 }
                                 else
                                 {
                                     //判斷收到的訊息ID  
-                                    ASI.Lib.Log.DebugLog.Log(mProcName, "處理其他訊息");
+                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理其他訊息");
                                 }
                                 break;
 
                             case ASI.Wanda.DCU.TaskCDU.Constants.SendPowerTimeSetting:
                                 taskCDUHelper.PowerSetting(Station_ID);
+                                break;
+                            case "節能模式開啟":
+                                OpenDisplay();
+
+                                break;
+                            case "節能模式關閉":
+                                CloseDisplay();
                                 break;
                         }
 
@@ -162,14 +175,14 @@ namespace ASI.Wanda.DCU.TaskCDU
                     }
                     catch (Exception ex)
                     {
-                        ASI.Lib.Log.ErrorLog.Log(mProcName, ex.ToString()); 
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, ex.ToString()); 
                     }
                     
                 }
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex);
             }
            
             return -1;
@@ -188,7 +201,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                 if (MSGFromTaskPA.UnPack(pMessage) > 0)
                 {
                     var sJsonData = MSGFromTaskPA.JsonData;
-                    ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到來自 TaskPA 的消息", sJsonData); // 記錄收到的消息
+                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} 收到來自 TaskPA 的消息", sJsonData); // 記錄收到的消息
                     // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除  
                     // 假設sJsonData已經是十六進位字串格式，直接解析
                     var sHexString = sJsonData;
@@ -199,7 +212,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     }
                     else
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes 長度小於 10", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataBytes 長度小於 10", sHexString);
                     }
                     if (dataBytes.Length >= 3)
                     {
@@ -207,13 +220,13 @@ namespace ASI.Wanda.DCU.TaskCDU
                     }
                     else
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes 長度小於 3", sJsonData);
+                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataBytes 長度小於 3", sJsonData);
                     }
                 }
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, ex); // 記錄例外情況 
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex); // 記錄例外情況 
             }
 
             return -1;
@@ -268,7 +281,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         private async Task ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
-            var taskUPDHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(mProcName, _mSerial);
+            var taskUPDHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(_mProcName, _mSerial);
             Tuple<byte[], byte[], byte[]> serializedData;
 
             switch (dataByteAtIndex8)
@@ -294,7 +307,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     
                     break;
                 default:
-                    ASI.Lib.Log.DebugLog.Log(mProcName + " ", $"{mProcName} unknown byte value at index 8: {dataByteAtIndex8.ToString("X2")}");
+                    ASI.Lib.Log.DebugLog.Log(_mProcName + " ", $"{_mProcName} unknown byte value at index 8: {dataByteAtIndex8.ToString("X2")}");
                     break;
             }
         }
@@ -302,18 +315,18 @@ namespace ASI.Wanda.DCU.TaskCDU
         private void SendSerializedData(byte[] serializedData, string logMessage)
         {
             // 記錄日誌
-            ASI.Lib.Log.DebugLog.Log(mProcName + " SendMessageToUrgnt", logMessage + ": " + BitConverter.ToString(serializedData));
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", logMessage + ": " + BitConverter.ToString(serializedData));
 
             // 發送數據
             var temp = _mSerial.Send(serializedData);
 
             // 記錄是否發送成功
-            ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + mProcName, temp.ToString());
+            ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + _mProcName, temp.ToString());
         }
         private void ProcessByteAtIndex2(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
             byte dataByte2 = dataBytes[2];
-            ASI.Lib.Log.DebugLog.Log($"{mProcName} dataByte2: ", dataByte2.ToString("X2"));
+            ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataByte2: ", dataByte2.ToString("X2"));
 
             switch (dataByte2)
             {
@@ -321,31 +334,30 @@ namespace ASI.Wanda.DCU.TaskCDU
                     HandleCase01(dataBytes, sRcvTime, sJsonData);
                     break;
                 case 0x06:
-                    ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到來自 TaskPA 的正確消息", sJsonData);
+                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} 收到來自 TaskPA 的正確消息", sJsonData);
                     break;
                 case 0x15:
                     HandleCase15(dataBytes, sRcvTime, sJsonData);
                     break;
                 default:
-                    ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到來自 PA 的未知錯誤消息", sJsonData);
+                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} 收到來自 PA 的未知錯誤消息", sJsonData);
                     break;
             }
         }
         private void HandleCase01(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
-            ASI.Lib.Log.DebugLog.Log($"{mProcName} processing 0x01 case", sJsonData);
+            ASI.Lib.Log.DebugLog.Log($"{_mProcName} processing 0x01 case", sJsonData);
             dataBytes[2] = 0x06;
             Array.Resize(ref dataBytes, dataBytes.Length - 1); // Remove the last byte
             byte newLRC = CalculateLRC(dataBytes);
             Array.Resize(ref dataBytes, dataBytes.Length + 1); // Add a byte back
             dataBytes[dataBytes.Length - 1] = newLRC;
-            ASI.Lib.Log.DebugLog.Log($"{mProcName} replied to TaskPA message at {sRcvTime}", sJsonData);
-
+            ASI.Lib.Log.DebugLog.Log($"{_mProcName} replied to TaskPA message at {sRcvTime}", sJsonData);
         }
 
         private void HandleCase15(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
-            ASI.Lib.Log.DebugLog.Log($"{mProcName} 處理 0x15 案例", sJsonData);
+            ASI.Lib.Log.DebugLog.Log($"{_mProcName} 處理 0x15 案例", sJsonData);
             string errorLog;
             switch (dataBytes[4])
             {
@@ -363,7 +375,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     break;
             }
 
-            ASI.Lib.Log.DebugLog.Log($"{mProcName} 在 {sRcvTime} 收到來自 TaskPA 的錯誤消息：{errorLog}", sJsonData);
+            ASI.Lib.Log.DebugLog.Log($"{_mProcName} 在 {sRcvTime} 收到來自 TaskPA 的錯誤消息：{errorLog}", sJsonData);
         }
 
         #endregion
@@ -380,7 +392,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             }
             catch (Exception)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, "斷線處理錯誤");
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, "斷線處理錯誤");
             }
         }
 
@@ -396,16 +408,16 @@ namespace ASI.Wanda.DCU.TaskCDU
             var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
             if (dataBytes.Length >= 3 && dataBytes[4] == 0x00)
             {
-                ASI.Lib.Log.DebugLog.Log(mProcName, "顯示器的狀態收到的訊息" + sHexString.ToString());  //處理顯示器回報的狀態
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "顯示器的狀態收到的訊息" + sHexString.ToString());  //處理顯示器回報的狀態
             }
             else if (dataBytes[4] != 0x00)
             {   
-                if (dataBytes[4] == 0x01) { ASI.Lib.Log.ErrorLog.Log(mProcName, "曾經有通訊不良"); }
-                else if (dataBytes[4] == 0x02) { ASI.Lib.Log.ErrorLog.Log(mProcName, "處於關機狀態 "); }
-                else if (dataBytes[4] == 0x04) { ASI.Lib.Log.ErrorLog.Log(mProcName, "通訊逾時"); }
-                else if (dataBytes[4] == 0x07) { ASI.Lib.Log.ErrorLog.Log(mProcName, " 1/2/4 多重組合 "); }
+                if (dataBytes[4] == 0x01) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "曾經有通訊不良"); }
+                else if (dataBytes[4] == 0x02) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "處於關機狀態 "); }
+                else if (dataBytes[4] == 0x04) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "通訊逾時"); }
+                else if (dataBytes[4] == 0x07) { ASI.Lib.Log.ErrorLog.Log(_mProcName, " 1/2/4 多重組合 "); }
             }
-            ASI.Lib.Log.ErrorLog.Log(mProcName, "從顯示器收到的訊息" + sHexString.ToString());//log紀錄 
+            ASI.Lib.Log.ErrorLog.Log(_mProcName, "從顯示器收到的訊息" + sHexString.ToString());//log紀錄 
         }
 
         #endregion
@@ -424,6 +436,36 @@ namespace ASI.Wanda.DCU.TaskCDU
             for (int i = 0; i < text.Length; i++)
                 xor ^= text[i];
             return xor;
+        } 
+
+        public void CloseDisplay()
+        {
+            // 關閉顯示器的邏輯
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Off = new byte[] { 0x3A, 0X01 };
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
+            var serializedDataOff = processor.SerializePacket(packetOff);
+             _mSerial.Send(serializedDataOff);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
         }
+        public void OpenDisplay()
+        {
+            // 開啟顯示器的邏輯
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Open = new byte[] { 0x3A, 0X00 };
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Open);
+            var serializedDataOpen = processor.SerializePacket(packetOpen);
+             _mSerial.Send(serializedDataOpen);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + "顯示畫面開啟", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
+        }
+
     }
 }

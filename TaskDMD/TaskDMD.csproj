@@ -49,6 +49,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProTaskDMD.cs" />
+    <Compile Include="ScheduledTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -67,6 +68,10 @@
     <ProjectReference Include="..\DCU_Frame\DCU_Frame.csproj">
       <Project>{0f2e5e11-5e76-4b5a-9a00-5d82dd33918b}</Project>
       <Name>DCU_Frame</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Display\Display.csproj">
+      <Project>{FD5A072F-115D-4896-91D3-996ED55CDAE3}</Project>
+      <Name>Display</Name>
     </ProjectReference>
     <ProjectReference Include="..\DMD_DB\DMD_DB.csproj">
       <Project>{26b445f9-2971-44b6-953a-8b9bf8205408}</Project>

@@ -50,7 +50,7 @@ namespace ASI.Wanda.DCU.TaskPUP
         {
             List<Guid> messageIds = new List<Guid>();
             //value tuple
-            //  List<Tuple<string, string, string>> date1 = new List<Tuple<string, string, string>>();
+            //List<Tuple<string, string, string>> date1 = new List<Tuple<string, string, string>>();
             var data = new List<(string, string, string)>();
             //收到字串模式target_du:["LG01_CCS_CDU-1", "LG01_CCS_CDU-2", "LG01_UPF_PDU-1", "LG08A_DPF_PDU-4"];
             target_du = target_du.Trim(new char[] { '[', ']', ' ' });
@@ -76,45 +76,6 @@ namespace ASI.Wanda.DCU.TaskPUP
                     }
                 }
             }
-            ////value tuple
-            //var data = new List<(string, string, string)>();
-            ////收到字串模式target_du:["LG01_CCS_CDU-1", "LG01_CCS_CDU-2", "LG01_UPF_PDU-1", "LG08A_DPF_PDU-4"];
-            //target_du = target_du.Trim(new char[] { '[', ']', ' ' });
-            //target_du = target_du.Replace("\"", ""); // 去除所有的引號
-            //var items = target_du.Split(',');
-            //foreach (var item in items)
-            //{
-            //    var parts = item.Split(new char[] { '_', '-' });
-
-            //    if (parts.Length == 4)
-            //    {
-            //        string stationID = parts[0];
-            //        string areaID = parts[1];
-            //        string deviceID = $"{parts[2]}-{parts[3]}";
-            //        // 檢查是否符合條件
-            //        // 檢查是否符合條件
-            //        //if (string.Equals(stationID, _stationID, StringComparison.OrdinalIgnoreCase) &&
-            //        //    string.Equals(areaID, _areaID, StringComparison.OrdinalIgnoreCase) &&
-            //        //    string.Equals(deviceID, _deviceID, StringComparison.OrdinalIgnoreCase))
-
-            //        //{
-            //        //    ASI.Lib.Log.DebugLog.Log(_mProcName, $"Matching condition met: stationID={stationID}, areaID={areaID}, deviceID={deviceID}");
-            //        //    // 符合條件，加入到 data 列表
-            //        //    data.Add((stationID, areaID, deviceID));
-            //        //    var messageId = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(stationID, areaID, deviceID);
-            //        //    ASI.Lib.Log.DebugLog.Log(_mProcName, $"Message ID added: {messageId}");
-
-            //        //}
-            //        //else
-            //        //{
-            //        //    ASI.Lib.Log.DebugLog.Log(_mProcName, $"No match: stationID={stationID} (expected {_stationID}), areaID={areaID} (expected {_areaID}), deviceID={deviceID} (expected {_deviceID})");
-            //        //}
-            //    }
-            //    else
-            //    {
-            //        ASI.Lib.Log.DebugLog.Log(_mProcName, $"Invalid item format: {item}. Expected format: stationID_areaID_deviceName-deviceNumber.");
-            //    }
-            //}
             return messageIds.FirstOrDefault();
         }
 
@@ -122,11 +83,11 @@ namespace ASI.Wanda.DCU.TaskPUP
 
         public void judgeDbName(string name)
         {
-            if ( name == "dmd_pre_record_message")
+            if (name == "dmd_pre_record_message")
             {
                 SendMessageToDisplay(name);
             }
-            else if (name == "dmd_instant_message" )
+            else if (name == "dmd_instant_message")
             {
                 SendMessageToDisplay(name);
             }
@@ -137,7 +98,7 @@ namespace ASI.Wanda.DCU.TaskPUP
         /// <param name="target_du"></param>
         /// <param name="dbName1"></param>
         /// <param name="dbName2"></param>
-       public void SendMessageToDisplay(string dbName1)
+        public void SendMessageToDisplay(string dbName1)
         {
             try
             {
@@ -152,12 +113,12 @@ namespace ASI.Wanda.DCU.TaskPUP
                     if (message_layout != null)
                     {
                         string color = message_layout.font_color;
-                         var fontColor = ProcessColor(color);
+                        var fontColor = ProcessColor(color);
                         //取得各項參數
                         var processor = new PacketProcessor();
                         var content = "萬大線";
 
-                       // var fontColor = new byte[] { 0XFF, 0XFF, 0XFF };
+                        // var fontColor = new byte[] { 0XFF, 0XFF, 0XFF };
                         var textStringBody = new TextStringBody
                         {
                             RedColor = fontColor[0],
@@ -181,7 +142,7 @@ namespace ASI.Wanda.DCU.TaskPUP
                                 PauseTime = 10
                             },
                             MessageContent = new List<StringMessage> { stringMessage }
-                        }; 
+                        };
                         var sequence1 = new Display.Sequence
                         {
                             SequenceNo = 1,
@@ -191,7 +152,7 @@ namespace ASI.Wanda.DCU.TaskPUP
                         var startCode = new byte[] { 0x55, 0xAA };
                         var function = new PassengerInfoHandler(); // Use PassengerInfoHandler  
                         var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
-                        var serializedData = processor.SerializePacket(packet); 
+                        var serializedData = processor.SerializePacket(packet);
                         ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
                         _mSerial.Send(serializedData);
                     }
@@ -204,7 +165,7 @@ namespace ASI.Wanda.DCU.TaskPUP
                     if (message_layout != null)
                     {
                         string color = message_layout.font_color;
-                        //   var fontColor = ProcessColor(color);
+                        //var fontColor = ProcessColor(color);
                         //取得各項參數
                         var processor = new PacketProcessor();
                         var fontColor = new byte[] { 0XFF, 0XFF, 0XFF };
@@ -284,7 +245,6 @@ namespace ASI.Wanda.DCU.TaskPUP
                 GreenColor = 0xFF,
                 BlueColor = 0xFF,
                 PhotoIndex = 1,
-
                 MessageContent = new List<StringMessage> { stringMessage }
             };
             var sequence1 = new Display.Sequence
@@ -364,8 +324,8 @@ namespace ASI.Wanda.DCU.TaskPUP
                     // 獲取當前日期的月和日以及現在的時間（時和分）
                     int currentMonth = DateTime.Now.Month;
                     int currentDay = DateTime.Now.Day;
-                    int currentHour = DateTime.Now.Hour; 
-                    int currentMinute = DateTime.Now.Minute; 
+                    int currentHour = DateTime.Now.Hour;
+                    int currentMinute = DateTime.Now.Minute;
                     // 使用 List 儲存不啟動節能模式的日期
                     var nonEcoDates = new List<(int Month, int Day)>();
 

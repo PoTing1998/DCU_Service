@@ -548,7 +548,7 @@ namespace ASI.Wanda.DCU.DB.Models.DMD
         }
 
         /// <summary>  
-        /// 備註        
+        /// 備註 
         /// </summary> 
         public string remark
         {

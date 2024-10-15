@@ -81,8 +81,8 @@ namespace ASI.Wanda.DMD.TaskDMD
         }
         public void SendToTaskSDU(int msgType, int msgID, string jsonData)
         {
-            try
-            {
+            try  
+            { 
                 var MSGFromTaskSDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertasksdu"));
                 //組相對應的封包 
                 MSGFromTaskSDU.MessageType = msgType;

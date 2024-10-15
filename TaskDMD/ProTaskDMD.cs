@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Timers;
+using TaskDMD;
+
 
 
 namespace ASI.Wanda.DCU.TaskDMD
@@ -36,6 +38,7 @@ namespace ASI.Wanda.DCU.TaskDMD
         private int _initialDelay = 2000;    // 重試延遲時間（毫秒）
         private bool _isConnecting = false;  // 標記當前是否在連接過程中
         private bool _isConnected = false;   // 標記是否已連接成功
+        private ScheduledTask _scheduledTask;
         #endregion
         /// <summary>
         /// 處理DMD模組執行程序所收到之訊息
@@ -84,12 +87,11 @@ namespace ASI.Wanda.DCU.TaskDMD
         public override int StartTask(string pComputer, string pProcName)
         {
             mTimerTick = 30;
-            mProcName = "TaskDMD";
+            _mProcName = "TaskDMD";
             // DCU Database Configuration
             string sDCU_DBIP    = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
             string sDCU_DBPort  = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
             string sDCU_DBName  = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
-            // DMD Database Configuration
             string sDMD_DBIP    = ConfigApp.Instance.GetConfigSetting("DMD_DB_IP");
             string sDMD_DBPort  = ConfigApp.Instance.GetConfigSetting("DMD_DB_Port");
             string sDMD_DBName  = ConfigApp.Instance.GetConfigSetting("DMD_DB_Name");
@@ -97,29 +99,41 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sUserID = "postgres";
             string sPassword = "postgres";
             string sCurrentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
+            int result = -1; // Default to an error state
             try
             {
-                  //"Server='localhost'; Port='5432'; Database='DMDDB'; User Id='postgres'; Password='postgres'";
+
+                // 1. 啟動 ScheduledTask，加入偵錯日誌
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "嘗試啟動 ScheduledTask...");
+                var task = new ScheduledTask();
+
+                task.StartPowerSettingScheduler("LG01");
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "ScheduledTask 已啟動成功.");
+
+                // 2. 初始化資料庫連線
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "嘗試初始化資料庫連線...");
+
                 // 嘗試初始化 DMD 資料庫連線
                 if (!ASI.Wanda.DMD.DB.Manager.Initializer(sDMD_DBIP, sDMD_DBPort, sDMD_DBName, sUserID, sPassword, sCurrentUserID))
                 {
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"DMD資料庫連線失敗!{sDMD_DBIP}:{sDMD_DBPort};userid={sUserID}");
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, $"DMD資料庫連線失敗!{sDMD_DBIP}:{sDMD_DBPort};userid={sUserID}");
                     return -1; // 返回錯誤代碼
                 }
                 // 嘗試初始化 DCU 資料庫連線
                 if (!ASI.Wanda.DCU.DB.Manager.Initializer(sDCU_DBIP, sDCU_DBPort, sDCU_DBName, sUserID, sPassword, sCurrentUserID))
                 {
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"CMFT資料庫連線失敗!{sDCU_DBIP}:{sDCU_DBPort};userid={sUserID}");
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, $"DCU資料庫連線失敗!{sDCU_DBIP}:{sDCU_DBPort};userid={sUserID}");
                     return -1; // 返回錯誤代碼
                 }
 
             }
             catch (System.Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, $"資料庫連線失敗! Exception: {ex.Message}");
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"資料庫連線失敗! Exception: {ex.Message}");
                 return -1; // 返回錯誤代碼
             }
             ConnToDMDServer();
+            ASI.Lib.Log.DebugLog.Log(_mProcName, "StartTask 成功啟動.");
             return base.StartTask(pComputer, pProcName);
         }
 
@@ -239,7 +253,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 {
                     ///Response
                     ///從CMFT來的訊息不應有Response 
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"從HMI來的訊息不應有Response，MessageType:{DMDServerMessage.MessageType}");
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從HMI來的訊息不應有Response，MessageType:{DMDServerMessage.MessageType}");
                 }
                 else
                 {
@@ -255,7 +269,7 @@ namespace ASI.Wanda.DCU.TaskDMD
         }
         private void DMD_API_DisconnectedEvent(string source)
         {
-            ASI.Lib.Log.DebugLog.Log(mProcName, "與 DMD Server 的連接已斷開，將嘗試重新連接。");
+            ASI.Lib.Log.DebugLog.Log(_mProcName, "與 DMD Server 的連接已斷開，將嘗試重新連接。");
             _isConnected = false;  // 標記為未連接
             ConnToDMDServer();     // 斷線後立即重試連接
         }
@@ -288,21 +302,21 @@ namespace ASI.Wanda.DCU.TaskDMD
                     {
                         //DMD內部通訊定義:Ack  
                         //從TaskDCU過來不應該有Ack
-                        ASI.Lib.Log.ErrorLog.Log(mProcName, $"從TaskDCU來的訊息不應有DMD內部通訊定義:Ack，MessageType:{mSGFromTaskDCU.MessageType}"); ;
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從TaskDCU來的訊息不應有DMD內部通訊定義:Ack，MessageType:{mSGFromTaskDCU.MessageType}"); ;
                     }
                     else if (mSGFromTaskDCU.MessageType == 2)
                     {
                         //DMD內部通訊定義:Change/Command  
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
-                        ASI.Lib.Log.DebugLog.Log(mProcName, sLog);
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);
                     }
                     else if (mSGFromTaskDCU.MessageType == 3)
                     {
                         //DMD內部通訊定義:Response 
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
-                        ASI.Lib.Log.DebugLog.Log(mProcName, sLog);
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);
                         //將訊息傳給DMD
                         var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(mSGFromTaskDCU.JsonData);
 
@@ -320,13 +334,13 @@ namespace ASI.Wanda.DCU.TaskDMD
                     else
                     {
                         //無此種訊息類別 
-                        ASI.Lib.Log.ErrorLog.Log(mProcName, $"無此種訊息類別，MessageType:{mSGFromTaskDCU.MessageType}");
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, $"無此種訊息類別，MessageType:{mSGFromTaskDCU.MessageType}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, ex);
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex);
             }
             finally
             {
@@ -345,13 +359,13 @@ namespace ASI.Wanda.DCU.TaskDMD
         {
             if (_isConnected)
             {
-                ASI.Lib.Log.DebugLog.Log(mProcName, "已經成功連接 DMD Server，不需要重複連接。");
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "已經成功連接 DMD Server，不需要重複連接。");
                 return;
             }
 
             if (_isConnecting)
             {
-                ASI.Lib.Log.DebugLog.Log(mProcName, "目前正在嘗試連接 DMD Server，請稍後再試。");
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "目前正在嘗試連接 DMD Server，請稍後再試。");
                 return;
             }
 
@@ -375,20 +389,20 @@ namespace ASI.Wanda.DCU.TaskDMD
                         // 連接成功
                         _isConnected = true;
                         _isConnecting = false;  // 停止連接狀態標記
-                        ASI.Lib.Log.DebugLog.Log(mProcName, "與 DMD Server 的 socket 開啟成功");
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, "與 DMD Server 的 socket 開啟成功");
                         LastHeartbeatTime = DateTime.Now;
                     }
                     else
                     {
                         // 連接失敗，記錄日誌，並等待後重試
-                        ASI.Lib.Log.DebugLog.Log(mProcName, $"與 DMD Server 的連接失敗，返回值: {iResult}，將在 {_initialDelay / 1000} 秒後重試。");
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"與 DMD Server 的連接失敗，返回值: {iResult}，將在 {_initialDelay / 1000} 秒後重試。");
                         Thread.Sleep(_initialDelay); // 延遲後重試
                     }
                 }
                 catch (Exception ex)
                 {
                     // 捕捉連接異常並記錄，等待後重試
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, $"連接 DMD Server 發生例外: {ex.Message}，將在 {_initialDelay / 1000} 秒後重試。");
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, $"連接 DMD Server 發生例外: {ex.Message}，將在 {_initialDelay / 1000} 秒後重試。");
                     Thread.Sleep(_initialDelay); // 延遲後重試
                 }
             }
@@ -401,7 +415,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 mDMD_API.ReceivedEvent -= DMD_API_ReceivedEvent;
                 mDMD_API.DisconnectedEvent -= DMD_API_DisconnectedEvent;
                 mDMD_API.Dispose();
-                ASI.Lib.Log.DebugLog.Log(mProcName, "Existing DMD_API disconnected and disposed.");
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "Existing DMD_API disconnected and disposed.");
             }
         }
 

@@ -23,13 +23,6 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
               );
         }
 
-        public static void DCUID(string Id)
-        {
-            var temp =
-                 SelectWhere(string.Format("where panel_id = '{0}' ", Id ))
-                 .SingleOrDefault();
-        }
-
         /// <summary>
         /// 根據提供的 `du_id` 和 `is_back` 條件，選擇符合的顯示器面向資料，並返回其 `panel_id`。
         /// </summary>

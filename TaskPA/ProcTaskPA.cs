@@ -75,7 +75,7 @@ namespace ASI.Wanda.DCU.TaskPA
             serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
             serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);  
             mTimerTick = 30;
-            mProcName = "TaskPA";
+            _mProcName = "TaskPA";
             ///serialPort的開啟 
             var iComPort = ConfigApp.Instance.GetConfigSetting("PAComPort"); 
             var iBaudrate = ConfigApp.Instance.GetConfigSetting("PABaudrate"); 
@@ -87,14 +87,14 @@ namespace ASI.Wanda.DCU.TaskPA
                 result = serial.Open();
                 if (result != 0)
                 {
-                    ASI.Lib.Log.ErrorLog.Log(mProcName, "Serial port open failed");
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, "Serial port open failed");
                     return result; // Return immediately if the serial port failed to open
                 }
               
             }
             catch (System.Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, $"例外發生! {ex.Message}");
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"例外發生! {ex.Message}");
                 return -1; // Return immediately if any exception occurs
             }
 
@@ -110,31 +110,31 @@ namespace ASI.Wanda.DCU.TaskPA
                 var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
 
                 // 記錄 dataBytes 的初始內容
-                ASI.Lib.Log.DebugLog.Log($"{mProcName} initial dataBytes: ", sHexString);
+                ASI.Lib.Log.DebugLog.Log($"{_mProcName} initial dataBytes: ", sHexString);
 
                 // 構建 DCU 的封包
                 if (dataBytes.Length >= 3)
                 {
                     byte dataByte2 = dataBytes[2];
-                    ASI.Lib.Log.DebugLog.Log($"{mProcName} dataByte2: ", dataByte2.ToString("X2"));
+                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataByte2: ", dataByte2.ToString("X2"));
 
                     if (dataByte2 == 0x01)
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 處理 0x01 案例", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} 處理 0x01 案例", sHexString);
                         dataBytes[2] = 0x06;
                         Array.Resize(ref dataBytes, dataBytes.Length - 1); // 移除最後一個位元組
                         byte newLRC = CalculateLRC(dataBytes);
                         Array.Resize(ref dataBytes, dataBytes.Length + 1); // 再添加一個位元組
                         dataBytes[dataBytes.Length - 1] = newLRC;
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 回應 TaskPA 消息於 {sRcvTime}", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} 回應 TaskPA 消息於 {sRcvTime}", sHexString);
                     }
                     else if (dataByte2 == 0x06)
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到 TaskPA 正確消息", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} 收到 TaskPA 正確消息", sHexString);
                     }
                     else if (dataByte2 == 0x15)
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 處理 0x15 案例", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} 處理 0x15 案例", sHexString);
                         string slog = "";
                         if (dataBytes[4] == 0x01)
                         {
@@ -148,17 +148,17 @@ namespace ASI.Wanda.DCU.TaskPA
                         {
                             slog = "表示其他錯誤";
                         }
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到 TaskPA 錯誤消息: {slog} 於 {sRcvTime}", sHexString);
+                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} 收到 TaskPA 錯誤消息: {slog} 於 {sRcvTime}", sHexString);
                     }
                     else
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{mProcName} 收到來自 PA 的未知錯誤消息", sHexString); // 記錄其他未知錯誤消息
+                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} 收到來自 PA 的未知錯誤消息", sHexString); // 記錄其他未知錯誤消息
                     }
                 }
                 else
                 {
-                    ASI.Lib.Log.DebugLog.Log($"{mProcName} dataBytes 長度小於 3", sHexString);
-                    ASI.Lib.Log.DebugLog.Log($"{mProcName} 回應 TaskPA 消息於 {sRcvTime}", sHexString); // 記錄回應消息
+                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataBytes 長度小於 3", sHexString);
+                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} 回應 TaskPA 消息於 {sRcvTime}", sHexString); // 記錄回應消息
                 }
 
                 var msg = new ASI.Wanda.DMD.Message.Message(ASI.Wanda.DMD.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sHexString));
@@ -196,7 +196,7 @@ namespace ASI.Wanda.DCU.TaskPA
             }
             catch (Exception)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, "斷線處理錯誤"); 
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, "斷線處理錯誤"); 
             }
         }
 
@@ -251,14 +251,14 @@ namespace ASI.Wanda.DCU.TaskPA
                     {
                         //DMD內部通訊定義:Ack
                         //從TaskDCU過來不應該有Ack
-                        ASI.Lib.Log.ErrorLog.Log(mProcName, $"從TaskDCU來的訊息不應有DMD內部通訊定義:Ack，MessageType:{mSGFromTaskDCU.MessageType}");
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從TaskDCU來的訊息不應有DMD內部通訊定義:Ack，MessageType:{mSGFromTaskDCU.MessageType}");
                     } 
                     else if (mSGFromTaskDCU.MessageType == 2)
                     {
                         //DMD內部通訊定義:Change/Command
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
                         sLog = $"sJsonObjectName = {sJsonObjectName}"; 
-                        ASI.Lib.Log.DebugLog.Log(mProcName, sLog);  
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);  
                     }
                     else if (mSGFromTaskDCU.MessageType == 3)
                     {
@@ -266,7 +266,7 @@ namespace ASI.Wanda.DCU.TaskPA
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
 
-                        ASI.Lib.Log.DebugLog.Log(mProcName, sLog);
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);
 
                         //將訊息傳給DCU
                         var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(mSGFromTaskDCU.JsonData);
@@ -285,13 +285,13 @@ namespace ASI.Wanda.DCU.TaskPA
                     else
                     {
                         //無此種訊息類別  
-                        ASI.Lib.Log.ErrorLog.Log(mProcName, $"無此種訊息類別，MessageType:{mSGFromTaskDCU.MessageType}");
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, $"無此種訊息類別，MessageType:{mSGFromTaskDCU.MessageType}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, ex); 
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex); 
             }
             ASI.Lib.Log.DebugLog.Log("收到TaskPUP回傳資料", pMessage.ToString());
 
@@ -313,21 +313,21 @@ namespace ASI.Wanda.DCU.TaskPA
                     {
                         // DMD內部通訊定義:Ack  
                         // 從TaskDCU過來不應該有Ack  
-                        ASI.Lib.Log.ErrorLog.Log(mProcName, $"從TaskDCU來的訊息不應有DMD內部通訊定義:Ack，MessageType:{mSGFromTaskDCU.MessageType}"); 
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從TaskDCU來的訊息不應有DMD內部通訊定義:Ack，MessageType:{mSGFromTaskDCU.MessageType}"); 
                     }
                     else if (mSGFromTaskDCU.MessageType == 2)
                     {
                         //DMD內部通訊定義:Change/Command 
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName"); 
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
-                        ASI.Lib.Log.DebugLog.Log(mProcName, sLog);
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);
                     }
                     else if (mSGFromTaskDCU.MessageType == 3)  
                     {
                         //DMD內部通訊定義:Response 
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName"); 
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
-                        ASI.Lib.Log.DebugLog.Log(mProcName, sLog);  
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);  
                         //將訊息傳給CMFT 
                         var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(mSGFromTaskDCU.JsonData);
 
@@ -343,13 +343,13 @@ namespace ASI.Wanda.DCU.TaskPA
                     else
                     {
                         //無此種訊息類別   
-                        ASI.Lib.Log.ErrorLog.Log(mProcName, $"無此種訊息類別，MessageType:{mSGFromTaskDCU.MessageType}"); 
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, $"無此種訊息類別，MessageType:{mSGFromTaskDCU.MessageType}"); 
                     }
                 }
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, ex); 
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex); 
             }
             finally
             {
