@@ -1,6 +1,4 @@
-﻿using ASI.Lib.Msg.Parsing;
-using ASI.Wanda.DCU.TaskCDU;
-using ASI.Wanda.DCU.TaskSDU;
+﻿using ASI.Wanda.DCU.TaskCDU;
 
 using Display;
 using Display.DisplayMode;
@@ -8,20 +6,15 @@ using Display.Function;
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using UITest.Verify;
 
 using static Display.DisplaySettingsEnums;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace UITest
 {
