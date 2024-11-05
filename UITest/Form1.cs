@@ -33,68 +33,69 @@ namespace UITest
         public Form1()
         {
             InitializeComponent();
-            _mProcName = "SDUHelper";
-            StationID = "LG01";
-            AreaID = "UPF";
-            DeviceID = "PDU-1";
-            //  取得預錄訊息
-            var message_id = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(StationID, AreaID, DeviceID);
-            //  取得單一一筆預錄訊息的資料
-            var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id);
-            data(message_layout);
-            var fontColorString = ASI.Wanda.DCU.DB.Tables.System.sysConfig.PickColor(message_layout.font_color);
-            var fontColor = DataConversion.FromHex(fontColorString);
+            //_mProcName = "SDUHelper";
+            //StationID = "LG01";
+            //AreaID = "UPF";
+            //DeviceID = "PDU-1";
+            ////  取得預錄訊息
+            //var message_ids = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemIds(StationID, AreaID, DeviceID);
             
-            var textStringBody = new TextStringBody
-            {
-                RedColor = fontColor[0],
-                GreenColor = fontColor[1],
-                BlueColor = fontColor[2],
-                StringText = message_layout.message_content
-            };
-            var stringMessage = new StringMessage
-            {
-                StringMode = 0x2A, // TextMode (Static)    
-                StringBody = textStringBody
-            };
-            var fullWindowMessage = new FullWindow //Display version
-            {
-                MessageType = 0x71, // FullWindow message 
-                MessageLevel = (byte)message_layout.message_priority, // level
-                //滾動模式
-                MessageScroll = new ScrollInfo
-                {
-                    ScrollMode = 0x64,
-                    ScrollSpeed = (byte)message_layout.move_speed,
-                    PauseTime = 10
-                },
-                MessageContent = new List<StringMessage> { stringMessage }
-            };
-            var sequence1 = new Display.Sequence
-            {
-                SequenceNo = 1,
-                Font = new FontSetting { Size = FontSize.Font24x24, Style = Display.FontStyle.Ming },
-                Messages = new List<IMessage> { fullWindowMessage }
-            };
-            var processor = new PacketProcessor();
-            var startCode = new byte[] { 0x55, 0xAA };
-            var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
-            var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
-            var serializedData = processor.SerializePacket(packet);
+            ////  取得單一一筆預錄訊息的資料
+            //var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id);
+            //data(message_layout);
+            //var fontColorString = ASI.Wanda.DCU.DB.Tables.System.sysConfig.PickColor(message_layout.font_color);
+            //var fontColor = DataConversion.FromHex(fontColorString);
+            
+            //var textStringBody = new TextStringBody
+            //{
+            //    RedColor = fontColor[0],
+            //    GreenColor = fontColor[1],
+            //    BlueColor = fontColor[2],
+            //    StringText = message_layout.message_content
+            //};
+            //var stringMessage = new StringMessage
+            //{
+            //    StringMode = 0x2A, // TextMode (Static)   
+            //    StringBody = textStringBody
+            //};
+            //var fullWindowMessage = new FullWindow //Display version
+            //{
+            //    MessageType = 0x71, // FullWindow message 
+            //    MessageLevel = (byte)message_layout.message_priority, // level
+            //    //滾動模式
+            //    MessageScroll = new ScrollInfo
+            //    {
+            //        ScrollMode = 0x64,
+            //        ScrollSpeed = (byte)message_layout.move_speed,
+            //        PauseTime = 10
+            //    },
+            //    MessageContent = new List<StringMessage> { stringMessage }
+            //};
+            //var sequence1 = new Display.Sequence
+            //{
+            //    SequenceNo = 1,
+            //    Font = new FontSetting { Size = FontSize.Font24x24, Style = Display.FontStyle.Ming },
+            //    Messages = new List<IMessage> { fullWindowMessage }
+            //};
+            //var processor = new PacketProcessor();
+            //var startCode = new byte[] { 0x55, 0xAA };
+            //var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
+            //var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
+            //var serializedData = processor.SerializePacket(packet);
         }
 
         #endregion
         #region Button
         private void button1_Click(object sender, EventArgs e)
         {
-            // 獲取當前 textBox1 中的內容
+            // 獲取當前 textBox1 中的內容 
             string textBoxContent = textBox1.Text;
 
-            // 提取字體顏色和字體內容
+            // 提取字體顏色和字體內容 
             string fontColor = ExtractValue(textBoxContent, "字體顏色 : ");
             string messageContent = ExtractValue(textBoxContent, "字體內容 : ");
 
-            // 將 messageContent 轉換為字節數組
+            // 將 messageContent 轉換為字節數組 
             var messageContentByte = Encoding.GetEncoding(950).GetBytes(messageContent);
 
             // 將字體顏色轉換為字節數組
@@ -183,7 +184,7 @@ namespace UITest
             else
             {
                 textBox2.Text = "尚未初始化 textStringBody。\r\n";
-            }
+            } 
 
         }
         private void button3_Click(object sender, EventArgs e)
@@ -274,10 +275,10 @@ namespace UITest
         {
 
             var ByteData = textBox6.Text;
-            // 將十六進制字串轉換為字節陣列
+            // 將十六進制字串轉換為字節陣列 
             var temp = ConvertHexStringToByteArray(ByteData);
             // 驗證封包是否符合
-            string errorMessage;
+            string errorMessage; 
             LeftPlatformHandlerVerify test = new LeftPlatformHandlerVerify();
             var result = test.ValidatePacket(temp, out errorMessage);
             //根據結果更新畫面
@@ -341,9 +342,9 @@ namespace UITest
         private void Version7BT_Click(object sender, EventArgs e)
         {
             var ByteData = textBox12.Text;
-            // 將十六進制字串轉換為字節陣列
+            // 將十六進制字串轉換為字節陣列 
             var temp = ConvertHexStringToByteArray(ByteData);
-            // 驗證封包是否符合
+            // 驗證封包是否符合 
             string errorMessage;
             IdentifierStatusImageTopLeft24x48HandlerVerify Verify = new IdentifierStatusImageTopLeft24x48HandlerVerify();
             var result = Verify.ValidatePacket(temp, out errorMessage);

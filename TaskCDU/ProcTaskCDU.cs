@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Newtonsoft.Json;
 
 
 
@@ -124,6 +125,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
                 if (mSGFromTaskDMD.UnPack(pMessage) > 0)
                 {
+                   
                     try
                     {
                         string sJsonData = mSGFromTaskDMD.JsonData;
@@ -133,36 +135,32 @@ namespace ASI.Wanda.DCU.TaskCDU
                         switch (sJsonObjectName)
                         {
                             case ASI.Wanda.DCU.TaskCDU.Constants.SendPreRecordMsg: //預錄訊息
-                                string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
-                                string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
-                                string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
-                                string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
-                                string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
-
-                                ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
-
-                                if (dbName1 == "dmd_pre_record_message") //預錄訊息
+                                // 從 JSON 數據中提取相關值
+                                var logData = new
                                 {
+                                    Message = "收到來自TaskDMD的訊息",
+                                    JsonData = sJsonData,
+                                    SeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID"),
+                                    MsgID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id"),
+                                    TargetDU = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du"),
+                                    DbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1"),
+                                    DbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2")
+                                };
+                                    // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄
+                                    string formattedLog = JsonConvert.SerializeObject(logData, Formatting.Indented);
+                                    ASI.Lib.Log.DebugLog.Log(_mProcName, formattedLog);
+                                
+                                    // 處理消息並記錄結果
                                     string result = "";
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
 
-                                    byte[] SerialiazedData = new byte[] { };
-                                    //傳送到面板上 
-                                    taskCDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result , out SerialiazedData);
 
-                                    _mSerial.Send(SerialiazedData);
-                                  //  string serializedDataHex = BitConverter.ToString(SerialiazedData);
+                                    // 發送消息到顯示面板
+                                    taskCDUHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result );
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message"+ result );
-                                }
-                                else
-                                {
-                                    //判斷收到的訊息ID
-                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理其他訊息");
-                                }
                                 break;
 
                             case ASI.Wanda.DCU.TaskCDU.Constants.SendInstantMsg: //即時訊息
-                               
                                 break;
                             case ASI.Wanda.DCU.TaskCDU.Constants.SendPowerTimeSetting:
                                 taskCDUHelper.PowerSetting(Station_ID);

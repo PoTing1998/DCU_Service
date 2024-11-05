@@ -15,7 +15,7 @@ namespace ASI.Wanda.DCU.TaskSDU
     {
         #region constructor
         static int mSEQ = 0; // 計算累進發送端的次數  
-        ASI.Lib.Comm.SerialPort.SerialPortLib serial = null;
+        ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
 
         /// <summary>
         /// 讀取火災資料
@@ -28,6 +28,9 @@ namespace ASI.Wanda.DCU.TaskSDU
         static string sClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
         static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
+
+        static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
+        static string _mDU_ID = "LG01_CDU_01";
         #endregion
         /// <summary>
         /// 處理DMD模組執行程序所收到之訊息 
@@ -79,15 +82,15 @@ namespace ASI.Wanda.DCU.TaskSDU
          
             var iComPort = ConfigApp.Instance.GetConfigSetting("SDUComPort"); ;
             var iBaudrate = ConfigApp.Instance.GetConfigSetting("SDUBaudrate"); ;
-            serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
+            _mSerial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
             string connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
-            serial.ConnectionString = connectionString;
-            serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
-            serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
+            _mSerial.ConnectionString = connectionString;
+            _mSerial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
+            _mSerial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
             int result = -1; // Default to an error state
             try
             {
-                result = serial.Open();
+                result = _mSerial.Open();
                 if (result != 0)
                 {
                     ASI.Lib.Log.ErrorLog.Log(_mProcName, "Serial port open failed");
@@ -117,7 +120,6 @@ namespace ASI.Wanda.DCU.TaskSDU
         {
             try
             {
-
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
                 if (mSGFromTaskDMD.UnPack(pMessage) > 0)
                 {
@@ -125,27 +127,52 @@ namespace ASI.Wanda.DCU.TaskSDU
                     {
                         string sJsonData = mSGFromTaskDMD.JsonData;
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
+                        var taskCDUHelper = new ASI.Wanda.DCU.TaskSDU.TaskSDUHelper(_mProcName, _mSerial);
 
-                        string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
-                        string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
-                        string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
-                        string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
-                        string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
-
-                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
-                        var taskSDUHelper = new ASI.Wanda.DCU.TaskSDU.TaskSDUHelper(_mProcName, serial);
-
-                        if (dbName1 == "dmd_pre_record_message")
+                        switch (sJsonObjectName)
                         {
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
+                            case ASI.Wanda.DCU.TaskSDU.Constants.SendPreRecordMsg: //預錄訊息
+                                string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
+                                string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
+                                string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
+                                string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
+                                string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
+
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
+
+                                if (dbName1 == "dmd_pre_record_message") //預錄訊息
+                                {
+                                    string result = "";
+                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
+
+                                    byte[] SerialiazedData = new byte[] { };
+                                    //傳送到面板上 
+                                    taskCDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result);
+                                    //  string serializedDataHex = BitConverter.ToString(SerialiazedData);
+                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message" + result);
+                                }
+                                else
+                                {
+                                    //判斷收到的訊息ID
+                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理其他訊息");
+                                }
+                                break;
+
+                            case ASI.Wanda.DCU.TaskSDU.Constants.SendInstantMsg: //即時訊息
+
+                                break;
+                            case ASI.Wanda.DCU.TaskSDU.Constants.SendPowerTimeSetting:
+                                taskCDUHelper.PowerSetting(Station_ID);
+                                break;
+                            case "節能模式開啟":
+                               
+                                break;
+                            case "節能模式關閉":
+                             
+                                break;
                         }
-                        else
-                        {
-                            //判斷收到的訊息ID  
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, "處理其他訊息");
-                        }
-                        //傳送到面板上
-                        taskSDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
+
+
                     }
                     catch (Exception ex)
                     {
@@ -158,6 +185,7 @@ namespace ASI.Wanda.DCU.TaskSDU
             {
                 ASI.Lib.Log.ErrorLog.Log(_mProcName, ex);
             }
+
             return -1;
         }
 
@@ -262,7 +290,7 @@ namespace ASI.Wanda.DCU.TaskSDU
         private void ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
-            var taskUPDHelper = new ASI.Wanda.DCU.TaskSDU.TaskSDUHelper(_mProcName, serial);
+            var taskUPDHelper = new ASI.Wanda.DCU.TaskSDU.TaskSDUHelper(_mProcName, _mSerial);
             switch (dataByteAtIndex8)
             {
                 case 0x81:
@@ -363,11 +391,11 @@ namespace ASI.Wanda.DCU.TaskSDU
         {
             try
             {
-                serial.Close();
-                serial = null;
-                serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
-                serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
-                serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
+                _mSerial.Close();
+                _mSerial = null;
+                _mSerial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
+                _mSerial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
+                _mSerial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
             }
             catch (Exception)
             {

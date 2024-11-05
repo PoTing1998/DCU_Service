@@ -36,11 +36,11 @@ namespace ASI.Wanda.DCU.TaskCDU
     }
     public class TaskCDUHelper
     {
+        private string _mProcName;
         private const string Pattern = @"LG01_CCS_CDU-1"; // 定義要篩選的模式
         public const string _mDU_ID = "LG01_CCS_CDU-1";
         public  bool is_back = true;
         static string StationID = ConfigApp.Instance.GetConfigSetting("Station_ID");
-        private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
     
         public TaskCDUHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
@@ -83,73 +83,89 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <param name="dbName2">資料庫名稱 2。</param>
         /// <param name="result">操作結果輸出參數。</param>
         /// <param name="dataByte">封包資料輸出參數。</param>
-        public void SendMessageToDisplay(string targetDu, string dbName1, string dbName2, out string result, out byte[] dataByte)
+        public void SendMessageToDisplay(string targetDu, string dbName1, string dbName2, out string result)
         {
-            // 創建並傳送顯示訊息，取得結果 
-            var sendResult = CreateAndSendMessage(targetDu, dbName1, dbName2);
-            result = sendResult.Result;
-            dataByte = sendResult.DataByte;
+            var results = CreateAndSendMessage(targetDu, dbName1, dbName2);
+            var successCount = results.Count(r => r.Result == "成功傳送");
+
+            result = successCount > 0 ? $"成功傳送 {successCount} 筆訊息" : "傳送失敗";
+
+            foreach (var displayResult in results)
+            {
+                if (displayResult.DataByte != null)
+                {
+                    _mSerial.Send(displayResult.DataByte);
+                }
+            }
         }
+        
 
         /// <summary>
-        /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。
+        /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。 
         /// </summary>
         /// <param name="targetDu">目標設備單元標識符。</param>
         /// <param name="dbName1">資料庫名稱 1。</param>
         /// <param name="dbName2">資料庫名稱 2。</param>
         /// <returns>包含操作結果與封包資料的 DisplayMessageResult 物件。</returns>
-        private DisplayMessageResult CreateAndSendMessage(string targetDu, string dbName1, string dbName2)
+        private List<DisplayMessageResult> CreateAndSendMessage(string targetDu, string dbName1, string dbName2)
         {
-            var result = new DisplayMessageResult { Result = "傳送失敗：未知錯誤", DataByte = null };
+            var results = new List<DisplayMessageResult>();
 
             try
             {
                 // 驗證輸入參數 
                 ValidateInput(targetDu);
 
-                // 拆分 targetDu 字符串並篩選符合模式的裝置 ID 
                 string[] deviceStrings = targetDu.Split(',');
                 string matchedDevice = null;
                 foreach (var deviceString in deviceStrings)
-                {   
-                    string trimmedDevice = deviceString.Trim();  
+                {
+                    string trimmedDevice = deviceString.Trim();
                     if (Regex.IsMatch(trimmedDevice, Pattern))
                     {
                         matchedDevice = trimmedDevice;
-                        break; // 找到匹配裝置後立即退出迴圈 
+                        break;
                     }
                 }
-                
-                // 解析 targetDu 並取得設備資訊  
+
                 var deviceInfo = GetDeviceInfo(matchedDevice);
+                var messageIds = GetPlayingItemIds(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
 
-                // 從資料庫中取得當前播放的消息 ID 與佈局 
-                var messageId = GetPlayingItemId(deviceInfo);
-                var messageLayout = GetMessageLayout(messageId);
-                
-           
-                // 建立文字訊息主體與全屏顯示消息
-                var textStringBody = CreateTextStringBody(messageLayout);
-                var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
+                foreach (var messageId in messageIds)
+                {
+                    var result = new DisplayMessageResult(); // 每個 messageId 的結果
 
-                // 建立顯示序列與封包
-                var sequence = CreateDisplaySequence(fullWindowMessage);
-                //取得顯示器的ID
-                var DUID =   ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDs(matchedDevice); //利用du_id 取得面板的id
-                var packet = CreatePacket(_mDU_ID, sequence);
+                    try
+                    {
+                        var messageLayout = GetMessageLayout(messageId);
+                        var textStringBody = CreateTextStringBody(messageLayout);
+                        var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
 
-                // 序列化並傳送封包
-                result.DataByte = SerializeAndSendPacket(packet);
-                result.Result = "成功傳送";
+                        var sequence = CreateDisplaySequence(fullWindowMessage);
+                        var DUID = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDs(matchedDevice);
+                        var packet = CreatePacket(_mDU_ID, sequence);
+
+                        result.DataByte = SerializeAndSendPacket(packet);
+                        result.Result = "成功傳送";
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleError(ex, result);
+                    }
+
+                    results.Add(result);
+                }
             }
             catch (Exception ex)
             {
-                // 異常處理
-                HandleError(ex, ref result);
+                var result = new DisplayMessageResult { Result = "傳送失敗：未知錯誤", DataByte = null };
+                HandleError(ex, result);
+                results.Add(result); // 添加通用的異常結果
             }
 
-            return result;
+            return results;
         }
+
 
         /// <summary>
         /// 驗證輸入的目標設備單元標識符是否為空值。
@@ -179,9 +195,9 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// </summary>
         /// <param name="deviceInfo">設備資訊物件。</param>
         /// <returns>當前播放的消息 ID。</returns> 
-        private Guid GetPlayingItemId(DeviceInfo deviceInfo)
+        private List<Guid> GetPlayingItemIds(string Station , string Location, string DeviceID)
         {
-            var messageId = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
+            var messageId = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemIds(Station, Location, DeviceID);
             if (messageId == null)
                 throw new InvalidOperationException("無法從資料庫中取得正在播放的消息 ID。");  
             return messageId;
@@ -293,7 +309,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// </summary>
         /// <param name="ex">捕獲的異常物件。</param>
         /// <param name="result">包含操作結果的 DisplayMessageResult 物件。</param>
-        private void HandleError(Exception ex, ref DisplayMessageResult result)
+        private void HandleError(Exception ex, DisplayMessageResult result)
         {
             switch (ex)
             {
@@ -483,7 +499,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             try
             {
                 var ConfigDate = ASI.Wanda.DCU.DB.Tables.System.sysConfig.SelectColor(colorName);
-                ASI.Lib.Log.DebugLog.Log(_mProcName, ConfigDate.config_value.ToString());
+
                 return DataConversion.FromHex(ConfigDate.config_value);
             }
             catch (Exception ex)

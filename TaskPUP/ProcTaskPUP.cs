@@ -32,7 +32,7 @@ namespace ASI.Wanda.DCU.TaskPUP
     {
         #region constructor
         static int mSEQ = 0; // 計算累進發送端的次數  
-        ASI.Lib.Comm.SerialPort.SerialPortLib serial = null;
+        ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
         /// <summary>
         /// 讀取火災資料
         /// </summary>
@@ -44,7 +44,8 @@ namespace ASI.Wanda.DCU.TaskPUP
         static string sClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
         static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
-      
+        static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
+        static string _mDU_ID = "LG01_CDU_01";
         #endregion
 
         #region MSMQ Method
@@ -102,16 +103,16 @@ namespace ASI.Wanda.DCU.TaskPUP
             string dbUserID = "postgres";
             string dbPassword = "postgres";
             var connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
-            serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
-            serial.ConnectionString = connectionString;
-            serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
-            serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
+            _mSerial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
+            _mSerial.ConnectionString = connectionString;
+            _mSerial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
+            _mSerial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
             int result = -1; // Default to an error state
 
             try
             {
                 // 2. 開啟 serialPort
-                result = serial.Open();
+                result = _mSerial.Open();
                 if (result != 0)
                 {
                     ASI.Lib.Log.ErrorLog.Log(_mProcName, "Serial port 開啟失敗");
@@ -136,7 +137,7 @@ namespace ASI.Wanda.DCU.TaskPUP
             return base.StartTask(pComputer, pProcName);
         }
 
-      
+
         /// <summary>
         /// 處理TaskDMD的訊息
         /// </summary>
@@ -149,52 +150,54 @@ namespace ASI.Wanda.DCU.TaskPUP
                 {
                     try
                     {
-                        ASI.Wanda.DCU.TaskPUP.TaskPUPHelper _taskPUPHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, serial);
-
                         string sJsonData = mSGFromTaskDMD.JsonData;
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-                       
-                        if (sJsonObjectName == ASI.Wanda.DCU.TaskPUP.TaskPUPHelper.Constants.SendPreRecordMsg)
+                        var taskCDUHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, _mSerial);
+
+                        switch (sJsonObjectName)
                         {
-                            string PreRecordMessageSettingSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
-                            string PreRecordMessageSettingMsg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
-                            string PreRecordMessageSettingDbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
-                            string PreRecordMessageSettingDbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
-                            string PreRecordMessageSettingTarget_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
+                            case ASI.Wanda.DCU.TaskPUP.Constants.SendPreRecordMsg: //預錄訊息
+                                string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
+                                string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
+                                string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
+                                string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
+                                string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
 
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{PreRecordMessageSettingSeatID}；MsgID:{PreRecordMessageSettingMsg_id}；target_du:{PreRecordMessageSettingTarget_du}; dbName1 :{PreRecordMessageSettingDbName1};dbName2 :{PreRecordMessageSettingDbName2}");
-                            //傳送到面板上
-                            _taskPUPHelper.judgeDbName(PreRecordMessageSettingDbName1);
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
+
+                                if (dbName1 == "dmd_pre_record_message") //預錄訊息
+                                {
+                                    string result = "";
+                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
+
+                                    byte[] SerialiazedData = new byte[] { };
+                                    //傳送到面板上 
+                                    taskCDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result);
+                                    //  string serializedDataHex = BitConverter.ToString(SerialiazedData);
+                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message" + result);
+                                }
+                                else
+                                {
+                                    //判斷收到的訊息ID
+                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理其他訊息");
+                                }
+                                break;
+
+                            case ASI.Wanda.DCU.TaskPUP.Constants.SendInstantMsg: //即時訊息
+
+                                break;
+                            case ASI.Wanda.DCU.TaskPUP.Constants.SendPowerTimeSetting:
+                                taskCDUHelper.PowerSetting(Station_ID);
+                                break;
+                            case "節能模式開啟":
+                              //  OpenDisplay();
+                                break;
+                            case "節能模式關閉":
+                               // CloseDisplay();
+                                break;
                         }
-                        else if (sJsonObjectName == ASI.Wanda.DCU.TaskPUP.TaskPUPHelper.Constants.SendInstantMsg)
-                        {
-                            string PreInstantMessageSettingSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
-                            string PreInstantMessageSettingMsg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
-                            string PreInstantMessageSettingDbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
-                            string PreInstantMessageSettingDbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
-                            string PreInstantMessageSettingTarget_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
 
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{PreInstantMessageSettingSeatID}；MsgID:{PreInstantMessageSettingMsg_id}；target_du:{PreInstantMessageSettingTarget_du}; dbName1 :{PreInstantMessageSettingDbName1};dbName2 :{PreInstantMessageSettingDbName2}");
 
-                            //傳送到面板上
-                            _taskPUPHelper.judgeDbName( PreInstantMessageSettingDbName1);
-
-                        }
-                        else if (sJsonObjectName == ASI.Wanda.DCU.TaskPUP.TaskPUPHelper.Constants.SendScheduleSetting)
-                        {
-                            string PreScheduleSettingSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
-                            string PreSendScheduleSettingMsg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
-                            string PreSendScheduleSettingDbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
-                            string PreSendScheduleSettingDbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{PreScheduleSettingSeatID}；MsgID:{PreSendScheduleSettingMsg_id}；dbName1 :{PreSendScheduleSettingDbName1};dbName2 :{PreSendScheduleSettingDbName2}");
-                            //傳送到面板上
-                            _taskPUPHelper.judgeDbName(PreSendScheduleSettingDbName1);
-                        }
-                        else if(sJsonObjectName == ASI.Wanda.DCU.TaskPUP.TaskPUPHelper.Constants.SendPowerTimeSetting)
-                        {
-                            _taskPUPHelper.PowerSetting("LG01");
-
-                        }
                     }
                     catch (Exception ex)
                     {
@@ -207,9 +210,10 @@ namespace ASI.Wanda.DCU.TaskPUP
             {
                 ASI.Lib.Log.ErrorLog.Log(_mProcName, ex);
             }
+
             return -1;
         }
-      
+
         /// <summary>
         /// 處理TaskPA的訊息   
         /// </summary>  
@@ -259,11 +263,11 @@ namespace ASI.Wanda.DCU.TaskPUP
         {
             try
             {
-                serial.Close();
-                serial = null;
-                serial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
-                serial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
-                serial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
+                _mSerial.Close();
+                _mSerial = null;
+                _mSerial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
+                _mSerial.ReceivedEvent += new ASI.Lib.Comm.ReceivedEvents.ReceivedEventHandler(SerialPort_ReceivedEvent);
+                _mSerial.DisconnectedEvent += new ASI.Lib.Comm.ReceivedEvents.DisconnectedEventHandler(SerialPort_DisconnectedEvent);
             }
             catch (Exception ex)
             {
@@ -365,7 +369,7 @@ namespace ASI.Wanda.DCU.TaskPUP
         private void ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
-            var taskPUPHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, serial);
+            var taskPUPHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, _mSerial);
             switch (dataByteAtIndex8)
             {
                 case 0x81:
