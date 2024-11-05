@@ -134,7 +134,8 @@ namespace ASI.Wanda.DCU.TaskCDU
 
                         switch (sJsonObjectName)
                         {
-                            case ASI.Wanda.DCU.TaskCDU.Constants.SendPreRecordMsg: //預錄訊息
+                            case ASI.Wanda.DCU.TaskCDU.Constants.SendPreRecordMsg: //預錄訊息 
+                                 
                                 // 從 JSON 數據中提取相關值
                                 var logData = new
                                 {

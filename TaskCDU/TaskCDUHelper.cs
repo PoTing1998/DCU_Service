@@ -224,16 +224,14 @@ namespace ASI.Wanda.DCU.TaskCDU
         private TextStringBody CreateTextStringBody(dmd_pre_record_message messageLayout)
         {
             var fontColor = ProcessMessageColor(messageLayout.font_color); 
-            //   var fontColor = new byte[] { 0xff, 0xff, 0x00 }; 
-            if (fontColor == null || fontColor.Length != 3)
-                throw new InvalidOperationException("無法處理消息顏色或 RGB 值無效。"); 
-      
+            if (fontColor == null || fontColor.Length != 3) throw new InvalidOperationException("無法處理消息顏色或 RGB 值無效。");
+            var content = messageLayout.message_content + messageLayout.message_content_en;
             return new TextStringBody
             {
                 RedColor = fontColor[0],
                 GreenColor = fontColor[1],
                 BlueColor = fontColor[2],
-                StringText = messageLayout.message_content
+                StringText = content
             };
         }
 
