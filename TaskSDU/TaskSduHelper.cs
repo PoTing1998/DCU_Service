@@ -24,7 +24,7 @@ namespace ASI.Wanda.DCU.TaskSDU
 
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
-
+        public const string _mDU_ID = "LG01_CDU_01";
         public TaskSDUHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
         {
             _mProcName = mProcName;
@@ -97,7 +97,10 @@ namespace ASI.Wanda.DCU.TaskSDU
 
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
-                var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
+                var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+                var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+
+                var packet = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Sequence> { sequence1 });
                 var serializedData = processor.SerializePacket(packet);
                 ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
 
@@ -164,7 +167,9 @@ namespace ASI.Wanda.DCU.TaskSDU
 
                 // Send Chinese Message   
                 var sequence1 = CreateSequence(FireContentChinese, 1);
-                var packet1 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
+                var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+                var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+                var packet1 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
                 var serializedData1 = processor.SerializePacket(packet1);
                 ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData1));
 
@@ -172,7 +177,7 @@ namespace ASI.Wanda.DCU.TaskSDU
                 ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + _mProcName, temp.ToString());
                 // Send English Message 
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
-                var packet2 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
+                var packet2 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
                 var serializedData2 = processor.SerializePacket(packet2);
                 ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData2));
 
@@ -182,7 +187,7 @@ namespace ASI.Wanda.DCU.TaskSDU
                 {
                     await Task.Delay(10000); // 延遲五秒   
                     var OffMode = new byte[] { 0x02 };
-                    var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
+                    var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, OffMode);
                     var serializedDataOff = processor.SerializePacket(packetOff);
                     ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
                     _mSerial.Send(serializedDataOff);
@@ -193,7 +198,7 @@ namespace ASI.Wanda.DCU.TaskSDU
                 {
                     await Task.Delay(10000); // 延遲十秒 
                     var OffMode = new byte[] { 0x02 };
-                    var packetOff2 = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
+                    var packetOff2 = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, OffMode);
                     var serializedDataOff2 = processor.SerializePacket(packetOff2);
                     ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff2));
                     _mSerial.Send(serializedDataOff2);
@@ -248,7 +253,9 @@ namespace ASI.Wanda.DCU.TaskSDU
             var processor = new PacketProcessor();
             var function = new PowerControlHandler();
             var Open = new byte[] { 0x3A, 0X00 };
-            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Open);
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Open);
             var serializedDataOpen = processor.SerializePacket(packetOpen);
             _mSerial.Send(serializedDataOpen);
             ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
@@ -262,7 +269,9 @@ namespace ASI.Wanda.DCU.TaskSDU
             var processor = new PacketProcessor();
             var function = new PowerControlHandler();
             var Off = new byte[] { 0x3A, 0X01 };
-            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Off);
             var serializedDataOff = processor.SerializePacket(packetOff);
             _mSerial.Send(serializedDataOff);
             ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));

@@ -101,6 +101,10 @@
       <Project>{fd5a072f-115d-4896-91d3-996ed55cdae3}</Project>
       <Name>Display</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TaskPDU\TaskCDU.csproj">
+      <Project>{C01457E8-7668-4DD5-874D-19068027A16A}</Project>
+      <Name>TaskCDU</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TaskSDU\TaskSDU.csproj">
       <Project>{34d6f4ab-dd12-47b4-8553-29b455421cb5}</Project>
       <Name>TaskSDU</Name>

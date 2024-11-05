@@ -134,7 +134,7 @@ namespace ASI.Wanda.DCU.TaskPDN
 
                         ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
                         var taskPDNHelper = new ASI.Wanda.DCU.TaskPDN.TaskPDNHelper(_mProcName, serial);
-
+                        string result = "";
                         if (dbName1 == "dmd_pre_record_message")
                         {
                             ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
@@ -144,8 +144,11 @@ namespace ASI.Wanda.DCU.TaskPDN
                             //判斷收到的訊息ID  
                             ASI.Lib.Log.DebugLog.Log(_mProcName, "處理其他訊息");
                         }
+
+                        byte[] SerialiazedData = new byte[] { };
                         //傳送到面板上
-                        taskPDNHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
+                        taskPDNHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result, out SerialiazedData);
+                      //  _mSerial.Send(SerialiazedData);
                     }
                     catch (Exception ex)
                     {

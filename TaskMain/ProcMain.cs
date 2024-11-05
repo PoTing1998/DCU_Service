@@ -61,7 +61,6 @@ namespace ASI.Wanda.DCU.TaskMain
                     }
                 }
             }
-
             return -1;
         }
 
@@ -115,29 +114,6 @@ namespace ASI.Wanda.DCU.TaskMain
         /// collection of process's state
         /// </summary>
 		private List<ProcInfo> mProcInfo = new List<ProcInfo>();
-        //private List<ProcInfo> ReadProcInfo()
-        //{
-        //    List<ProcInfo> proc_infos = new List<ProcInfo>();
-        //    DataBase adb = new DataBase(null);
-        //    try
-        //    {
-        //        adb = ProjectDB.Connect(ConfigApp.Instance.ServerDB);
-        //        tbProcConf atable = new tbProcConf(adb.Conn);
-        //        atable.SelectAll();
-        //        foreach (tbProcConf.Row arow in atable.records)
-        //        {
-        //            ProcInfo ainfo = new ProcInfo(mComputerName, mProcName, arow.ProcID);
-        //            ainfo.InUse = arow.InUse;
-        //            ainfo.AutoFlag = arow.AutoAlive;
-        //            ainfo.ExeName = arow.ExeName;
-        //            proc_infos.Add(ainfo);
-        //        }
-        //    }
-        //    finally { adb.Close(); }
-
-        //    return proc_infos;
-        //}
-
         /// <summary>
         /// 讀取config.xml裡各個process資訊並存放在ProcInfo物件
         /// </summary>

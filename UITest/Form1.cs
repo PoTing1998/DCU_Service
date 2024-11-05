@@ -1,4 +1,5 @@
 ﻿using ASI.Lib.Msg.Parsing;
+using ASI.Wanda.DCU.TaskCDU;
 using ASI.Wanda.DCU.TaskSDU;
 
 using Display;
@@ -13,6 +14,7 @@ using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -27,7 +29,6 @@ namespace UITest
     {
         #region  construct
         private string _mProcName;
-        ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
         private string StationID;
         private string AreaID;
         private string DeviceID;
@@ -812,8 +813,114 @@ namespace UITest
         }
 
 
+
         #endregion
 
-    
+        private void button6_Click(object sender, EventArgs e)
+        {
+            // 獲取輸入內容 
+            var s = textBox3.Text;
+
+            // 建立一個 StringBuilder 來構建帶有空格的輸出
+            StringBuilder formattedString = new StringBuilder();
+
+            // 遍歷字串，每兩個字元添加一個空格
+            for (int i = 0; i < s.Length; i += 2)
+            {
+                // 如果有兩個字元，則加入這兩個字元；否則僅加入最後一個字元 
+                if (i + 2 <= s.Length)
+                {
+                    formattedString.Append(s.Substring(i, 2));  // 取兩個字元 
+                }
+                else
+                {
+                    formattedString.Append(s[i]);  // 僅取最後一個字元  
+                }
+                // 如果不是最後一組字元，添加空格
+                if (i + 2 < s.Length)
+                {
+                    formattedString.Append(" ");
+                }
+            }
+
+            // 將結果顯示在另一個 TextBox 中（假設你有一個 textBox4）
+            textBox4.Text = formattedString.ToString();
+        }
+
+        private const string Pattern = @"LG01_UPF_PDU-1"; // 定義要篩選的模式
+        private void button7_Click(object sender, EventArgs e)
+        {
+         
+            string[] deviceStrings = textBox8.Text.Split(',');
+            string matchedDevice = null;
+            foreach (var deviceString in deviceStrings)
+            {
+                string trimmedDevice = deviceString.Trim();
+                if (Regex.IsMatch(trimmedDevice, Pattern))
+                {
+                    matchedDevice = trimmedDevice;
+                    break; // 找到匹配裝置後立即退出迴圈
+                }
+
+            }
+
+            var result = matchedDevice;
+            textBox14.Text = result.ToString();
+        }
+       
+        
+
+        /// <summary>
+        ///分別讀取該設備
+        /// </summary>
+        /// <param name="deviceString"></param>
+        /// <returns></returns>
+        private static DeviceInfo SplitStringToDeviceInfo(string deviceString)
+        {
+            // 正則表達式模式
+            string pattern = @"([A-Z0-9]+)_([A-Z]+)_([A-Z]+-\d+)";
+            Match match = Regex.Match(deviceString, pattern);
+            
+            if (match.Success)
+            {
+                return new DeviceInfo 
+                {
+                    Station = match.Groups[1].Value,
+                    Location = match.Groups[2].Value,
+                    DeviceWithNumber = match.Groups[3].Value
+                };
+            }
+            else
+            {
+                throw new ArgumentException("Invalid device string format", nameof(deviceString));
+            }
+        }
+
+        /// <summary>
+        /// 色碼轉換成byte  
+        /// </summary>
+        /// <param name="colorName"></param>
+        /// <returns></returns>
+        private byte[] ProcessMessageColor(string colorName)
+        {
+            try
+            {
+                var ConfigDate = ASI.Wanda.DCU.DB.Tables.System.sysConfig.SelectColor(colorName);
+                ASI.Lib.Log.DebugLog.Log(_mProcName, ConfigDate.config_value.ToString());
+
+                return DataConversion.FromHex(ConfigDate.config_value);  
+            }
+            catch (Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("Error ProcessMessage ProcessMessageColor", ex);
+                return null;
+            }
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            var temp = ProcessMessageColor(textBox15.Text); 
+            textBox16.Text = temp.ToString();
+        }
     }
 }

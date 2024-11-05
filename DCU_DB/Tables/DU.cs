@@ -23,6 +23,12 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
               );
         }
 
+        public static List<string> GetPanelIDs(string DU_ID)
+        {
+            var data = SelectWhere(string.Format("WHERE du_id = '{0}'", DU_ID)).ToList();
+            return data.Select(d => d.equip_id).ToList();
+        }
+
         /// <summary>
         /// 根據提供的 `du_id` 和 `is_back` 條件，選擇符合的顯示器面向資料，並返回其 `panel_id`。
         /// </summary>
@@ -32,7 +38,7 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
         public static int GetPanelIDByDuAndOrientation(string du_id, bool is_back)
         {
             var data = SelectWhere(string.Format("WHERE du_id = '{0}' and is_back = '{1}'", du_id, is_back)).SingleOrDefault();
-            return data.panel_id;
+            return data.panel_id;  
         }
     }
 

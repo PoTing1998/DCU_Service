@@ -113,9 +113,12 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
             DeleteWhere(whereString);
         }
         static public Guid GetPlayingItemId(string stationID, string area_id, string deviceID)
-        {
-            var temp = SelectWhere( string.Format("where station_id = '{0}' AND area_id = '{1}' AND  device_id = '{2}' ", stationID, area_id, deviceID)).SingleOrDefault();
-            return    temp.message_id;
+        { // 僅傳入篩選條件
+            var temp = SelectWhere(
+                string.Format(" where station_id = '{0}' AND area_id = '{1}' AND device_id = '{2}'",
+                stationID, area_id, deviceID), eSortWay.Desc /*或 Ascending */);
+
+            return temp?.FirstOrDefault()?.message_id ?? Guid.Empty;
         }
 
 

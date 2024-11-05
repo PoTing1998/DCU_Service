@@ -99,7 +99,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sUserID = "postgres";
             string sPassword = "postgres";
             string sCurrentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
-            int result = -1; // Default to an error state
+            // Default to an error state
             try
             {
 
@@ -309,18 +309,18 @@ namespace ASI.Wanda.DCU.TaskDMD
                         //DMD內部通訊定義:Change/Command  
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
-                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog); 
                     }
                     else if (mSGFromTaskDCU.MessageType == 3)
                     {
-                        //DMD內部通訊定義:Response 
+                        //DMD內部通訊定義:Response  
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
-                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog); 
                         //將訊息傳給DMD
                         var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(mSGFromTaskDCU.JsonData);
 
-                        //組封包
+                        //組封包 
                         var Res_SendPreRecordMessage = new ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage(ASI.Wanda.DMD.Enum.Station.OCC);
                         Res_SendPreRecordMessage.seatID = oJsonObject.seatID;
                         Res_SendPreRecordMessage.msg_id = oJsonObject.msg_id;

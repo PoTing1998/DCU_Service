@@ -38,7 +38,7 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             var sLog = $"Ack，訊息識別碼:[{DMDServerMessage.MessageID}]";
             var MSG = new ASI.Wanda.DMD.Message.Message(ASI.Wanda.DMD.Message.Message.eMessageType.Ack, DMDServerMessage.MessageID, null);
-            ASI.Lib.Log.DebugLog.Log("FromDMDService", sLog);
+            ASI.Lib.Log.DebugLog.Log("FromDMDService", sLog); 
             //利用委派的方式傳送
             sendAction?.Invoke(API, MSG);
         }
@@ -48,7 +48,6 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             try
             {
-
                 var MSGFromTaskPUP = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskpup"));
                 //組相對應的封包 
                 MSGFromTaskPUP.MessageType = msgType;
@@ -66,7 +65,6 @@ namespace ASI.Wanda.DMD.TaskDMD
             try
             {
                 var sendPreRecordMessage = new JsonObject.DCU.FromDMD.SendPreRecordMessage(Enum.Station.OCC);
-      
                 var MSGFromTaskCDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskcdu"));
                 //組相對應的封包 
                 MSGFromTaskCDU.MessageType = msgType;
@@ -142,7 +140,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                         ins_user = item.ins_user,
                         send_time = item.send_time,
                         upd_time = item.upd_time,
-                        upd_user = item.upd_user,
+                        upd_user = item.upd_user,  
                     })
                     .ToList();
                 ///刪除原本的資料  
@@ -151,11 +149,11 @@ namespace ASI.Wanda.DMD.TaskDMD
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.DeletePlayingItem(
                         item.station_id, item.area_id, item.device_id);
                 });
-
+                
                 ///遍歷轉換後的列表，進行更新操作  
                 foreach (var item in convertedList)
                 {
-                    ///MSGtype  0 =預錄  1= 及時  
+                    ///MSGtype  0 =預錄  1= 及時 
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.InsertPlayingItem(
                         item.playlist_id,
                         item.station_id,
@@ -237,7 +235,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                         item.message_content_en,
                         item.font_type_en,
                         item.font_size_en,
-                        item.font_color_en
+                        item.font_color_en 
                     );
                 }
 
@@ -252,7 +250,7 @@ namespace ASI.Wanda.DMD.TaskDMD
         }
 
         /// <summary>
-        /// 更新DMDPreRecordMessage資料表   
+        /// 更新DCUInstantMessage資料表   
         /// </summary>
         /// <returns></returns>    
         public IEnumerable<ASI.Wanda.DCU.DB.Tables.DMD.dmdInstantMessage> UpdataDCUInstantMessage()
@@ -262,10 +260,9 @@ namespace ASI.Wanda.DMD.TaskDMD
                 var tempList = ASI.Wanda.DMD.DB.Tables.DMD.dmdInstantMessage.SelectAll();
                 ///轉換過程  
                 var convertedList = tempList
-                    .Select(item => new ASI.Wanda.DMD.DB.Models.dmd_instant_message
+                    .Select(item => new ASI.Wanda.DCU.DB.Models.DMD.dmd_instant_message
                     {
                         message_id = item.message_id,
-
                         message_type = item.message_type,
                         message_priority = item.message_priority,
                         move_mode = item.move_mode,
@@ -296,8 +293,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                 {
                     ///MSGtype  0 =預錄  1= 及時 
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdInstantMessage.InsertInstantMessages(
-                        item.message_id,
-
+                        item.message_id, 
                         item.message_type,
                         item.message_priority,
                         item.move_mode,
@@ -316,11 +312,11 @@ namespace ASI.Wanda.DMD.TaskDMD
 
                 return convertedList.Cast<DCU.DB.Tables.DMD.dmdInstantMessage>();
             }
-            catch (Exception updateException)
+            catch (Exception updateException) 
             {
-                ///記錄例外狀況   
-                ASI.Lib.Log.ErrorLog.Log("Error updating dmdPreRecordMessage", updateException);
-                return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdInstantMessage>();
+                ///記錄例外狀況  
+                ASI.Lib.Log.ErrorLog.Log("Error updating dmdInstantMessage", updateException);
+                return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdInstantMessage>();  
             }
         }
 
@@ -457,7 +453,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedulePlayList.InsertSchedulePlayListItem(
                        item.schedule_id,
                        item.message_id,
-                       item.station_id,
+                       item.station_id,  
                        item.device_id
                     );
                 }

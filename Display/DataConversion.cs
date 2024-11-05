@@ -102,7 +102,7 @@ namespace Display
             //packet[packet.Length - 1] = checkSum;
             //return packet;
 
-            // 使用 LINQ 加總所有的封包內容
+            // 使用 LINQ 加總所有的封包內容 
             checkSum = packetData.Aggregate<byte, byte>(0, (current, bData) => (byte)(current + bData));
 
             // 將 CheckSum 加在封包的最後面

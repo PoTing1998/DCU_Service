@@ -43,18 +43,17 @@ namespace ASI.Wanda.DCU.TaskKernel
 
                 return base.ProcEvent(pLabel, pBody);
             }
-            else
+            else 
             {
                 string astr = "Rcving error : " + pBody;
                 LogFile.Log(mComputerName, _mProcName, "Rcving error : " + pBody);
                 LogFile.Display(astr);
-
                 return -1;
             }
         }
 
         /// <summary>
-        /// handle healthy message from other process
+        /// handle healthy message from other process  
         /// </summary>
         /// <param name="pMessage"></param>
         /// <returns></returns>
@@ -103,7 +102,7 @@ namespace ASI.Wanda.DCU.TaskKernel
                     ahealth.HealthFlag = true;
                     MSQueue.SendMessage(ahealth);
                 }
-
+                
                 PeriodCheckHealth();
 
                 return 1;
@@ -191,6 +190,7 @@ namespace ASI.Wanda.DCU.TaskKernel
         {
             base.StopTask();
             StopProcess(taskmain_info);
+          
         }
     }
 }
