@@ -156,7 +156,7 @@ namespace ASI.Wanda.DCU.TaskPUP
 
                         switch (sJsonObjectName)
                         {
-                            case ASI.Wanda.DCU.TaskPUP.Constants.SendPreRecordMsg: //預錄訊息
+                            case ASI.Wanda.DCU.TaskPUP.Constants.SendPreRecordMsg: //預錄訊息 
                                 string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
                                 string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
                                 string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
@@ -169,11 +169,9 @@ namespace ASI.Wanda.DCU.TaskPUP
                                 {
                                     string result = "";
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
-
                                     byte[] SerialiazedData = new byte[] { };
-                                    //傳送到面板上 
+                                    //傳送到面板上    
                                     taskCDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result);
-                                    //  string serializedDataHex = BitConverter.ToString(SerialiazedData);
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message" + result);
                                 }
                                 else
@@ -190,7 +188,7 @@ namespace ASI.Wanda.DCU.TaskPUP
                                 taskCDUHelper.PowerSetting(Station_ID);
                                 break;
                             case "節能模式開啟":
-                              //  OpenDisplay();
+                               //  OpenDisplay();
                                 break;
                             case "節能模式關閉":
                                // CloseDisplay();

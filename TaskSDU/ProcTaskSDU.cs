@@ -93,7 +93,7 @@ namespace ASI.Wanda.DCU.TaskSDU
                 result = _mSerial.Open();
                 if (result != 0)
                 {
-                    ASI.Lib.Log.ErrorLog.Log(_mProcName, "Serial port open failed");
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, " 打開串口失敗  port open failed");
                     return result; // Return immediately if the serial port failed to open
                 }
 
@@ -139,27 +139,14 @@ namespace ASI.Wanda.DCU.TaskSDU
                                 string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
 
                                 ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
-
-                                if (dbName1 == "dmd_pre_record_message") //預錄訊息
-                                {
-                                    string result = "";
-                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
-
-                                    byte[] SerialiazedData = new byte[] { };
-                                    //傳送到面板上 
-                                    taskCDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result);
-                                    //  string serializedDataHex = BitConverter.ToString(SerialiazedData);
-                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message" + result);
-                                }
-                                else
-                                {
-                                    //判斷收到的訊息ID
-                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理其他訊息");
-                                }
+                                string result = "";
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
+                                //傳送到面板上 
+                                taskCDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result);
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message" + result);
                                 break;
 
                             case ASI.Wanda.DCU.TaskSDU.Constants.SendInstantMsg: //即時訊息
-
                                 break;
                             case ASI.Wanda.DCU.TaskSDU.Constants.SendPowerTimeSetting:
                                 taskCDUHelper.PowerSetting(Station_ID);

@@ -96,10 +96,10 @@ namespace ASI.Wanda.DCU.TaskCDU
                 result = _mSerial.Open(); 
                 if (result != 0)
                 {
-                    ASI.Lib.Log.ErrorLog.Log(_mProcName, "打開串口失敗");
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, "打開串口失敗 Serial port open failed ");
                     return result; // 如果串口打開失敗，立即返回
                 }
-                // 初始化資料庫連線
+                // 初始化資料庫連線 看你家那戶 是在誰名下
                 if (!ASI.Wanda.DCU.DB.Manager.Initializer(dbIP, dbPort, dbName, dbUserID, dbPassword, currentUserID))
                 {
                     ASI.Lib.Log.ErrorLog.Log(_mProcName, $"資料庫連線失敗! {dbIP}:{dbPort};userid={dbUserID}");
@@ -135,7 +135,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                         switch (sJsonObjectName)
                         {
                             case ASI.Wanda.DCU.TaskCDU.Constants.SendPreRecordMsg: //預錄訊息 
-                                 
+                            case ASI.Wanda.DCU.TaskCDU.Constants.SendInstantMsg: //即時訊息
                                 // 從 JSON 數據中提取相關值
                                 var logData = new
                                 {
@@ -150,18 +150,26 @@ namespace ASI.Wanda.DCU.TaskCDU
                                     // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄
                                     string formattedLog = JsonConvert.SerializeObject(logData, Formatting.Indented);
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, formattedLog);
-                                
                                     // 處理消息並記錄結果
                                     string result = "";
-                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
-
-
-                                    // 發送消息到顯示面板
-                                    taskCDUHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result );
-                                    ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message"+ result );
-                                break;
-
-                            case ASI.Wanda.DCU.TaskCDU.Constants.SendInstantMsg: //即時訊息
+                                switch (logData.DbName1)
+                                {
+                                    case "dmd_pre_record_message":
+                                        ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
+                                        // 發送消息到顯示面板（針對預錄訊息的處理）
+                                        taskCDUHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result);
+                                        ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message: " + result);
+                                        break;
+                                    case "dmd_instant_message":
+                                        ASI.Lib.Log.DebugLog.Log(_mProcName, "處理即時消息 dmd_instant_message");
+                                        // 發送消息到顯示面板（針對即時訊息的處理）
+                                        taskCDUHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result);
+                                        ASI.Lib.Log.DebugLog.Log(_mProcName, "處理即時消息 dmd_instant_message: " + result);
+                                        break;
+                                    default:
+                                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"未知的 DbName1 值：{logData.DbName1}");
+                                        break;
+                                }
                                 break;
                             case ASI.Wanda.DCU.TaskCDU.Constants.SendPowerTimeSetting:
                                 taskCDUHelper.PowerSetting(Station_ID);
@@ -173,8 +181,6 @@ namespace ASI.Wanda.DCU.TaskCDU
                                 CloseDisplay();
                                 break;
                         }
-
-
                     }
                     catch (Exception ex)
                     {
