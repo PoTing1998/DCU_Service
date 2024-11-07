@@ -99,7 +99,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     ASI.Lib.Log.ErrorLog.Log(_mProcName, "打開串口失敗 Serial port open failed ");
                     return result; // 如果串口打開失敗，立即返回
                 }
-                // 初始化資料庫連線 看你家那戶 是在誰名下
+                // 初始化資料庫連線 
                 if (!ASI.Wanda.DCU.DB.Manager.Initializer(dbIP, dbPort, dbName, dbUserID, dbPassword, currentUserID))
                 {
                     ASI.Lib.Log.ErrorLog.Log(_mProcName, $"資料庫連線失敗! {dbIP}:{dbPort};userid={dbUserID}");
