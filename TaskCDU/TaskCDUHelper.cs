@@ -310,7 +310,6 @@ namespace ASI.Wanda.DCU.TaskCDU
             var startCode = new byte[] { 0x55, 0xAA };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, false);
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, true); 
-
             var processor = new PacketProcessor();
             return processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(back), Convert.ToByte(front) }, new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
         }
@@ -432,9 +431,9 @@ namespace ASI.Wanda.DCU.TaskCDU
         }
         #endregion
         /// <summary>
-        /// 建立緊急訊息的封包  放入訊息內容以及上下排
+        /// 建立緊急訊息的封包  放入訊息內容以及上下排 
         /// </summary>
-        /// <param name="messageContent"></param>
+        /// <param name="messageContent">訊息內容</param>
         /// <param name="sequenceNo"></param>
         /// <returns></returns>
         Display.Sequence CreateSequence(string messageContent, int sequenceNo)
@@ -499,7 +498,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <summary>
         /// 色碼轉換成byte
         /// </summary>
-        /// <param name="colorName"></param>
+        /// <param name="colorName">顯示顏色</param>
         /// <returns></returns>
         private  byte[] ProcessMessageColor(string colorName)
         { 
@@ -557,7 +556,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <summary>
         /// 找尋車站Id並且判斷是否需要關閉 
         /// </summary>
-        /// <param name="messageID"></param>
+        /// <param name="messageID">車站</param>
         /// <returns></returns> 
         public  dmdPowerSetting PowerSetting(string stationID)
         {
@@ -566,11 +565,12 @@ namespace ASI.Wanda.DCU.TaskCDU
 
             if (stationData.eco_mode == "ON")
             {
-                // 獲取當前日期的月和日以及現在的時間（時和分）
-                int currentMonth = DateTime.Now.Month;
-                int currentDay = DateTime.Now.Day;
-                int currentHour = DateTime.Now.Hour;
-                
+                // 正在使用的月日及時分
+                var currentDate = DateTime.Now;
+                int currentMonth = currentDate.Month;
+                int currentDay = currentDate.Day;
+                int currentHour = currentDate.Hour;
+
                 // 使用 List 儲存不啟動節能模式的日期 
                 var nonEcoDates = new List<(int Month, int Day)>();
 
@@ -583,20 +583,21 @@ namespace ASI.Wanda.DCU.TaskCDU
                         int dayOfMonth = int.Parse(day.Substring(2, 2));
                         nonEcoDates.Add((month, dayOfMonth)); 
 
-                        // 檢查當前日期是否在不啟動節能模式的日期列表中 
-                        if (month == currentMonth && dayOfMonth == currentDay)
-                        {
-                            // 當前日期不啟動節能模式 
-                            continue; 
-                        }
                     }
                     else
                     {
                         // 處理長度不是 4 的情況，代表日期格式錯誤 
                         ASI.Lib.Log.ErrorLog.Log(_mProcName, "無效的日期格式：" + day);
                         continue; 
-                    } 
-                    
+                    }
+
+                    // 檢查當前日期是否在不啟動節能的日期列表中
+                    if (nonEcoDates.Any(d => d.Month == currentMonth && d.Day == currentDay))
+                    {
+                        // 當前日期不啟動節能模式
+                        return null;
+                    }
+
                     // 檢查開關顯示器的時間   
                     string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);

@@ -175,7 +175,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                                 taskCDUHelper.PowerSetting(Station_ID);
                                 break;
                             case "節能模式開啟":
-                                OpenDisplay();
+                                OpenDisplay();//來自taskDMD的 判斷
                                 break;
                             case "節能模式關閉":
                                 CloseDisplay();
@@ -217,7 +217,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     byte[] dataBytes = HexStringToBytes(sJsonData);
                     if (dataBytes.Length >= 10) // 確保有足夠長度的陣列
                     {
-                        ProcessDataBytes(dataBytes);
+                         ProcessDataBytes(dataBytes);
                     }
                     else
                     {
@@ -286,7 +286,11 @@ namespace ASI.Wanda.DCU.TaskCDU
                 return null;
             }
         }
-
+        /// <summary>
+        /// 處理緊急訊息
+        /// </summary>
+        /// <param name="dataBytes"></param>
+        /// <returns></returns>
         private async Task ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
@@ -359,7 +363,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             dataBytes[2] = 0x06;
             Array.Resize(ref dataBytes, dataBytes.Length - 1); // Remove the last byte
             byte newLRC = CalculateLRC(dataBytes);
-            Array.Resize(ref dataBytes, dataBytes.Length + 1); // Add a byte back
+            Array.Resize(ref dataBytes, dataBytes.Length + 1); // Add a byte back 
             dataBytes[dataBytes.Length - 1] = newLRC;
             ASI.Lib.Log.DebugLog.Log($"{_mProcName} replied to TaskPA message at {sRcvTime}", sJsonData);
         }
@@ -411,15 +415,15 @@ namespace ASI.Wanda.DCU.TaskCDU
             string str = "";
             foreach (byte b in dataBytes)
             {
-                str += Convert.ToString(b, 16).ToUpper().PadLeft(2, '0') + " ";
+                str += Convert.ToString(b, 16).ToUpper().PadLeft(2, '0') + " ";  
             } 
             var text = string.Format("{0} \r\n收到收包內容 {1} \r\n", sRcvTime, str);
             var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
             if (dataBytes.Length >= 3 && dataBytes[4] == 0x00)
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName, "顯示器的狀態收到的訊息" + sHexString.ToString());  //處理顯示器回報的狀態
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "顯示器的狀態收到的訊息" + sHexString.ToString());  //處理顯示器回報的狀態 
             }
-            else if (dataBytes[4] != 0x00)
+            else if (dataBytes[4] != 0x00)  
             {   
                 if (dataBytes[4] == 0x01) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "曾經有通訊不良"); }
                 else if (dataBytes[4] == 0x02) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "處於關機狀態 "); }
@@ -466,7 +470,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             // 開啟顯示器的邏輯
             var startCode = new byte[] { 0x55, 0xAA };
             var processor = new PacketProcessor();
-            var function = new PowerControlHandler();
+            var function = new PowerControlHandler(); 
             var Open = new byte[] { 0x3A, 0X00 };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
@@ -474,8 +478,9 @@ namespace ASI.Wanda.DCU.TaskCDU
             var serializedDataOpen = processor.SerializePacket(packetOpen);
              _mSerial.Send(serializedDataOpen);
             ASI.Lib.Log.DebugLog.Log(_mProcName + "顯示畫面開啟", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
+       
         }
+
       
-        
     }
 }
