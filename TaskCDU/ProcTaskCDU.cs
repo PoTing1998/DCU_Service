@@ -21,7 +21,6 @@ namespace ASI.Wanda.DCU.TaskCDU
     public class ProcTaskCDU : ProcBase
     {
         #region constructor
-        static int mSEQ = 0; // 計算累進發送端的次數  
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
 
         /// <summary>
@@ -144,13 +143,13 @@ namespace ASI.Wanda.DCU.TaskCDU
                                     SeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID"),
                                     MsgID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id"),
                                     TargetDU = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du"),
-                                    DbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1"),
+                                    DbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1"), 
                                     DbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2")
                                 };
                                     // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄
                                     string formattedLog = JsonConvert.SerializeObject(logData, Formatting.Indented);
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, formattedLog);
-                                    // 處理消息並記錄結果
+                                    // 處理消息並記錄結果   
                                     string result = "";
                                 switch (logData.DbName1)
                                 {
@@ -235,7 +234,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex); // 記錄例外情況 
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex); // 記錄例外情況  
             }
 
             return -1;
@@ -392,7 +391,6 @@ namespace ASI.Wanda.DCU.TaskCDU
         }
 
         #endregion
-        #region serialport
         void SerialPort_DisconnectedEvent(string source) //斷線處理  
         {
             try
@@ -433,7 +431,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             ASI.Lib.Log.ErrorLog.Log(_mProcName, "從顯示器收到的訊息" + sHexString.ToString());//log紀錄 
         }
 
-        #endregion
+
         /// <summary>
         /// 計算LRC 
         /// </summary>

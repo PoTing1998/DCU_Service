@@ -147,7 +147,7 @@ public class ScheduledTask
                 {
                     ASI.Lib.Log.DebugLog.Log(_mProcName, "當前時間符合播放條件，開始顯示");
                     OpenDisplay();
-                    isDisplayCurrentlyOn = true;
+                    isDisplayCurrentlyOn = true; 
                     SendToTaskCDU("節能模式開啟");
                 }
             }

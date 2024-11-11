@@ -308,6 +308,17 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
                 , messageContentENG, fontTypeENG, fontSizeENG, fontColorENG);
         }
 
+        public static void InsertTrainMessages(string messageID, int messageType, int messageSubType, int messagePriority
+            , int moveMode, int moveSpeed, int displayTimes, int countDownDisplayInterval
+            , string messageContentCHN, string fontTypeCHN, int fontSizeCHN, string fontColorCHN
+            , string messageContentENG, string fontTypeENG, int fontSizeENG, string fontColorENG)
+        {
+            Insert(messageID, messageType, messageSubType, messagePriority
+                , moveMode, moveSpeed, displayTimes, countDownDisplayInterval
+                , messageContentCHN, fontTypeCHN, fontSizeCHN, fontColorCHN
+                , messageContentENG, fontTypeENG, fontSizeENG, fontColorENG);
+        }
+
 
         /// <summary>
         /// 取得訊息的優先權

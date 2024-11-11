@@ -14,15 +14,15 @@ namespace ASI.Wanda.DMD.TaskDMD
     /// </summary>
     public static class Constants
     {
-        public const string SendPreRecordMsg                = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage";
-        public const string SendInstantMsg                  = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendInstantMessage";
-        public const string ScheduleSetting             = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ScheduleSetting";
-        public const string PreRecordMessageSetting     = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting";
-        public const string TrainMessageSetting         = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMessageSetting";
-        public const string PowerTimeSetting            = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PowerTimeSetting";
-        public const string GroupSetting                = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting";
-        public const string ParameterSetting            = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ParameterSetting";
-    }                                                                    
+        public const string SendPreRecordMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage";
+        public const string SendInstantMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendInstantMessage";
+        public const string ScheduleSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ScheduleSetting";
+        public const string PreRecordMessageSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting";
+        public const string TrainMessageSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMessageSetting";
+        public const string PowerTimeSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PowerTimeSetting";
+        public const string GroupSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting";
+        public const string ParameterSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ParameterSetting";
+    }
 
     public class TaskDMDHelper<T> where T : class
     {
@@ -38,7 +38,7 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             var sLog = $"Ack，訊息識別碼:[{DMDServerMessage.MessageID}]";
             var MSG = new ASI.Wanda.DMD.Message.Message(ASI.Wanda.DMD.Message.Message.eMessageType.Ack, DMDServerMessage.MessageID, null);
-            ASI.Lib.Log.DebugLog.Log("FromDMDService", sLog); 
+            ASI.Lib.Log.DebugLog.Log("FromDMDService", sLog);
             //利用委派的方式傳送
             sendAction?.Invoke(API, MSG);
         }
@@ -79,8 +79,8 @@ namespace ASI.Wanda.DMD.TaskDMD
         }
         public void SendToTaskSDU(int msgType, int msgID, string jsonData)
         {
-            try  
-            { 
+            try
+            {
                 var MSGFromTaskSDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertasksdu"));
                 //組相對應的封包 
                 MSGFromTaskSDU.MessageType = msgType;
@@ -140,7 +140,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                         ins_user = item.ins_user,
                         send_time = item.send_time,
                         upd_time = item.upd_time,
-                        upd_user = item.upd_user,  
+                        upd_user = item.upd_user,
                     })
                     .ToList();
                 ///刪除原本的資料  
@@ -149,7 +149,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.DeletePlayingItem(
                         item.station_id, item.area_id, item.device_id);
                 });
-                
+
                 ///遍歷轉換後的列表，進行更新操作  
                 foreach (var item in convertedList)
                 {
@@ -235,7 +235,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                         item.message_content_en,
                         item.font_type_en,
                         item.font_size_en,
-                        item.font_color_en 
+                        item.font_color_en
                     );
                 }
 
@@ -293,7 +293,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                 {
                     ///MSGtype  0 =預錄  1= 及時 
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdInstantMessage.InsertInstantMessages(
-                        item.message_id, 
+                        item.message_id,
                         item.message_type,
                         item.message_priority,
                         item.move_mode,
@@ -312,11 +312,11 @@ namespace ASI.Wanda.DMD.TaskDMD
 
                 return convertedList.Cast<DCU.DB.Tables.DMD.dmdInstantMessage>();
             }
-            catch (Exception updateException) 
+            catch (Exception updateException)
             {
                 ///記錄例外狀況  
                 ASI.Lib.Log.ErrorLog.Log("Error updating dmdInstantMessage", updateException);
-                return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdInstantMessage>();  
+                return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdInstantMessage>();
             }
         }
 
@@ -380,15 +380,15 @@ namespace ASI.Wanda.DMD.TaskDMD
                 var convertedList = tempList
                     .Select(item => new ASI.Wanda.DCU.DB.Models.DMD.dmd_schedule
                     {
-                        schedule_id     = item.schedule_id,
-                        schedule_name   = item.schedule_name,
-                        is_enable       = item.is_enable,
-                        start_date      = item.start_date,
-                        end_date        = item.end_date,
-                        ins_user        = item.ins_user,
-                        ins_time        = item.ins_time,
-                        upd_user        = item.upd_user,
-                        upd_time        = item.upd_time,
+                        schedule_id = item.schedule_id,
+                        schedule_name = item.schedule_name,
+                        is_enable = item.is_enable,
+                        start_date = item.start_date,
+                        end_date = item.end_date,
+                        ins_user = item.ins_user,
+                        ins_time = item.ins_time,
+                        upd_user = item.upd_user,
+                        upd_time = item.upd_time,
                     })
                     .ToList();
                 convertedList.ForEach(item =>
@@ -419,7 +419,6 @@ namespace ASI.Wanda.DMD.TaskDMD
                 return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedule>();
             }
         }
-
         public IEnumerable<ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedulePlayList> UpDMDSchedulePlaylist()
         {
             try
@@ -429,15 +428,15 @@ namespace ASI.Wanda.DMD.TaskDMD
                 var convertedList = tempList
                     .Select(item => new ASI.Wanda.DCU.DB.Models.DMD.dmd_schedule_playlist
                     {
-                        schedule_id     = item.schedule_id,
-                        message_id      = item.message_id,
-                        station_id      = item.station_id,
-                        device_id       = item.device_id,
-                        sned_time       = item.sned_time,
-                        ins_user        = item.ins_user,
-                        ins_time        = item.ins_time,
-                        upd_user        = item.upd_user,
-                        upd_time        = item.upd_time,
+                        schedule_id = item.schedule_id,
+                        message_id = item.message_id,
+                        station_id = item.station_id,
+                        device_id = item.device_id,
+                        sned_time = item.sned_time,
+                        ins_user = item.ins_user,
+                        ins_time = item.ins_time,
+                        upd_user = item.upd_user,
+                        upd_time = item.upd_time,
                     })
                     .ToList();
                 convertedList.ForEach(item =>
@@ -453,7 +452,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedulePlayList.InsertSchedulePlayListItem(
                        item.schedule_id,
                        item.message_id,
-                       item.station_id,  
+                       item.station_id,
                        item.device_id
                     );
                 }
@@ -467,6 +466,10 @@ namespace ASI.Wanda.DMD.TaskDMD
                 return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedulePlayList>();
             }
         }
+        /// <summary>
+        /// 更新節能設定 資料表
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting> UpDateDMDPowerSetting()
         {
             try
@@ -476,22 +479,22 @@ namespace ASI.Wanda.DMD.TaskDMD
                 var convertedList = tempList
                     .Select(item => new ASI.Wanda.DCU.DB.Models.DMD.dmd_power_setting
                     {
-                        station_id      = item.station_id,
-                        eco_mode        = item.eco_mode,
-                        eco_time        = item.eco_time,
-                        not_eco_day     = item.not_eco_day,
-                        auto_play_time  = item.auto_play_time,
-                        auto_eco_time   = item.auto_eco_time,
-                        ins_user        = item.ins_user,
-                        ins_time        = item.ins_time,
-                        upd_user        = item.upd_user,
-                        upd_time        = item.upd_time,
+                        station_id = item.station_id,
+                        eco_mode = item.eco_mode,
+                        eco_time = item.eco_time,
+                        not_eco_day = item.not_eco_day,
+                        auto_play_time = item.auto_play_time,
+                        auto_eco_time = item.auto_eco_time,
+                        ins_user = item.ins_user,
+                        ins_time = item.ins_time,
+                        upd_user = item.upd_user,
+                        upd_time = item.upd_time,
                     })
                     .ToList();
                 ///遍歷轉換後的列表，進行更新操作
                 foreach (var item in convertedList)
                 {
-                
+
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.UpdatePowerSetting(
                        item.station_id,
                        item.eco_mode,
@@ -511,6 +514,118 @@ namespace ASI.Wanda.DMD.TaskDMD
             }
         }
 
+
+        /// <summary>
+        /// 更新列車訊息資料表
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ASI.Wanda.DCU.DB.Tables.DMD.dmdTrainMessage> UpDateDMDTrainMessage()
+        {
+            try
+            {
+                var tempList = ASI.Wanda.DMD.DB.Tables.DMD.dmdTrainMessage.SelectAll();
+                ///轉換過程
+                var convertedList = tempList
+                    .Select(item => new ASI.Wanda.DCU.DB.Models.DMD.dmd_train_message
+                    {
+                        message_id = item.message_id,
+                        message_type = item.message_type,
+                        message_subtype = item.message_subtype,
+                        message_priority = item.message_priority,
+                        move_mode = item.move_mode,
+                        move_speed = item.move_speed,
+                        display_times = item.display_times,
+                        countdown_display_Interval = item.countdown_display_Interval,
+                        message_content = item.message_content,
+                        font_type = item.font_type,
+                        font_size = item.font_size,
+                        font_color = item.font_color,
+                        message_content_en = item.message_content_en,
+                        font_type_en = item.font_type_en,
+                        font_size_en = item.font_size_en,
+                        font_color_en = item.font_color_en,
+                        ins_user = item.ins_user,
+                        ins_time = item.ins_time,
+                        upd_user = item.upd_user,
+                        upd_time = item.upd_time,
+                    })
+                    .ToList();
+                ///遍歷轉換後的列表，進行更新操作
+                foreach (var item in convertedList)
+                {
+
+                    ASI.Wanda.DCU.DB.Tables.DMD.dmdTrainMessage.UpdateTrainMessages(
+                     item.message_id,
+                      item.message_type,
+                    item.message_subtype,
+                     item.message_priority,
+                     item.move_mode,
+                      item.move_speed,
+                     item.display_times,
+                    item.countdown_display_Interval,
+                     item.message_content,
+                     item.font_type,
+                     item.font_size,
+                      item.font_color,
+                     item.message_content_en,
+                      item.font_type_en,
+                      item.font_size_en,
+                      item.font_color_en
+                    );
+                }
+                return convertedList.Cast<DCU.DB.Tables.DMD.dmdTrainMessage>();
+            }
+            catch (Exception updateException)
+            {
+                ///記錄例外狀況 
+                ASI.Lib.Log.ErrorLog.Log("Error updating dmdTrainMessage", updateException);
+                return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdTrainMessage>();
+            }
+        }
+
+
+
+        /// <summary>
+        /// 更新群組資料表
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ASI.Wanda.DCU.DB.Tables.DMD.dmdGroup> UpDateDMDGroup()
+        {
+            try
+            {
+                var tempList = ASI.Wanda.DMD.DB.Tables.DMD.dmdGroup.SelectAll();
+                ///轉換過程
+                var convertedList = tempList
+                    .Select(item => new ASI.Wanda.DCU.DB.Models.DMD.dmd_group
+                    {
+                        group_id = item.group_id,
+                        group_name = item.group_name,
+                        group_description = item.group_description,
+                        ins_user = item.ins_user,
+                        ins_time = item.ins_time,
+                        upd_user = item.upd_user,
+                        upd_time = item.upd_time,
+                    })
+                    .ToList();
+                ///遍歷轉換後的列表，進行更新操作
+                foreach (var item in convertedList)
+                {
+
+                    ASI.Wanda.DCU.DB.Tables.DMD.dmdGroup.InsertGroup(
+                     item.group_id,
+                     item.group_name,
+                     item.group_description
+                  );
+                }
+                return convertedList.Cast<DCU.DB.Tables.DMD.dmdGroup>();
+            }
+            catch (Exception updateException)
+            {
+                ///記錄例外狀況 
+                ASI.Lib.Log.ErrorLog.Log("Error updating dmdGroup", updateException);
+                return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdGroup>();
+            }
+        }
         #endregion
     }
 

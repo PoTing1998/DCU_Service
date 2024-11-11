@@ -137,7 +137,7 @@ namespace ASI.Wanda.DCU.TaskDMD
         }
 
         /// <summary>
-        /// 從DMDServer接收訊息      
+        /// 從DMDServer接收訊息
         /// </summary>
         /// <param name="DMDServerMessage"></param> 
         private void DMD_API_ReceivedEvent(ASI.Wanda.DMD.Message.Message DMDServerMessage)
@@ -359,7 +359,11 @@ namespace ASI.Wanda.DCU.TaskDMD
                     HandlePreRecordMessageSetting(DMDServerMessage, DMDHelper);
                     break;
                 case ASI.Wanda.DMD.TaskDMD.Constants.TrainMessageSetting:
+                    HandleTrainMessageSetting(DMDServerMessage, DMDHelper);
+                    break;
                 case ASI.Wanda.DMD.TaskDMD.Constants.GroupSetting:
+                    HandleGroupSetting(DMDServerMessage, DMDHelper);
+                    break;
                 case ASI.Wanda.DMD.TaskDMD.Constants.ParameterSetting:
                     DMDHelper.HandleAckMessage(DMDServerMessage);
                     break;
@@ -375,7 +379,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             {
                 seatID = oJsonObject.seatID,
                 msg_id = oJsonObject.msg_id,
-                target_du = oJsonObject.target_du
+                target_du = oJsonObject.target_du 
             };
 
             DMDHelper.UpdataConfig();
@@ -415,7 +419,11 @@ namespace ASI.Wanda.DCU.TaskDMD
             DMDHelper.UpdataDCUPreRecordMessage();
             SendToAllTasks(DMDHelper, sendScheduleSetting);
         }
-
+        /// <summary>
+        /// 預錄訊息設定
+        /// </summary>
+        /// <param name="DMDServerMessage"></param>
+        /// <param name="DMDHelper"></param>
         private void HandlePreRecordMessageSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
             var oJsonObjectPreRecordMessageSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
@@ -431,7 +439,11 @@ namespace ASI.Wanda.DCU.TaskDMD
             DMDHelper.UpdataDCUPreRecordMessage();
             SendToAllTasks(DMDHelper, PreRecordMessageSetting);
         }
-
+        /// <summary>
+        /// 節能設定
+        /// </summary>
+        /// <param name="DMDServerMessage"></param>
+        /// <param name="DMDHelper"></param>
         private void HandlePowerTimeSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
             DMDHelper.UpDateDMDPowerSetting();
@@ -444,8 +456,42 @@ namespace ASI.Wanda.DCU.TaskDMD
             SendToAllTasks(DMDHelper, PowerTimeSetting);
         }
 
+        /// <summary>
+        /// 列車訊息
+        /// </summary>
+        /// <param name="DMDServerMessage"></param>
+        /// <param name="DMDHelper"></param>
+       private  void HandleTrainMessageSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
+        {
+            DMDHelper.UpDateDMDTrainMessage(); 
+            var oJsonObjectTrainMessageSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMessageSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
+            var TrainMessageSetting = new DMD.JsonObject.DCU.FromDMD.TrainMessageSetting(ASI.Wanda.DMD.Enum.Station.OCC)
+            {
+                msg_id = oJsonObjectTrainMessageSetting.msg_id,
+                seatID = oJsonObjectTrainMessageSetting.seatID,
+                SqlCommand = oJsonObjectTrainMessageSetting.SqlCommand
+            };
+            SendToAllTasks(DMDHelper, TrainMessageSetting); 
+        }
+        /// <summary>
+        /// 群組設定 
+        /// </summary>
+        /// <param name="DMDServerMessage"></param>
+        /// <param name="DMDHelper"></param>
+        private void HandleGroupSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
+        {
+            DMDHelper.UpDateDMDGroup();
+            var oJsonObjectGroupSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
+            var GroupSetting = new DMD.JsonObject.DCU.FromDMD.GroupSetting(ASI.Wanda.DMD.Enum.Station.OCC)
+            {
+                group_id = oJsonObjectGroupSetting.group_id,
+                seatID = oJsonObjectGroupSetting.seatID,
+                SqlCommand = oJsonObjectGroupSetting.SqlCommand
+            };
+            SendToAllTasks(DMDHelper, GroupSetting);
+        }
 
-        private void HandleUnexpectedResponse(ASI.Wanda.DMD.Message.Message DMDServerMessage)
+        private void HandleUnexpectedResponse(ASI.Wanda.DMD.Message.Message DMDServerMessage) 
         {
             ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從CMFT來的訊息不應有Response，MessageType:{DMDServerMessage.MessageType}");
         }
