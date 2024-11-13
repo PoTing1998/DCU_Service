@@ -46,6 +46,7 @@
     <Compile Include="Models\DMD.cs" />
     <Compile Include="Models\DU.cs" />
     <Compile Include="Models\System.cs" />
+    <Compile Include="Models\Train.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tables\DMD.cs" />
     <Compile Include="Tables\DU.cs" />

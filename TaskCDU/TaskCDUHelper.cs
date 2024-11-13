@@ -218,7 +218,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             return new TextStringBody
             {
                 RedColor = fontColor[0],
-                GreenColor = fontColor[1],
+                GreenColor = fontColor[1], 
                 BlueColor = fontColor[2],
                 StringText = content
             };
@@ -324,7 +324,6 @@ namespace ASI.Wanda.DCU.TaskCDU
             var serializedData = processor.SerializePacket(packet);
             string result = BitConverter.ToString(serializedData).Replace("-"," ");
             ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + result);
-
             _mSerial.Send(serializedData);
             return serializedData;
         }
