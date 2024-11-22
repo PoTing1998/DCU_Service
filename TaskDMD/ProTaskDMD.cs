@@ -24,7 +24,7 @@ namespace ASI.Wanda.DCU.TaskDMD
     {
         #region construct
         private ASI.Wanda.DMD.DMD_API mDMD_API = null;
-        public string DCUSation ;
+        public string DCUSation;
         /// <summary>
         /// 最後一次收到DMD訊息的時間
         /// </summary>
@@ -75,7 +75,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 return -1;
             }
             return 1;
-        } 
+        }
 
         /// <summary> 
         /// 啟始處理DMD模組執行程序 
@@ -88,12 +88,12 @@ namespace ASI.Wanda.DCU.TaskDMD
             mTimerTick = 30;
             _mProcName = "TaskDMD";
             // DCU Database Configuration
-            string sDCU_DBIP    = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
-            string sDCU_DBPort  = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
-            string sDCU_DBName  = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
-            string sDMD_DBIP    = ConfigApp.Instance.GetConfigSetting("DMD_DB_IP");
-            string sDMD_DBPort  = ConfigApp.Instance.GetConfigSetting("DMD_DB_Port");
-            string sDMD_DBName  = ConfigApp.Instance.GetConfigSetting("DMD_DB_Name");
+            string sDCU_DBIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
+            string sDCU_DBPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
+            string sDCU_DBName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
+            string sDMD_DBIP = ConfigApp.Instance.GetConfigSetting("DMD_DB_IP");
+            string sDMD_DBPort = ConfigApp.Instance.GetConfigSetting("DMD_DB_Port");
+            string sDMD_DBName = ConfigApp.Instance.GetConfigSetting("DMD_DB_Name");
 
             string sUserID = "postgres";
             string sPassword = "postgres";
@@ -101,7 +101,6 @@ namespace ASI.Wanda.DCU.TaskDMD
             // Default to an error state
             try
             {
-
                 // 1. 啟動 ScheduledTask，加入偵錯日誌
                 ASI.Lib.Log.DebugLog.Log(_mProcName, "嘗試啟動 ScheduledTask...");
                 var task = new ScheduledTask();
@@ -133,7 +132,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             }
             ConnToDMDServer();
             ASI.Lib.Log.DebugLog.Log(_mProcName, "StartTask 成功啟動.");
-            return base.StartTask(pComputer, pProcName);  
+            return base.StartTask(pComputer, pProcName);
         }
 
         /// <summary>
@@ -149,7 +148,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 var sByteArray = ASI.Lib.Text.Parsing.String.BytesToHexString(DMDServerMessage.CompleteContent, "");
                 var sJsonData = DMDServerMessage.JsonContent;
                 var sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-       
+
                 //建立DMDHelper並將 DMD_API的send 委派 
                 var DMDHelper = new TaskDMDHelper<ASI.Wanda.DMD.DMD_API>(mDMD_API, (api, message) => api.Send(message));
                 ////判斷車站
@@ -161,7 +160,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 }
                 else if (DMDServerMessage.MessageType == ASI.Wanda.DMD.Message.Message.eMessageType.Command)
                 {
-                     HandleCommandMessage(DMDServerMessage, DMDHelper, sByteArray, sJsonData, sJsonObjectName, iMsgID);
+                    HandleCommandMessage(DMDServerMessage, DMDHelper, sByteArray, sJsonData, sJsonObjectName, iMsgID);
                 }
                 else if (DMDServerMessage.MessageType == DMD.Message.Message.eMessageType.Response)
                 {
@@ -220,14 +219,14 @@ namespace ASI.Wanda.DCU.TaskDMD
                         //DMD內部通訊定義:Change/Command  
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
-                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog); 
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);
                     }
                     else if (mSGFromTaskDCU.MessageType == 3)
                     {
                         //DMD內部通訊定義:Response  
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
-                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog); 
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);
                         //將訊息傳給DMD
                         var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(mSGFromTaskDCU.JsonData);
 
@@ -262,7 +261,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             }
             return -1;
         }
-       
+
         /// <summary>
         /// 與DMD Server連線 
         /// </summary>
@@ -343,7 +342,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
             ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
 
-            // 根據 JsonObjectName 處理不同的訊息類型
+            // 根據 JsonObjectName 處理不同的訊息類型  
             switch (sJsonObjectName)
             {
                 case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMsg:
@@ -372,6 +371,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                     break;
             }
         }
+        #region 各處理的method
         private void HandleSendPreRecordMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
             var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
@@ -379,7 +379,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             {
                 seatID = oJsonObject.seatID,
                 msg_id = oJsonObject.msg_id,
-                target_du = oJsonObject.target_du 
+                target_du = oJsonObject.target_du
             };
 
             DMDHelper.UpdataConfig();
@@ -419,11 +419,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             DMDHelper.UpdataDCUPreRecordMessage();
             SendToAllTasks(DMDHelper, sendScheduleSetting);
         }
-        /// <summary>
-        /// 預錄訊息設定
-        /// </summary>
-        /// <param name="DMDServerMessage"></param>
-        /// <param name="DMDHelper"></param>
+
         private void HandlePreRecordMessageSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
             var oJsonObjectPreRecordMessageSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
@@ -432,18 +428,14 @@ namespace ASI.Wanda.DCU.TaskDMD
                 seatID = oJsonObjectPreRecordMessageSetting.seatID,
                 msg_id = oJsonObjectPreRecordMessageSetting.msg_id,
                 SqlCommand = oJsonObjectPreRecordMessageSetting.SqlCommand
-            }; 
+            };
 
             DMDHelper.UpdataConfig();
             DMDHelper.UpdateDCUPlayList();
             DMDHelper.UpdataDCUPreRecordMessage();
             SendToAllTasks(DMDHelper, PreRecordMessageSetting);
         }
-        /// <summary>
-        /// 節能設定
-        /// </summary>
-        /// <param name="DMDServerMessage"></param>
-        /// <param name="DMDHelper"></param>
+
         private void HandlePowerTimeSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
             DMDHelper.UpDateDMDPowerSetting();
@@ -456,14 +448,10 @@ namespace ASI.Wanda.DCU.TaskDMD
             SendToAllTasks(DMDHelper, PowerTimeSetting);
         }
 
-        /// <summary>
-        /// 列車訊息
-        /// </summary>
-        /// <param name="DMDServerMessage"></param>
-        /// <param name="DMDHelper"></param>
-       private  void HandleTrainMessageSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
+
+        private void HandleTrainMessageSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
-            DMDHelper.UpDateDMDTrainMessage(); 
+            DMDHelper.UpDateDMDTrainMessage();
             var oJsonObjectTrainMessageSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMessageSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
             var TrainMessageSetting = new DMD.JsonObject.DCU.FromDMD.TrainMessageSetting(ASI.Wanda.DMD.Enum.Station.OCC)
             {
@@ -471,13 +459,9 @@ namespace ASI.Wanda.DCU.TaskDMD
                 seatID = oJsonObjectTrainMessageSetting.seatID,
                 SqlCommand = oJsonObjectTrainMessageSetting.SqlCommand
             };
-            SendToAllTasks(DMDHelper, TrainMessageSetting); 
+            SendToAllTasks(DMDHelper, TrainMessageSetting);
         }
-        /// <summary>
-        /// 群組設定 
-        /// </summary>
-        /// <param name="DMDServerMessage"></param>
-        /// <param name="DMDHelper"></param>
+
         private void HandleGroupSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
             DMDHelper.UpDateDMDGroup();
@@ -490,6 +474,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             };
             SendToAllTasks(DMDHelper, GroupSetting);
         }
+        #endregion
 
         private void HandleUnexpectedResponse(ASI.Wanda.DMD.Message.Message DMDServerMessage) 
         {
@@ -516,7 +501,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 ASI.Lib.Log.ErrorLog.Log("SendToAllTasks", $"序列化消息時發生錯誤: {ex.Message}");
             }
         }
-      
+
 
         #endregion
 

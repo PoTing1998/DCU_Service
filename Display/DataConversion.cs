@@ -17,7 +17,7 @@ namespace Display
         /// <returns></returns>
         static public byte[] ConvertToFiveSecondUnitsByteArray(int seconds)
         {
-            int unitsOfFiveSeconds = seconds / 5; // 將秒數除以5，以獲得五秒為一個單位的數量  
+            int unitsOfFiveSeconds = seconds / 5; // 將秒數除以5，以獲得五秒為一個單位的數量   
             string hexadecimalValue = unitsOfFiveSeconds.ToString("X");
 
             // 將十六進制字符串轉換為 byte[]  

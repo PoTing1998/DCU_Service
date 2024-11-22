@@ -319,8 +319,6 @@ namespace ASI.Wanda.DMD.TaskDMD
                 return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdInstantMessage>();
             }
         }
-
-
         /// <summary>
         /// 從DMD更新Config的表 拿到相對色碼顏色  
         /// </summary>
@@ -366,7 +364,6 @@ namespace ASI.Wanda.DMD.TaskDMD
                 return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.System.sysConfig>();
             }
         }
-
         /// <summary>
         /// 更新dmd_schedule資料表  
         /// </summary>
@@ -513,8 +510,6 @@ namespace ASI.Wanda.DMD.TaskDMD
                 return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting>();
             }
         }
-
-
         /// <summary>
         /// 更新列車訊息資料表
         /// </summary>
@@ -582,9 +577,6 @@ namespace ASI.Wanda.DMD.TaskDMD
                 return Enumerable.Empty<ASI.Wanda.DCU.DB.Tables.DMD.dmdTrainMessage>();
             }
         }
-
-
-
         /// <summary>
         /// 更新群組資料表
         /// </summary>

@@ -36,7 +36,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
 
         static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
-        static string _mDU_ID = "LG01_CDU_01";
+        static string _mDU_ID = "LG01_CDU_09";
         #endregion
         /// <summary>
         /// 處理DMD模組執行程序所收到之訊息 
@@ -146,7 +146,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                                     DbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1"), 
                                     DbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2")
                                 };
-                                    // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄
+                                    // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄  
                                     string formattedLog = JsonConvert.SerializeObject(logData, Formatting.Indented);
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, formattedLog);
                                     // 處理消息並記錄結果   

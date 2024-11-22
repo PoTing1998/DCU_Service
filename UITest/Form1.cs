@@ -323,16 +323,7 @@ namespace UITest
         }
         #endregion
         #region 組成封包的Method
-        private void data(ASI.Wanda.DCU.DB.Models.DMD.dmd_pre_record_message data)
-        {
-            textBox1.Text += "字體顏色 : " + data.font_color + "\r\n"; 
-            textBox1.Text += "字體內容 : " + data.message_content + "\r\n"; 
-            textBox1.Text += "訊息等級 : " + data.message_priority + "\r\n"; 
-            textBox1.Text += "訊息速度 :" + data.move_speed + "\r\n";
-            textBox1.Text += "訊息間格 : " + data.Interval + "\r\n";
-            textBox1.Text += "訊息字體大小 : " + data.font_size + "\r\n";
-            textBox1.Text += "訊息字體風格 : " + data.font_type + "\r\n";
-        }
+       
         // 用於提取文本中指定標籤後的值
         private string ExtractValue(string source, string label)
         {
@@ -814,33 +805,6 @@ namespace UITest
             textBox14.Text = result.ToString();
         }
        
-        
-
-        /// <summary>
-        ///分別讀取該設備
-        /// </summary>
-        /// <param name="deviceString"></param>
-        /// <returns></returns>
-        private static DeviceInfo SplitStringToDeviceInfo(string deviceString)
-        {
-            // 正則表達式模式
-            string pattern = @"([A-Z0-9]+)_([A-Z]+)_([A-Z]+-\d+)";
-            Match match = Regex.Match(deviceString, pattern);
-            
-            if (match.Success)
-            {
-                return new DeviceInfo 
-                {
-                    Station = match.Groups[1].Value,
-                    Location = match.Groups[2].Value,
-                    DeviceWithNumber = match.Groups[3].Value
-                };
-            }
-            else
-            {
-                throw new ArgumentException("Invalid device string format", nameof(deviceString));
-            }
-        }
 
         /// <summary>
         /// 色碼轉換成byte  
@@ -849,7 +813,7 @@ namespace UITest
         /// <returns></returns>
         private byte[] ProcessMessageColor(string colorName)
         {
-            try
+            try 
             {
                 var ConfigDate = ASI.Wanda.DCU.DB.Tables.System.sysConfig.SelectColor(colorName);
                 ASI.Lib.Log.DebugLog.Log(_mProcName, ConfigDate.config_value.ToString());
@@ -868,5 +832,8 @@ namespace UITest
             var temp = ProcessMessageColor(textBox15.Text); 
             textBox16.Text = temp.ToString();
         }
+
+      
+        
     }
 }

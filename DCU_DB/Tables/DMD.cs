@@ -113,7 +113,8 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
             DeleteWhere(whereString);
         }
         static public List<Guid> GetPlayingItemIds(string stationID, string area_id, string deviceID)
-        { // 僅傳入篩選條件
+        { 
+            // 僅傳入篩選條件
             var temp = SelectWhere(
                 string.Format(" where station_id = '{0}' AND area_id = '{1}' AND device_id = '{2}'",
                 stationID, area_id, deviceID), eSortWay.Desc /*或 Ascending */);
