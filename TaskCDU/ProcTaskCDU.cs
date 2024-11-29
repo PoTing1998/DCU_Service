@@ -82,8 +82,8 @@ namespace ASI.Wanda.DCU.TaskCDU
             string dbPassword = "postgres";
             string currentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
             //serialPort的開啟 
-            var iComPort = ConfigApp.Instance.GetConfigSetting("CDUComPort"); ;
-            var iBaudrate = ConfigApp.Instance.GetConfigSetting("CDUBaudrate"); ;
+            var iComPort = ConfigApp.Instance.GetConfigSetting("CDUComPort"); 
+            var iBaudrate = ConfigApp.Instance.GetConfigSetting("CDUBaudrate"); 
             _mSerial = new ASI.Lib.Comm.SerialPort.SerialPortLib();
             string connectionString = $"PortName=COM{iComPort};BaudRate={iBaudrate};DataBits=8;StopBits=One;Parity=None";
             _mSerial.ConnectionString = connectionString;
@@ -161,7 +161,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                                         break;
                                     case "dmd_instant_message":
                                         ASI.Lib.Log.DebugLog.Log(_mProcName, "處理即時消息 dmd_instant_message");
-                                        // 發送消息到顯示面板（針對即時訊息的處理）
+                                        // 發送消息到顯示面板（針對即時訊息的處理） 
                                         taskCDUHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result);
                                         ASI.Lib.Log.DebugLog.Log(_mProcName, "處理即時消息 dmd_instant_message: " + result);
                                         break;
@@ -174,7 +174,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                                 taskCDUHelper.PowerSetting(Station_ID);
                                 break;
                             case "節能模式開啟":
-                                OpenDisplay();//來自taskDMD的 判斷
+                                OpenDisplay(); 
                                 break;
                             case "節能模式關閉":
                                 CloseDisplay();
@@ -316,7 +316,6 @@ namespace ASI.Wanda.DCU.TaskCDU
                 case 0x84:
                     serializedData = await taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
                     SendSerializedData(serializedData.Item3, "Serialized display packet (Chinese)"); // 關閉訊息
-                    
                     break;
                 default:
                     ASI.Lib.Log.DebugLog.Log(_mProcName + " ", $"{_mProcName} unknown byte value at index 8: {dataByteAtIndex8.ToString("X2")}");
@@ -407,7 +406,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             }
         }
 
-        void SerialPort_ReceivedEvent(byte[] dataBytes, string source) //顯示器的狀態顯示 只能限制一個ID
+        void SerialPort_ReceivedEvent(byte[] dataBytes, string source) //顯示器的狀態顯示 只能限制一個ID 
         {
             string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
             string str = "";

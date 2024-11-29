@@ -342,7 +342,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
             ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
 
-            // 根據 JsonObjectName 處理不同的訊息類型  
+            // 根據 JsonObjectName 處理不同的訊息類型       
             switch (sJsonObjectName)
             {
                 case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMsg:
@@ -401,7 +401,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             DMDHelper.UpdataConfig();
             DMDHelper.UpdateDCUPlayList();
             DMDHelper.UpdataDCUInstantMessage();
-            SendToAllTasks(DMDHelper, sendInstantMessage);
+            SendToAllTasks(DMDHelper, sendInstantMessage); 
         }
 
         private void HandleScheduleSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
@@ -413,7 +413,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 sched_id = oJsonObjectSendScheduleSetting.sched_id,
                 SqlCommand = oJsonObjectSendScheduleSetting.SqlCommand
             };
-
+            
             DMDHelper.UpSchedule();
             DMDHelper.UpDMDSchedulePlaylist();
             DMDHelper.UpdataDCUPreRecordMessage();
@@ -432,7 +432,7 @@ namespace ASI.Wanda.DCU.TaskDMD
 
             DMDHelper.UpdataConfig();
             DMDHelper.UpdateDCUPlayList();
-            DMDHelper.UpdataDCUPreRecordMessage();
+            DMDHelper.UpdataDCUPreRecordMessage(); 
             SendToAllTasks(DMDHelper, PreRecordMessageSetting);
         }
 
@@ -446,6 +446,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 SqlCommand = oJsonObjectPowerTimeSetting.SqlCommand
             };
             SendToAllTasks(DMDHelper, PowerTimeSetting);
+            
         }
 
 

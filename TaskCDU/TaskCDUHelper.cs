@@ -12,8 +12,7 @@ using ASI.Wanda.DCU.DB.Models.DMD;
 using ASI.Wanda.DCU.DB.Tables.DMD;
 using System.Text.RegularExpressions;
 using ASI.Lib.Config;
-
-
+using System.IO;
 
 namespace ASI.Wanda.DCU.TaskCDU
 {
@@ -82,20 +81,75 @@ namespace ASI.Wanda.DCU.TaskCDU
             var results = CreateAndSendMessage(targetDu, dbName1, dbName2);
 
             var successCount = results.Count(r => r.Result == "成功傳送");
+            var failureCount = results.Count(r => r.Result != "成功傳送");
+            var failedMessages = results.Where(r => r.Result != "成功傳送").ToList();
 
-            result = successCount > 0 ? $"成功傳送 {successCount} 筆訊息" : "傳送失敗";
+            // 統一生成回應結果
+            result = successCount > 0
+                ? $"成功處理 {successCount} 筆訊息，失敗 {failureCount} 筆。"
+                : "所有訊息處理失敗。";
 
-            foreach (var displayResult in results)
+            try
             {
-                if (displayResult.DataByte != null)
-                {
-                    _mSerial.Send(displayResult.DataByte);
+                // 整理所有成功的資料，組合成一筆訊息
+                var combinedData = CombineMessages(results.Where(r => r.Result == "成功傳送").ToList());
 
+                if (combinedData != null && combinedData.Length > 0)
+                {
+                    // 傳送組合後的訊息
+                    _mSerial.Send(combinedData);
+                }
+                else
+                {
+                    LogError("組合後的訊息為空，未能發送。");
+                }
+            }
+            catch (Exception ex)
+            {
+                // 捕捉發送時的例外並記錄
+                LogError($"組合訊息傳送失敗: {ex.Message}");
+            }
+
+            // 可選：記錄失敗訊息的詳細資訊  
+            if (failedMessages.Any())
+            {
+                foreach (var failed in failedMessages)
+                {
+                    LogError($"處理失敗的訊息 : {failed.Result}");
                 }
             }
 
         }
-
+        // 新增的輔助方法：將多筆資料組合成一筆訊息 
+        private byte[] CombineMessages(List<DisplayMessageResult> successfulResults)
+        {
+            try
+            {
+                // 假設每筆資料的 DataByte 是 byte[]，這裡進行合併  
+                using (var memoryStream = new MemoryStream())
+                { 
+                        foreach (var result in successfulResults)
+                        {
+                            if (result.DataByte != null)
+                            {
+                                memoryStream.Write(result.DataByte, 0, result.DataByte.Length);
+                            }
+                        }
+                    return memoryStream.ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"組合訊息時發生錯誤: {ex.Message}");
+                return null;
+            }
+        }
+        // 假設有個錯誤日誌方法 
+        private void LogError(string message)
+        {
+            // 替換成你的日誌框架或存檔邏輯
+           ASI.Lib.Log.ErrorLog.Log( "信息處理錯誤" ,$"[Error] {message}");
+        }
 
         /// <summary>
         /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。 
@@ -107,10 +161,10 @@ namespace ASI.Wanda.DCU.TaskCDU
         private List<DisplayMessageResult> CreateAndSendMessage(string targetDu, string dbName1, string dbName2)
         {
             var results = new List<DisplayMessageResult>();
-            var fullWindowMessages = new List<FullWindow>(); // 用於儲存所有生成的 FullWindowMessage
+            var fullWindowMessages = new List<FullWindow>(); // 用於儲存所有生成的 FullWindowMessage 
             try
             {
-                // 驗證輸入參數 
+                // 驗證輸入參數  
                 ValidateInput(targetDu);
 
                 string[] deviceStrings = targetDu.Split(',');
@@ -120,7 +174,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     string trimmedDevice = deviceString.Trim();
                     if (Regex.IsMatch(trimmedDevice, Pattern))
                     {
-                        matchedDevice = trimmedDevice;
+                        matchedDevice = trimmedDevice; 
                         break;
                     }
                 }
@@ -134,21 +188,21 @@ namespace ASI.Wanda.DCU.TaskCDU
                 }
                 else
                 { 
-                    // 批量處理預錄訊息 
+                    // 批量處理預錄訊息  
                     foreach (var messageId in messageIds)
                     {
-                        var result = new DisplayMessageResult(); // 每個 messageId 的結果
+                        var result = new DisplayMessageResult(); // 每個 messageId 的結果  
                         try
                         {
                             if (dbName1 == "dmd_pre_record_message")
                             {
                                 var messageLayout = GetPreRecordedMessageLayoutById(messageId);
 
-                                // 創建文字內容和完整視窗訊息
-                                var textStringBody = CreateTextStringBody(messageLayout);
-                                var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
+                                // 創建文字內容和完整視窗訊息  
+                                var textStringBody = CreateTextStringBody(messageLayout);//訊息內容 
+                                var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout); //版型
 
-                                // 將 FullWindowMessage 加入集合  
+                                // 將 FullWindowMessage 加入集合 
                                 fullWindowMessages.Add(fullWindowMessage);
                             }
                         }
@@ -159,9 +213,9 @@ namespace ASI.Wanda.DCU.TaskCDU
 
                         results.Add(result);
                     }
-
-                    // 統一創建並發送 sequence
-                    if (fullWindowMessages.Any())
+                    
+                    // 統一創建並發送 sequence 最多五則  
+                    if (fullWindowMessages.Any()) 
                     {
                         results.Add(SendBatchMessage(matchedDevice, fullWindowMessages));
                     }
@@ -172,16 +226,16 @@ namespace ASI.Wanda.DCU.TaskCDU
             {
                 var result = new DisplayMessageResult { Result = "傳送失敗：未知錯誤", DataByte = null };
                 HandleError(ex, result);
-                results.Add(result); // 添加通用的異常結果
+                results.Add(result); // 添加通用的異常結果  
             }
 
             return results;
         }
 
         /// <summary>
-        /// 驗證輸入的目標設備單元標識符是否為空值。
+        /// 驗證輸入的目標設備單元標識符是否為空值。 
         /// </summary>
-        /// <param name="targetDu">目標設備單元標識符。</param>
+        /// <param name="targetDu">目標設備單元標識符。</param> 
         private void ValidateInput(string targetDu)
         {
             if (string.IsNullOrEmpty(targetDu))
@@ -191,7 +245,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <summary>
         /// 根據目標設備標識符解析設備資訊。
         /// </summary>
-        /// <param name="targetDu">目標設備單元標識符。</param>
+        /// <param name="targetDu">目標設備單元標識符。</param> 
         /// <returns>解析後的設備資訊物件。</returns>
         private DeviceInfo GetDeviceInfo(string targetDu)
         {
@@ -202,7 +256,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         }
 
         /// <summary>
-        /// 處理即時訊息的發送邏輯。
+        /// 處理即時訊息的發送邏輯。   
         /// </summary>
         private DisplayMessageResult SendInstantMessage(string matchedDevice, Guid messageId)
         {
@@ -211,7 +265,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             try
             {
                 var messageLayout = GetInstantMessageLayoutById(messageId);
-                var textStringBody = CreateTextStringBody(messageLayout);
+                var textStringBody = CreateTextStringBody(messageLayout);  
                 var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
 
                 var instantSequence = CreateDisplaySequence(fullWindowMessage);
@@ -229,7 +283,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             return result;
         }
         /// <summary>
-        /// 處理批量訊息的發送邏輯。
+        /// 處理批量訊息的發送邏輯。  
         /// </summary>
         private DisplayMessageResult SendBatchMessage(string matchedDevice, List<FullWindow> fullWindowMessages)
         {
@@ -264,9 +318,9 @@ namespace ASI.Wanda.DCU.TaskCDU
             var messageContentEnProperty = typeof(T).GetProperty("message_content_en");
 
             if (fontColorProperty == null || messageContentProperty == null || messageContentEnProperty == null)
-                throw new ArgumentException($"類型 {typeof(T).Name} 缺少必要屬性。");
+                ASI.Lib.Log.ErrorLog.Log( "資料庫取的相關資料" ,$"類型 {typeof(T).Name} 缺少必要屬性。");
 
-            // 提取屬性值
+            // 提取屬性值 
             var fontColor = (string)fontColorProperty.GetValue(messageLayout);
             var messageContent = (string)messageContentProperty.GetValue(messageLayout) ?? string.Empty;
             var messageContentEn = (string)messageContentEnProperty.GetValue(messageLayout) ?? string.Empty;
@@ -287,12 +341,17 @@ namespace ASI.Wanda.DCU.TaskCDU
 
         private FullWindow CreateFullWindowMessage<T>(TextStringBody textStringBody, T messageLayout) where T : class
         {
+            // 讀取 資料庫的檔案
             var messagePriorityProperty = typeof(T).GetProperty("message_priority");
+            //  var ScrollMode = typeof(T).GetProperty("move_mode");
+            //  var ScrollSpeed = typeof(T).GetProperty("move_speed");
+            //  var interval =typeof(T).GetProperty("Interval");
             if (messagePriorityProperty == null)
                 throw new ArgumentException("The message layout does not contain a 'message_priority' property.");
-
             var messagePriority = (int)messagePriorityProperty.GetValue(messageLayout);
-
+            // var ScrollMode = (int)ScrollSeed.GetValue(ScrollMode);
+            // var scrollSpped = (int)ScrollSeed.GetValue(ScrollSpeed);
+            // var PauseTime = (int)ScrollSeed.GetValue(interval);
             return new FullWindow
             {
                 MessageType = 0x71,
@@ -343,7 +402,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// </summary>
         /// <param name="sequence">顯示序列物件。</param>
         /// <returns>資料封包物件。</returns>
-        private Packet CreatePacket(string DU_ID, Display.Sequence sequence)
+        private Packet CreatePacket(string DU_ID, Display.Sequence sequence) 
         {
             var startCode = new byte[] { 0x55, 0xAA };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, false);
@@ -358,7 +417,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <returns>序列化的字節陣列。</returns> 
         private byte[] SerializeAndSendPacket(Packet packet)
         {
-            var processor = new PacketProcessor();
+            var processor = new PacketProcessor();   
             var serializedData = processor.SerializePacket(packet);
             string result = BitConverter.ToString(serializedData).Replace("-", " ");
             ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + result);
@@ -405,7 +464,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             {
                 // 設定警示的視為固定內容   
                 var processor = new PacketProcessor();
-                var startCode = new byte[] { 0x55, 0xAA };
+                var startCode = new byte[] { 0x55, 0xAA }; 
                 var function = new EmergencyMessagePlaybackHandler();
                 var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
                 var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
@@ -457,9 +516,9 @@ namespace ASI.Wanda.DCU.TaskCDU
         public void PowerSettingOff()
         {
             var startCode = new byte[] { 0x55, 0xAA };
-            var processor = new PacketProcessor();
+            var processor = new PacketProcessor();  
             var function = new PowerControlHandler();
-            var Off = new byte[] { 0x3A, 0X01 };
+            var Off = new byte[] { 0x3A, 0X01 }; 
             var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
             var serializedDataOff = processor.SerializePacket(packetOff);
             _mSerial.Send(serializedDataOff);
@@ -484,7 +543,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             var stringMessage = new StringMessage
             {
                 StringMode = 0x2A, // TextMode (Static)     
-                StringBody = textStringBody
+                StringBody = textStringBody  
             };
             var urgentMessage = new Urgent // Display version  
             {
@@ -553,7 +612,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <summary>
         /// 根據設備資訊從資料庫中取得當前正在播放的消息 ID。 
         /// </summary>
-        /// <param name="deviceInfo">設備資訊物件。</param>
+        /// <param name="deviceInfo">設備資訊物件。</param>    
         /// <returns>當前播放的消息 ID。</returns>
         private List<Guid> GetPlayingItemIds(string Station, string Location, string DeviceID)
         {
@@ -617,7 +676,6 @@ namespace ASI.Wanda.DCU.TaskCDU
                     if (day.Length == 4)
                     {
                         int month = int.Parse(day.Substring(0, 2));
-
                         int dayOfMonth = int.Parse(day.Substring(2, 2));
                         nonEcoDates.Add((month, dayOfMonth));
                     }
@@ -635,7 +693,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                         return null;
                     }
 
-                    // 檢查開關顯示器的時間   
+                    // 檢查開關顯示器的時間      
                     string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -648,9 +706,9 @@ namespace ASI.Wanda.DCU.TaskCDU
 
                         if (currentHour >= autoPlayStartHour && currentHour <= autoPlayEndHour)
                         {
-                            // 關閉顯示器
+                            // 關閉顯示器  
                             ASI.Lib.Log.DebugLog.Log(_mProcName, "關閉顯示器");
-                            PowerSettingOff();
+                            PowerSettingOff(); 
                         }
                         else if (currentHour >= autoEcoStartHour && currentHour <= autoEcoEndHour)
                         {
@@ -663,7 +721,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             }
             else
             {
-                // 不需要做任何處理  
+                
             }
 
             return null;

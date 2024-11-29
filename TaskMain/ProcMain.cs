@@ -177,7 +177,7 @@ namespace ASI.Wanda.DCU.TaskMain
         /// <summary>
         /// ÀË¬dprocessªºª¬ºA
         /// </summary>
-        /// <returns></returns>
+        /// <returns></returns> 
 		private int CheckProcInfo()
         {
             if (mStopFlag) return 0;

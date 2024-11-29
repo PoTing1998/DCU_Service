@@ -175,6 +175,7 @@ public class ScheduledTask
         var processor = new PacketProcessor();
         var function = new PowerControlHandler();
         var Off = new byte[] { 0x3A, 0x01 };
+        //設定ID
         var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
         var serializedDataOff = processor.SerializePacket(packetOff);
         ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
@@ -187,6 +188,7 @@ public class ScheduledTask
         var processor = new PacketProcessor();
         var function = new PowerControlHandler();
         var Open = new byte[] { 0x3A, 0x00 };
+        //設定ID 
         var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Open);
         var serializedDataOpen = processor.SerializePacket(packetOpen);
         ASI.Lib.Log.DebugLog.Log(_mProcName + "顯示畫面開啟", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen) + " | Current Time: " + DateTime.Now);
