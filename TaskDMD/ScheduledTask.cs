@@ -59,7 +59,7 @@ public class ScheduledTask
     }
 
     /// <summary>
-    /// 找尋車站Id並且判斷是否需要關閉 
+    /// 找尋車站Id並且判斷是否需要關閉
     /// </summary>
     /// <param name="stationID"></param>
     /// <returns></returns> 
@@ -136,7 +136,7 @@ public class ScheduledTask
             TimeSpan playStartTime = new TimeSpan(autoPlayStartHour, autoPlayMinute, 0);
             TimeSpan ecoStartTime = new TimeSpan(autoEcoStartHour, autoEcoMinute, 0);
 
-            // 檢查時間段是否重疊，並正確處理跨日的情況
+            // 檢查時間段是否重疊，並正確處理跨日的情況 
             bool isInPlayTime = playStartTime <= ecoStartTime
                 ? currentTime >= playStartTime && currentTime < ecoStartTime
                 : currentTime >= playStartTime || currentTime < ecoStartTime;
@@ -170,7 +170,7 @@ public class ScheduledTask
 
     public void CloseDisplay()
     {
-        // 關閉顯示器的邏輯
+        // 關閉顯示器的邏輯 
         var startCode = new byte[] { 0x55, 0xAA };
         var processor = new PacketProcessor();
         var function = new PowerControlHandler();
@@ -183,7 +183,7 @@ public class ScheduledTask
 
     public void OpenDisplay()
     {
-        // 開啟顯示器的邏輯
+        // 開啟顯示器的邏輯 
         var startCode = new byte[] { 0x55, 0xAA };
         var processor = new PacketProcessor();
         var function = new PowerControlHandler();

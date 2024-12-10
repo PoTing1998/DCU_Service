@@ -144,7 +144,7 @@ namespace ASI.Wanda.DCU.TaskPDN
                         var sequence = CreateDisplaySequence(fullWindowMessage);
                         var DUID = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDs(matchedDevice);
                         var packet = CreatePacket(_mDU_ID, sequence);
-
+                        //組成封包的架構
                         result.DataByte = SerializeAndSendPacket(packet);
                         result.Result = "成功傳送";
                     }
@@ -250,7 +250,7 @@ namespace ASI.Wanda.DCU.TaskPDN
                 MessageType = 0x71,
                 MessageLevel = (byte)messageLayout.message_priority,
                 MessageScroll = new ScrollInfo
-                {
+                { 
                     ScrollMode = 0x64,
                     ScrollSpeed = (byte)messageLayout.move_speed,
                     PauseTime = 10
@@ -260,7 +260,7 @@ namespace ASI.Wanda.DCU.TaskPDN
         }
 
         /// <summary>
-        /// 建立顯示序列物件，設定序列號、字體與消息內容。
+        /// 建立顯示序列物件，設定序列號、字體與消息內容。 
         /// </summary>
         /// <param name="fullWindowMessage">全屏消息物件。</param>
         /// <returns>顯示序列物件。</returns>
@@ -306,7 +306,7 @@ namespace ASI.Wanda.DCU.TaskPDN
         }
 
         /// <summary>
-        /// 捕獲並處理異常，記錄相應的錯誤日誌。
+        /// 捕獲並處理異常，記錄相應的錯誤日誌。  
         /// </summary>
         /// <param name="ex">捕獲的異常物件。</param>
         /// <param name="result">包含操作結果的 DisplayMessageResult 物件。</param>
@@ -383,36 +383,59 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// <param name="FireContentEnglish"></param>
         /// <param name="situation"></param>
         /// <returns></returns>
-        public async Task<Tuple<byte[], byte[], byte[]>> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
+        /// <summary>
+        /// 處理訊息
+        /// </summary>
+        /// <param name="FireContentChinese">中文訊息內容</param>
+        /// <param name="FireContentEnglish">英文訊息內容</param>
+        /// <param name="situation">情境參數</param>
+        /// <returns>返回中文、英文和關閉訊息的序列化數據</returns>
+        public Tuple<byte[], byte[], byte[]> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
         {
             byte[] serializedDataChinese = new byte[] { };
             byte[] serializedDataEnglish = new byte[] { };
-            byte[] serializedDataOff = new byte[] { };  // 新增存放關閉訊息的序列化數據
+            byte[] serializedDataOff = new byte[] { }; // 新增存放關閉訊息的序列化數據 
 
             try
             {
-                // 設定警示的視為固定內容  
+                // 設定警示的固定內容
                 var processor = new PacketProcessor();
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
                 var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
                 var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+
                 // 序列化中文訊息
                 var sequence1 = CreateSequence(FireContentChinese, 1);
-                var packet1 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
+                var packet1 = processor.CreatePacket(
+                    startCode,
+                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                    function.FunctionCode,
+                    new List<Display.Sequence> { sequence1 }
+                );
                 serializedDataChinese = processor.SerializePacket(packet1);
 
                 // 序列化英文訊息
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
-                var packet2 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
+                var packet2 = processor.CreatePacket(
+                    startCode,
+                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                    function.FunctionCode,
+                    new List<Display.Sequence> { sequence2 }
+                );
                 serializedDataEnglish = processor.SerializePacket(packet2);
 
-                // Optional delay and turn off if situation is 84  
+                // 如果情境為 84，執行延遲並關閉
                 if (situation == 84)
                 {
-                    await Task.Delay(10000); // 延遲十秒
+                    System.Threading.Thread.Sleep(10000); // 同步延遲十秒 
                     var OffMode = new byte[] { 0x02 };
-                    var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
+                    var packetOff = processor.CreatePacketOff(
+                        startCode,
+                        new List<byte> { 0x11, 0x12 },
+                        function.FunctionCode,
+                        OffMode
+                    );
                     serializedDataOff = processor.SerializePacket(packetOff);
                 }
             }
@@ -421,9 +444,12 @@ namespace ASI.Wanda.DCU.TaskPDN
                 ASI.Lib.Log.ErrorLog.Log("SendMessageToUrgnt", ex);
             }
 
-            // 返回中文、英文和關閉訊息的序列化數據
+            // 返回中文、英文和關閉訊息的序列化數據 
             return Tuple.Create(serializedDataChinese, serializedDataEnglish, serializedDataOff);
         }
+
+
+
 
         /// <summary>
         /// 顯示器的畫面開啟
@@ -451,7 +477,7 @@ namespace ASI.Wanda.DCU.TaskPDN
             var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
             var serializedDataOff = processor.SerializePacket(packetOff);
             _mSerial.Send(serializedDataOff);
-            ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff)); 
         }
         #endregion
         /// <summary>

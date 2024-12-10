@@ -328,60 +328,63 @@ namespace ASI.Wanda.DCU.TaskSDU
         /// <summary>
         /// 緊急訊息  
         /// </summary> 
-        public async void SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
+        public Tuple<byte[], byte[], byte[]> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
         {
+            byte[] serializedDataChinese = new byte[] { };
+            byte[] serializedDataEnglish = new byte[] { };
+            byte[] serializedDataOff = new byte[] { }; // 新增存放關閉訊息的序列化數據
+
             try
             {
-                // 設定警示的視為固定內容  
+                // 設定警示的固定內容
                 var processor = new PacketProcessor();
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
-
-                // Send Chinese Message   
-                var sequence1 = CreateSequence(FireContentChinese, 1);
                 var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
                 var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
-                var packet1 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
-                var serializedData1 = processor.SerializePacket(packet1);
-                ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData1));
 
-                var temp = _mSerial.Send(serializedData1);
-                ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + _mProcName, temp.ToString());
-                // Send English Message 
+                // 序列化中文訊息
+                var sequence1 = CreateSequence(FireContentChinese, 1);
+                var packet1 = processor.CreatePacket(
+                    startCode,
+                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                    function.FunctionCode,
+                    new List<Display.Sequence> { sequence1 }
+                );
+                serializedDataChinese = processor.SerializePacket(packet1);
+
+                // 序列化英文訊息
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
-                var packet2 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
-                var serializedData2 = processor.SerializePacket(packet2);
-                ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", "Serialized display packet: " + BitConverter.ToString(serializedData2));
+                var packet2 = processor.CreatePacket(
+                    startCode,
+                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                    function.FunctionCode,
+                    new List<Display.Sequence> { sequence2 }
+                );
+                serializedDataEnglish = processor.SerializePacket(packet2);
 
-                _mSerial.Send(serializedData2);
-                // Optional delay and turn off if situation is 84  
+                // 如果情境為 84，執行延遲並關閉
                 if (situation == 84)
                 {
-                    await Task.Delay(10000); // 延遲五秒   
+                    System.Threading.Thread.Sleep(10000); // 同步延遲十秒
                     var OffMode = new byte[] { 0x02 };
-                    var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, OffMode);
-                    var serializedDataOff = processor.SerializePacket(packetOff);
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
-                    _mSerial.Send(serializedDataOff);
-                }
-
-                // Optional delay and turn off if situation is 84 
-                if (situation == 84)
-                {
-                    await Task.Delay(10000); // 延遲十秒 
-                    var OffMode = new byte[] { 0x02 };
-                    var packetOff2 = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, OffMode);
-                    var serializedDataOff2 = processor.SerializePacket(packetOff2);
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff2));
-                    _mSerial.Send(serializedDataOff2);
+                    var packetOff = processor.CreatePacketOff(
+                        startCode,
+                        new List<byte> { 0x11, 0x12 },
+                        function.FunctionCode,
+                        OffMode
+                    );
+                    serializedDataOff = processor.SerializePacket(packetOff);
                 }
             }
             catch (Exception ex)
             {
                 ASI.Lib.Log.ErrorLog.Log("SendMessageToUrgnt", ex);
             }
-        }
 
+            // 返回中文、英文和關閉訊息的序列化數據
+            return Tuple.Create(serializedDataChinese, serializedDataEnglish, serializedDataOff);
+        }
 
 
         #endregion

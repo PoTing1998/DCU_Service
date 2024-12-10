@@ -175,66 +175,39 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// </summary>
         private int ProMsgFromPA(string pMessage)
         {
+            string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
             try
             {
-                ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
-                string sJsonData = mSGFromTaskDMD.JsonData;
-                string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-                var taskPDNHelper = new ASI.Wanda.DCU.TaskPDN.TaskPDNHelper(_mProcName, _mSerial);
-
-                switch (sJsonObjectName)
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskPA MSGFromTaskPA = new ProcMsg.MSGFromTaskPA(new MSGFrameBase(""));
+                if (MSGFromTaskPA.UnPack(pMessage) > 0)
                 {
-                    case ASI.Wanda.DCU.TaskPDN.Constants.SendPreRecordMsg: //預錄訊息 
-                    case ASI.Wanda.DCU.TaskPDN.Constants.SendInstantMsg: //即時訊息
-                                                                         // 從 JSON 數據中提取相關值
-                        var logData = new
-                        {
-                            Message = "收到來自TaskDMD的訊息",
-                            JsonData = sJsonData,
-                            SeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID"),
-                            MsgID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id"),
-                            TargetDU = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du"),
-                            DbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1"),
-                            DbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2")
-                        };
-                        // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄  
-                        string formattedLog = JsonConvert.SerializeObject(logData, Formatting.Indented);
-                        ASI.Lib.Log.DebugLog.Log(_mProcName, formattedLog);
-                        // 處理消息並記錄結果   
-                        string result = "";
-                        switch (logData.DbName1)
-                        {
-                            case "dmd_pre_record_message":
-                                ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
-                                // 發送消息到顯示面板（針對預錄訊息的處理）
-                                taskPDNHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result);
-                                ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message: " + result);
-                                break;
-                            case "dmd_instant_message":
-                                ASI.Lib.Log.DebugLog.Log(_mProcName, "處理即時消息 dmd_instant_message");
-                                // 發送消息到顯示面板（針對即時訊息的處理） 
-                                taskPDNHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result);
-                                ASI.Lib.Log.DebugLog.Log(_mProcName, "處理即時消息 dmd_instant_message: " + result);
-                                break;
-                            default:
-                                ASI.Lib.Log.DebugLog.Log(_mProcName, $"未知的 DbName1 值：{logData.DbName1}");
-                                break;
-                        }
-                        break;
-                    case ASI.Wanda.DCU.TaskPDN.Constants.SendPowerTimeSetting:
-                        taskPDNHelper.PowerSetting(Station_ID);
-                        break;
-                    case "節能模式開啟":
-                        OpenDisplay();
-                        break;
-                    case "節能模式關閉":
-                        CloseDisplay();
-                        break;
+                    var sJsonData = MSGFromTaskPA.JsonData;
+                    ASI.Lib.Log.DebugLog.Log(_mProcName + " received a message from TaskPA ", sJsonData); // Log the received message 
+                    // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除  
+                    // 假設sJsonData已經是十六進位字串格式，直接解析
+                    var sHexString = sJsonData;
+                    byte[] dataBytes = HexStringToBytes(sJsonData);
+                    if (dataBytes.Length >= 10) // 確保有足夠長度的陣列
+                    {
+                        ProcessDataBytes(dataBytes);
+                    }
+                    else
+                    {
+                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataBytes length less than 10", sHexString);
+                    }
+                    if (dataBytes.Length >= 3)
+                    {
+                        ProcessByteAtIndex2(dataBytes, sRcvTime, sJsonData);
+                    }
+                    else
+                    {
+                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataBytes length less than 3", sJsonData);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex.ToString());
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex); // 記錄例外情況 
             }
 
             return -1;

@@ -290,35 +290,26 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// </summary>
         /// <param name="dataBytes"></param>
         /// <returns></returns>
-        private async Task ProcessDataBytes(byte[] dataBytes)
+        private void ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
-            var taskUPDHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(_mProcName, _mSerial);
-            Tuple<byte[], byte[], byte[]> serializedData;
-
+            var taskPUPHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(_mProcName, _mSerial);
             switch (dataByteAtIndex8)
             {
                 case 0x81:
-                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
-                    SendSerializedData(serializedData.Item1, "Serialized display packet (Chinese)"); // 發送中文訊息
-                    SendSerializedData(serializedData.Item2, "Serialized display packet (English)"); // 發送英文訊息
+                    taskPUPHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
                     break;
                 case 0x82:
-                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
-                    SendSerializedData(serializedData.Item1, "Serialized display packet (Chinese)"); // 發送中文訊息
-                    SendSerializedData(serializedData.Item2, "Serialized display packet (English)"); // 發送英文訊息
+                    taskPUPHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
                     break;
                 case 0x83:
-                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
-                    SendSerializedData(serializedData.Item1, "Serialized display packet (Chinese)"); // 發送中文訊息
-                    SendSerializedData(serializedData.Item2, "Serialized display packet (English)"); // 發送英文訊息
+                    taskPUPHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
                     break;
                 case 0x84:
-                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
-                    SendSerializedData(serializedData.Item3, "Serialized display packet (Chinese)"); // 關閉訊息
+                    taskPUPHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
                     break;
                 default:
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " ", $"{_mProcName} unknown byte value at index 8: {dataByteAtIndex8.ToString("X2")}");
+                    ASI.Lib.Log.DebugLog.Log(_mProcName + " ", $"{_mProcName} unknown byte value at index 9: {dataByteAtIndex8.ToString("X2")}");
                     break;
             }
         }

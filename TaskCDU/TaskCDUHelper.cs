@@ -454,36 +454,52 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <param name="FireContentEnglish"></param>
         /// <param name="situation"></param>
         /// <returns></returns>
-        public async Task<Tuple<byte[], byte[], byte[]>> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
+        public Tuple<byte[], byte[], byte[]> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
         {
             byte[] serializedDataChinese = new byte[] { };
             byte[] serializedDataEnglish = new byte[] { };
-            byte[] serializedDataOff = new byte[] { };  // 新增存放關閉訊息的序列化數據
+            byte[] serializedDataOff = new byte[] { }; // 新增存放關閉訊息的序列化數據
 
             try
             {
-                // 設定警示的視為固定內容   
+                // 設定警示的固定內容
                 var processor = new PacketProcessor();
-                var startCode = new byte[] { 0x55, 0xAA }; 
+                var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
                 var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
                 var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
-                // 序列化中文訊息   
+
+                // 序列化中文訊息
                 var sequence1 = CreateSequence(FireContentChinese, 1);
-                var packet1 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
+                var packet1 = processor.CreatePacket(
+                    startCode,
+                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                    function.FunctionCode,
+                    new List<Display.Sequence> { sequence1 }
+                );
                 serializedDataChinese = processor.SerializePacket(packet1);
 
-                // 序列化英文訊息   
+                // 序列化英文訊息
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
-                var packet2 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
+                var packet2 = processor.CreatePacket(
+                    startCode,
+                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                    function.FunctionCode,
+                    new List<Display.Sequence> { sequence2 }
+                );
                 serializedDataEnglish = processor.SerializePacket(packet2);
 
-                // Optional delay and turn off if situation is 84  
+                // 如果情境為 84，執行延遲並關閉
                 if (situation == 84)
                 {
-                    await Task.Delay(10000); // 延遲十秒 
+                    System.Threading.Thread.Sleep(10000); // 同步延遲十秒
                     var OffMode = new byte[] { 0x02 };
-                    var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
+                    var packetOff = processor.CreatePacketOff(
+                        startCode,
+                        new List<byte> { 0x11, 0x12 },
+                        function.FunctionCode,
+                        OffMode
+                    );
                     serializedDataOff = processor.SerializePacket(packetOff);
                 }
             }
@@ -492,10 +508,9 @@ namespace ASI.Wanda.DCU.TaskCDU
                 ASI.Lib.Log.ErrorLog.Log("SendMessageToUrgnt", ex);
             }
 
-            // 返回中文、英文和關閉訊息的序列化數據   
+            // 返回中文、英文和關閉訊息的序列化數據
             return Tuple.Create(serializedDataChinese, serializedDataEnglish, serializedDataOff);
         }
-
         /// <summary>
         /// 顯示器的畫面開啟
         /// </summary>
