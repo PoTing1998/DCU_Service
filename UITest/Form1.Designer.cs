@@ -54,15 +54,6 @@
             this.textBox12 = new System.Windows.Forms.TextBox();
             this.Version8BT = new System.Windows.Forms.Button();
             this.textBox13 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.button6 = new System.Windows.Forms.Button();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.textBox8 = new System.Windows.Forms.TextBox();
-            this.textBox14 = new System.Windows.Forms.TextBox();
-            this.button7 = new System.Windows.Forms.Button();
-            this.textBox15 = new System.Windows.Forms.TextBox();
-            this.textBox16 = new System.Windows.Forms.TextBox();
-            this.button8 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBox1
@@ -320,100 +311,11 @@
             this.textBox13.Text = "55 AA 01 01 34 26 00 02 23 00 7F 21 31 7E 31 00 FF 00 31 7B 00 00 FF 0C 00 74 10 " +
     "00 04 64 07 0A 2A FF 00 00 B8 55 A4 6A BD 75 1F 1E 1D 28";
             // 
-            // textBox3
-            // 
-            this.textBox3.Location = new System.Drawing.Point(20, 569);
-            this.textBox3.Multiline = true;
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(205, 165);
-            this.textBox3.TabIndex = 36;
-            // 
-            // button6
-            // 
-            this.button6.Location = new System.Drawing.Point(20, 540);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(119, 23);
-            this.button6.TabIndex = 37;
-            this.button6.Text = "格式轉換";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
-            // 
-            // textBox4
-            // 
-            this.textBox4.Location = new System.Drawing.Point(246, 569);
-            this.textBox4.Multiline = true;
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(218, 165);
-            this.textBox4.TabIndex = 38;
-            // 
-            // textBox8
-            // 
-            this.textBox8.Location = new System.Drawing.Point(20, 350);
-            this.textBox8.Multiline = true;
-            this.textBox8.Name = "textBox8";
-            this.textBox8.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox8.Size = new System.Drawing.Size(205, 127);
-            this.textBox8.TabIndex = 39;
-            // 
-            // textBox14
-            // 
-            this.textBox14.Location = new System.Drawing.Point(246, 350);
-            this.textBox14.Multiline = true;
-            this.textBox14.Name = "textBox14";
-            this.textBox14.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox14.Size = new System.Drawing.Size(205, 127);
-            this.textBox14.TabIndex = 40;
-            // 
-            // button7
-            // 
-            this.button7.Location = new System.Drawing.Point(20, 310);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(119, 23);
-            this.button7.TabIndex = 41;
-            this.button7.Text = "設備檢查";
-            this.button7.UseVisualStyleBackColor = true;
-            this.button7.Click += new System.EventHandler(this.button7_Click);
-            // 
-            // textBox15
-            // 
-            this.textBox15.Location = new System.Drawing.Point(672, 576);
-            this.textBox15.Multiline = true;
-            this.textBox15.Name = "textBox15";
-            this.textBox15.Size = new System.Drawing.Size(141, 21);
-            this.textBox15.TabIndex = 42;
-            // 
-            // textBox16
-            // 
-            this.textBox16.Location = new System.Drawing.Point(672, 612);
-            this.textBox16.Multiline = true;
-            this.textBox16.Name = "textBox16";
-            this.textBox16.Size = new System.Drawing.Size(174, 36);
-            this.textBox16.TabIndex = 43;
-            // 
-            // button8
-            // 
-            this.button8.Location = new System.Drawing.Point(672, 547);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(119, 23);
-            this.button8.TabIndex = 44;
-            this.button8.Text = "色碼表轉換";
-            this.button8.UseVisualStyleBackColor = true;
-            this.button8.Click += new System.EventHandler(this.button8_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1062, 746);
-            this.Controls.Add(this.button8);
-            this.Controls.Add(this.textBox16);
-            this.Controls.Add(this.textBox15);
-            this.Controls.Add(this.button7);
-            this.Controls.Add(this.textBox14);
-            this.Controls.Add(this.textBox8);
-            this.Controls.Add(this.textBox4);
-            this.Controls.Add(this.button6);
-            this.Controls.Add(this.textBox3);
+            this.ClientSize = new System.Drawing.Size(1062, 642);
             this.Controls.Add(this.textBox13);
             this.Controls.Add(this.Version8BT);
             this.Controls.Add(this.Version7BT);
@@ -475,15 +377,6 @@
         private System.Windows.Forms.TextBox textBox12;
         private System.Windows.Forms.Button Version8BT;
         private System.Windows.Forms.TextBox textBox13;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.Button button6;
-        private System.Windows.Forms.TextBox textBox4;
-        private System.Windows.Forms.TextBox textBox8;
-        private System.Windows.Forms.TextBox textBox14;
-        private System.Windows.Forms.Button button7;
-        private System.Windows.Forms.TextBox textBox15;
-        private System.Windows.Forms.TextBox textBox16;
-        private System.Windows.Forms.Button button8;
     }
 }
 

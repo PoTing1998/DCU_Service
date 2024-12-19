@@ -18,15 +18,15 @@ namespace ASI.Wanda.DCU.TaskPDN
 
     public static class Constants
     {
-        public const string SendPreRecordMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage";
-        public const string SendInstantMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendInstantMessage";
-        public const string SendScheduleSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ScheduleSetting";
-        public const string SendPreRecordMessageSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting";
-        public const string SendTrainMessageSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMessageSetting";
-        public const string SendPowerTimeSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PowerTimeSetting";
-        public const string SendGroupSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting";
-        public const string SendParameterSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ParameterSetting";
-
+        public const string SendPreRecordMsg                = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.SendPreRecordMessage";
+        public const string SendInstantMsg                  = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.SendInstantMessage";
+        public const string SendScheduleSetting             = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.ScheduleSetting";
+        public const string SendPreRecordMessageSetting     = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.PreRecordMessageSetting";
+        public const string SendTrainMessageSetting         = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.TrainMessageSetting";
+        public const string SendPowerTimeSetting            = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.PowerTimeSetting";
+        public const string SendGroupSetting                = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.GroupSetting";
+        public const string SendParameterSetting            = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.ParameterSetting";
+  
 
 
     }
@@ -38,7 +38,6 @@ namespace ASI.Wanda.DCU.TaskPDN
     }
     public class TaskPDNHelper
     {
-        private const string Pattern = @"LG01_CCS_CDU-1"; // 定義要篩選的模式
         public const string _mDU_ID = "LG01_CDU_01";
         public bool is_back = true;
         static string StationID = ConfigApp.Instance.GetConfigSetting("Station_ID");
@@ -223,8 +222,7 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// <returns>TextStringBody 文字訊息主體物件。</returns>
         private TextStringBody CreateTextStringBody(dmd_pre_record_message messageLayout)
         {
-            //  var fontColor = ProcessMessageColor(messageLayout.font_color);
-            var fontColor = new byte[] { 0xff, 0xff, 0x00 };
+            var fontColor = ProcessMessageColor(messageLayout.font_color);
             if (fontColor == null || fontColor.Length != 3)
                 throw new InvalidOperationException("無法處理消息顏色或 RGB 值無效。");
 
@@ -286,7 +284,7 @@ namespace ASI.Wanda.DCU.TaskPDN
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, true);
 
             var processor = new PacketProcessor();
-            return processor.CreatePacket(startCode, new List<byte> { 0x17,0x18 }, new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
+            return processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
         }
 
         /// <summary>
@@ -298,8 +296,8 @@ namespace ASI.Wanda.DCU.TaskPDN
         {
             var processor = new PacketProcessor();
             var serializedData = processor.SerializePacket(packet);
-            string result = BitConverter.ToString(serializedData).Replace("-", " ");
-            ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + result);
+
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
 
             _mSerial.Send(serializedData);
             return serializedData;
@@ -402,27 +400,15 @@ namespace ASI.Wanda.DCU.TaskPDN
                 var processor = new PacketProcessor();
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
-                var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
-                var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
 
                 // 序列化中文訊息
                 var sequence1 = CreateSequence(FireContentChinese, 1);
-                var packet1 = processor.CreatePacket(
-                    startCode,
-                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
-                    function.FunctionCode,
-                    new List<Display.Sequence> { sequence1 }
-                );
+                var packet1 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
                 serializedDataChinese = processor.SerializePacket(packet1);
 
                 // 序列化英文訊息
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
-                var packet2 = processor.CreatePacket(
-                    startCode,
-                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
-                    function.FunctionCode,
-                    new List<Display.Sequence> { sequence2 }
-                );
+                var packet2 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
                 serializedDataEnglish = processor.SerializePacket(packet2);
 
                 // 如果情境為 84，執行延遲並關閉

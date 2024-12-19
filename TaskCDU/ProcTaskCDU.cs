@@ -216,7 +216,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     byte[] dataBytes = HexStringToBytes(sJsonData);
                     if (dataBytes.Length >= 10) // 確保有足夠長度的陣列
                     {
-                         ProcessDataBytes(dataBytes);
+                        ProcessDataBytes(dataBytes);
                     }
                     else
                     {
@@ -293,7 +293,9 @@ namespace ASI.Wanda.DCU.TaskCDU
         private void ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
-            var taskPUPHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(_mProcName, _mSerial);
+            var taskUPDHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(_mProcName, _mSerial);
+            Tuple<byte[], byte[], byte[]> serializedData;
+
             switch (dataByteAtIndex8)
             {
                 case 0x81:
@@ -441,7 +443,7 @@ namespace ASI.Wanda.DCU.TaskCDU
 
         public void CloseDisplay()
         {
-            // 關閉顯示器的邏輯
+            // 關閉顯示器的邏輯 
             var startCode = new byte[] { 0x55, 0xAA };
             var processor = new PacketProcessor(); 
             var function = new PowerControlHandler(); 
