@@ -23,7 +23,7 @@ namespace ASI.Wanda.DCU.TaskPDN
 
         #region constructor
         static int mSEQ = 0; // 計算累進發送端的次數  
-        ASI.Lib.Comm.SerialPort.SerialPortLib serial = null;
+        ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
         /// <summary>
         /// 讀取火災資料
         /// </summary>
@@ -156,7 +156,7 @@ namespace ASI.Wanda.DCU.TaskPDN
 
                         byte[] SerialiazedData = new byte[] { };
                         //傳送到面板上
-                        taskPDNHelper.SendMessageToDisplay(target_du, dbName1, dbName2);
+                        taskPDNHelper.SendMessageToDisplay(target_du, dbName1, dbName2 ,out result);
                     }
                     catch (Exception ex)
                     {
@@ -213,34 +213,29 @@ namespace ASI.Wanda.DCU.TaskPDN
 
             return -1;
         }
-        private async Task ProcessDataBytes(byte[] dataBytes)
+        private void ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
-            var taskPUPHelper = new ASI.Wanda.DCU.TaskPDN.TaskPDNHelper(_mProcName, serial);
+            var taskUPDHelper = new ASI.Wanda.DCU.TaskPDN.TaskPDNHelper(_mProcName, _mSerial);
+            Tuple<byte[], byte[], byte[]> serializedData;
+
             switch (dataByteAtIndex8)
             {
                 case 0x81:
-                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
-                    SendSerializedData(serializedData.Item1, "Serialized display packet (Chinese)"); // 發送中文訊息
-                    SendSerializedData(serializedData.Item2, "Serialized display packet (English)"); // 發送英文訊息
+                    taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
                     break;
                 case 0x82:
-                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
-                    SendSerializedData(serializedData.Item1, "Serialized display packet (Chinese)"); // 發送中文訊息
-                    SendSerializedData(serializedData.Item2, "Serialized display packet (English)"); // 發送英文訊息
+                    taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
                     break;
                 case 0x83:
-                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
-                    SendSerializedData(serializedData.Item1, "Serialized display packet (Chinese)"); // 發送中文訊息
-                    SendSerializedData(serializedData.Item2, "Serialized display packet (English)"); // 發送英文訊息
+                    taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
                     break;
                 case 0x84:
-                    serializedData = await taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
-                    SendSerializedData(serializedData.Item3, "Serialized display packet (Chinese)"); // 關閉訊息
+                    taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
                     break;
                 default:
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " ", $"{_mProcName} unknown byte value at index 8: {dataByteAtIndex8.ToString("X2")}");
-                    break; 
+                    ASI.Lib.Log.DebugLog.Log(_mProcName + " ", $"{_mProcName} unknown byte value at index 9: {dataByteAtIndex8.ToString("X2")}");
+                    break;
             }
         }
         private void SendSerializedData(byte[] serializedData, string logMessage)

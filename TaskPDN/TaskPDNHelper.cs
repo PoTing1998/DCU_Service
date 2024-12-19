@@ -27,8 +27,6 @@ namespace ASI.Wanda.DCU.TaskPDN
         public const string SendGroupSetting                = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.GroupSetting";
         public const string SendParameterSetting            = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.ParameterSetting";
   
-
-
     }
     public class DeviceInfo
     {
@@ -39,6 +37,7 @@ namespace ASI.Wanda.DCU.TaskPDN
     public class TaskPDNHelper
     {
         public const string _mDU_ID = "LG01_CDU_01";
+        private const string Pattern = @"LG01_CCS_CDU-1"; // 定義要篩選的模式
         public bool is_back = true;
         static string StationID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         private string _mProcName;

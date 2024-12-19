@@ -299,16 +299,16 @@ namespace ASI.Wanda.DCU.TaskCDU
             switch (dataByteAtIndex8)
             {
                 case 0x81:
-                    taskPUPHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
+                    taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
                     break;
                 case 0x82:
-                    taskPUPHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
+                    taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
                     break;
                 case 0x83:
-                    taskPUPHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
+                    taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
                     break;
                 case 0x84:
-                    taskPUPHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
+                    taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
                     break;
                 default:
                     ASI.Lib.Log.DebugLog.Log(_mProcName + " ", $"{_mProcName} unknown byte value at index 9: {dataByteAtIndex8.ToString("X2")}");
