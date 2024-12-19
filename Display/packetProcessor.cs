@@ -211,7 +211,7 @@ namespace Display
                         throw new InvalidOperationException("Unknown StringMode");
                 }
 
-                var stringMessage = new StringMessage
+                var stringMessage = new StringMessage 
                 {
                     StringMode = mode,
                     StringBody = body,

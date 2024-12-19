@@ -99,7 +99,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sUserID = "postgres";
             string sPassword = "postgres";
             string sCurrentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
-            int result = -1; // Default to an error state
+            // Default to an error state
             try
             {
 

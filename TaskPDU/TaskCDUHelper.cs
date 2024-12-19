@@ -18,14 +18,14 @@ namespace ASI.Wanda.DCU.TaskCDU
     
     public static class Constants
     {
-        public const string SendPreRecordMsg                = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.SendPreRecordMessage";
-        public const string SendInstantMsg                  = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.SendInstantMessage";
-        public const string SendScheduleSetting             = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.ScheduleSetting";
-        public const string SendPreRecordMessageSetting     = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.PreRecordMessageSetting";
-        public const string SendTrainMessageSetting         = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.TrainMessageSetting";
-        public const string SendPowerTimeSetting            = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.PowerTimeSetting";
-        public const string SendGroupSetting                = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.GroupSetting";
-        public const string SendParameterSetting            = "ASI.Wanda.CMFT.JsonObject.DMD.FromCMFT.ParameterSetting";
+        public const string SendPreRecordMsg                = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage";
+        public const string SendInstantMsg                  = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendInstantMessage";
+        public const string SendScheduleSetting             = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ScheduleSetting";
+        public const string SendPreRecordMessageSetting     = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting";
+        public const string SendTrainMessageSetting         = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMessageSetting";
+        public const string SendPowerTimeSetting            = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PowerTimeSetting";
+        public const string SendGroupSetting                = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting";
+        public const string SendParameterSetting            = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ParameterSetting";
   
 
 
@@ -38,7 +38,7 @@ namespace ASI.Wanda.DCU.TaskCDU
     }
     public class TaskCDUHelper
     {
-        public const string _mDU_ID = "LG01_CDU_01";
+        public const string _mDU_ID = "LG01_CDU_09";
         public  bool is_back = true;
         static string StationID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         private string _mProcName;
@@ -191,9 +191,10 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <returns>TextStringBody 文字訊息主體物件。</returns>
         private TextStringBody CreateTextStringBody(dmd_pre_record_message messageLayout)
         {
-            var fontColor = ProcessMessageColor(messageLayout.font_color);
-            if (fontColor == null || fontColor.Length != 3)
-                throw new InvalidOperationException("無法處理消息顏色或 RGB 值無效。");
+          //  var fontColor = ProcessMessageColor(messageLayout.font_color);
+            var fontColor = new byte[] { 0xff, 0xff, 0x00 };
+            //if (fontColor == null || fontColor.Length != 3)
+            //    throw new InvalidOperationException("無法處理消息顏色或 RGB 值無效。");
 
             return new TextStringBody
             {
@@ -253,7 +254,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, true);
 
             var processor = new PacketProcessor();
-            return processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
+            return processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(back), Convert.ToByte(front) }, new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
         }
 
         /// <summary>
@@ -265,8 +266,8 @@ namespace ASI.Wanda.DCU.TaskCDU
         {
             var processor = new PacketProcessor();
             var serializedData = processor.SerializePacket(packet);
-
-            ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + BitConverter.ToString(serializedData));
+            string result = BitConverter.ToString(serializedData).Replace("-"," ");
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + result);
 
             _mSerial.Send(serializedData);
             return serializedData;
@@ -361,15 +362,16 @@ namespace ASI.Wanda.DCU.TaskCDU
                 var processor = new PacketProcessor();
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
-
+                var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+                var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
                 // 序列化中文訊息
                 var sequence1 = CreateSequence(FireContentChinese, 1);
-                var packet1 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
+                var packet1 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
                 serializedDataChinese = processor.SerializePacket(packet1);
 
                 // 序列化英文訊息
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
-                var packet2 = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
+                var packet2 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
                 serializedDataEnglish = processor.SerializePacket(packet2);
 
                 // Optional delay and turn off if situation is 84  
@@ -466,6 +468,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         { 
             try
             {
+                ASI.Lib.Log.DebugLog.Log(_mProcName + "470", colorName);
                 var ConfigDate = ASI.Wanda.DCU.DB.Tables.System.sysConfig.SelectColor(colorName);
                 ASI.Lib.Log.DebugLog.Log(_mProcName, ConfigDate.config_value.ToString());
                 return DataConversion.FromHex(ConfigDate.config_value);

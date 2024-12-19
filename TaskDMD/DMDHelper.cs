@@ -252,7 +252,7 @@ namespace ASI.Wanda.DMD.TaskDMD
         }
 
         /// <summary>
-        /// 更新DMDPreRecordMessage資料表   
+        /// 更新DCUInstantMessage資料表   
         /// </summary>
         /// <returns></returns>    
         public IEnumerable<ASI.Wanda.DCU.DB.Tables.DMD.dmdInstantMessage> UpdataDCUInstantMessage()

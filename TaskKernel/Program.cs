@@ -12,8 +12,6 @@ namespace ASI.Wanda.DCU.TaskKernel
 	{
 		static void Main(string[] args)
 		{
-
-           
             string qname = "TaskKernel";
 			if (args.Length == 1) qname = args[0];
                     

@@ -54,6 +54,9 @@
             this.textBox12 = new System.Windows.Forms.TextBox();
             this.Version8BT = new System.Windows.Forms.Button();
             this.textBox13 = new System.Windows.Forms.TextBox();
+            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.button6 = new System.Windows.Forms.Button();
+            this.textBox4 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // textBox1
@@ -311,11 +314,40 @@
             this.textBox13.Text = "55 AA 01 01 34 26 00 02 23 00 7F 21 31 7E 31 00 FF 00 31 7B 00 00 FF 0C 00 74 10 " +
     "00 04 64 07 0A 2A FF 00 00 B8 55 A4 6A BD 75 1F 1E 1D 28";
             // 
+            // textBox3
+            // 
+            this.textBox3.Location = new System.Drawing.Point(20, 569);
+            this.textBox3.Multiline = true;
+            this.textBox3.Name = "textBox3";
+            this.textBox3.Size = new System.Drawing.Size(205, 165);
+            this.textBox3.TabIndex = 36;
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(222, 540);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(119, 23);
+            this.button6.TabIndex = 37;
+            this.button6.Text = "格式轉換";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // textBox4
+            // 
+            this.textBox4.Location = new System.Drawing.Point(352, 569);
+            this.textBox4.Multiline = true;
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(218, 165);
+            this.textBox4.TabIndex = 38;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1062, 642);
+            this.ClientSize = new System.Drawing.Size(1062, 746);
+            this.Controls.Add(this.textBox4);
+            this.Controls.Add(this.button6);
+            this.Controls.Add(this.textBox3);
             this.Controls.Add(this.textBox13);
             this.Controls.Add(this.Version8BT);
             this.Controls.Add(this.Version7BT);
@@ -377,6 +409,9 @@
         private System.Windows.Forms.TextBox textBox12;
         private System.Windows.Forms.Button Version8BT;
         private System.Windows.Forms.TextBox textBox13;
+        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.TextBox textBox4;
     }
 }
 

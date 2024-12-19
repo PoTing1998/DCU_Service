@@ -812,8 +812,32 @@ namespace UITest
         }
 
 
+
         #endregion
 
-    
+        private void button6_Click(object sender, EventArgs e)
+        {
+            // 获取输入内容
+            var s = textBox3.Text;
+
+            // 创建一个 StringBuilder 来构建带有空格的输出
+            StringBuilder formattedString = new StringBuilder();
+
+            // 遍历字符串，每两个字符添加一个空格
+            for (int i = 0; i < s.Length; i += 2)
+            {
+                if (i + 2 <= s.Length)
+                {
+                    formattedString.Append(s.Substring(i, 2));  // 取两个字符
+                    if (i + 2 < s.Length)  // 如果不是最后一组字符，添加空格
+                    {
+                        formattedString.Append(" ");
+                    }
+                }
+            }
+
+            // 将结果显示在另一个 TextBox 中（假设你有一个 textBox4）
+            textBox4.Text = formattedString.ToString();
+        }
     }
 }

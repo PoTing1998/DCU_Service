@@ -158,7 +158,6 @@ namespace ASI.Wanda.DCU.TaskCDU
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, "處理其他訊息");
                                 }
                                 break;
-
                             case ASI.Wanda.DCU.TaskCDU.Constants.SendPowerTimeSetting:
                                 taskCDUHelper.PowerSetting(Station_ID);
                                 break;
@@ -208,7 +207,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     byte[] dataBytes = HexStringToBytes(sJsonData);
                     if (dataBytes.Length >= 10) // 確保有足夠長度的陣列
                     {
-                        ProcessDataBytes(dataBytes);
+                       ProcessDataBytes(dataBytes);
                     }
                     else
                     {
@@ -284,7 +283,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             var taskUPDHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(_mProcName, _mSerial);
             Tuple<byte[], byte[], byte[]> serializedData;
 
-            switch (dataByteAtIndex8)
+            switch (dataByteAtIndex8)   
             {
                 case 0x81:
                     serializedData = await taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
@@ -440,14 +439,14 @@ namespace ASI.Wanda.DCU.TaskCDU
 
         public void CloseDisplay()
         {
-            // 關閉顯示器的邏輯
+            // 關閉顯示器的邏輯 
             var startCode = new byte[] { 0x55, 0xAA };
             var processor = new PacketProcessor();
             var function = new PowerControlHandler();
             var Off = new byte[] { 0x3A, 0X01 };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
-            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
+            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Off);
             var serializedDataOff = processor.SerializePacket(packetOff);
              _mSerial.Send(serializedDataOff);
             ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
