@@ -17,7 +17,7 @@ namespace Display
         /// <returns></returns>
         static public byte[] ConvertToFiveSecondUnitsByteArray(int seconds)
         {
-            int unitsOfFiveSeconds = seconds / 5; // 將秒數除以5，以獲得五秒為一個單位的數量  
+            int unitsOfFiveSeconds = seconds / 5; // 將秒數除以5，以獲得五秒為一個單位的數量   
             string hexadecimalValue = unitsOfFiveSeconds.ToString("X");
 
             // 將十六進制字符串轉換為 byte[]  
@@ -102,7 +102,7 @@ namespace Display
             //packet[packet.Length - 1] = checkSum;
             //return packet;
 
-            // 使用 LINQ 加總所有的封包內容
+            // 使用 LINQ 加總所有的封包內容 
             checkSum = packetData.Aggregate<byte, byte>(0, (current, bData) => (byte)(current + bData));
 
             // 將 CheckSum 加在封包的最後面

@@ -1,21 +1,20 @@
-﻿
+﻿using ASI.Lib.Config;
+using ASI.Wanda.DCU.DB.Models.DMD;
+using ASI.Wanda.DCU.DB.Tables.DMD;
+
+using Display;
 using Display.DisplayMode;
 using Display.Function;
-using Display;
+
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ASI.Wanda.DCU.DB.Models.DMD;
-using ASI.Wanda.DCU.DB.Tables.DMD;
 using System.Text.RegularExpressions;
-using ASI.Lib.Config;
+using System.Threading.Tasks;
 
-namespace ASI.Wanda.DCU.TaskPDN
+namespace ASI.Wanda.DCU.TaskPUP
 {
-
     public static class Constants
     {
         public const string SendPreRecordMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage";
@@ -26,9 +25,6 @@ namespace ASI.Wanda.DCU.TaskPDN
         public const string SendPowerTimeSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PowerTimeSetting";
         public const string SendGroupSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting";
         public const string SendParameterSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ParameterSetting";
-
-
-
     }
     public class DeviceInfo
     {
@@ -36,14 +32,13 @@ namespace ASI.Wanda.DCU.TaskPDN
         public string Location { get; set; }
         public string DeviceWithNumber { get; set; }
     }
-    public class TaskPDNHelper
+    public class TaskPUPHelper
     {
-        public const string _mDU_ID = "LG01_CDU_01";
-        public bool is_back = true;
-        static string StationID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
-        public TaskPDNHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
+        public const string _mDU_ID = "LG01_UPF_PDU-1";
+        private const string Pattern = @"LG01_UPF_PDU-1"; // 定義要篩選的模式
+        public TaskPUPHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
         {
             _mProcName = mProcName;
             _mSerial = serial;
@@ -68,12 +63,14 @@ namespace ASI.Wanda.DCU.TaskPDN
                 throw new ArgumentException("Invalid device string format", nameof(deviceString));
             }
         }
-        #region  版型的操作    
+
+        #region  版型的操作
         public class DisplayMessageResult
         {
             public string Result { get; set; }
             public byte[] DataByte { get; set; }
         }
+
 
         /// <summary>
         /// 發送訊息至顯示器的主函式。
@@ -83,57 +80,89 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// <param name="dbName2">資料庫名稱 2。</param>
         /// <param name="result">操作結果輸出參數。</param>
         /// <param name="dataByte">封包資料輸出參數。</param>
-        public void SendMessageToDisplay(string targetDu, string dbName1, string dbName2, out string result, out byte[] dataByte)
+        public void SendMessageToDisplay(string targetDu, string dbName1, string dbName2, out string result)
         {
-            // 創建並傳送顯示訊息，取得結果
-            var sendResult = CreateAndSendMessage(targetDu, dbName1, dbName2);
-            result = sendResult.Result;
-            dataByte = sendResult.DataByte;
+            var results = CreateAndSendMessage(targetDu, dbName1, dbName2);
+            var successCount = results.Count(r => r.Result == "成功傳送");
+
+            result = successCount > 0 ? $"成功傳送 {successCount} 筆訊息" : "傳送失敗";
+
+            foreach (var displayResult in results)
+            {
+                if (displayResult.DataByte != null)
+                {
+                    _mSerial.Send(displayResult.DataByte);
+                }
+            }
         }
 
+
         /// <summary>
-        /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。
+        /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。 
         /// </summary>
         /// <param name="targetDu">目標設備單元標識符。</param>
         /// <param name="dbName1">資料庫名稱 1。</param>
         /// <param name="dbName2">資料庫名稱 2。</param>
         /// <returns>包含操作結果與封包資料的 DisplayMessageResult 物件。</returns>
-        private DisplayMessageResult CreateAndSendMessage(string targetDu, string dbName1, string dbName2)
+        private List<DisplayMessageResult> CreateAndSendMessage(string targetDu, string dbName1, string dbName2)
         {
-            var result = new DisplayMessageResult { Result = "傳送失敗：未知錯誤", DataByte = null };
+            var results = new List<DisplayMessageResult>();
 
             try
             {
-                // 驗證輸入參數
+                // 驗證輸入參數 
                 ValidateInput(targetDu);
 
-                // 解析 targetDu 並取得設備資訊
-                var deviceInfo = GetDeviceInfo(targetDu);
+                string[] deviceStrings = targetDu.Split(',');
+                string matchedDevice = null;
+                foreach (var deviceString in deviceStrings)
+                {
+                    string trimmedDevice = deviceString.Trim();
+                    if (Regex.IsMatch(trimmedDevice, Pattern))
+                    {
+                        matchedDevice = trimmedDevice;
+                        break;
+                    }
+                }
 
-                // 從資料庫中取得當前播放的消息 ID 與佈局
-                var messageId = GetPlayingItemId(deviceInfo);
-                var messageLayout = GetMessageLayout(messageId);
+                var deviceInfo = GetDeviceInfo(matchedDevice);
+                var messageIds = GetPlayingItemIds(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
 
-                // 建立文字訊息主體與全屏顯示消息
-                var textStringBody = CreateTextStringBody(messageLayout);
-                var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
+                foreach (var messageId in messageIds)
+                {
+                    var result = new DisplayMessageResult(); // 每個 messageId 的結果
 
-                // 建立顯示序列與封包
-                var sequence = CreateDisplaySequence(fullWindowMessage);
-                var packet = CreatePacket(_mDU_ID, sequence);
+                    try
+                    {
+                        var messageLayout = GetMessageLayout(messageId);
+                        var textStringBody = CreateTextStringBody(messageLayout);
+                        var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
 
-                // 序列化並傳送封包
-                result.DataByte = SerializeAndSendPacket(packet);
-                result.Result = "成功傳送";
+                        var sequence = CreateDisplaySequence(fullWindowMessage);
+                        var DUID = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDs(matchedDevice);
+                        var packet = CreatePacket(_mDU_ID, sequence);
+
+                        result.DataByte = SerializeAndSendPacket(packet);
+                        result.Result = "成功傳送";
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleError(ex, result);
+                    }
+
+                    results.Add(result);
+                }
             }
             catch (Exception ex)
             {
-                // 異常處理
-                HandleError(ex, ref result);
+                var result = new DisplayMessageResult { Result = "傳送失敗：未知錯誤", DataByte = null };
+                HandleError(ex, result);
+                results.Add(result); // 添加通用的異常結果
             }
 
-            return result;
+            return results;
         }
+
 
         /// <summary>
         /// 驗證輸入的目標設備單元標識符是否為空值。
@@ -159,13 +188,13 @@ namespace ASI.Wanda.DCU.TaskPDN
         }
 
         /// <summary>
-        /// 根據設備資訊從資料庫中取得當前正在播放的消息 ID。
+        /// 根據設備資訊從資料庫中取得當前正在播放的消息 ID。 邏輯有誤 待修改
         /// </summary>
         /// <param name="deviceInfo">設備資訊物件。</param>
-        /// <returns>當前播放的消息 ID。</returns>
-        private Guid GetPlayingItemId(DeviceInfo deviceInfo)
+        /// <returns>當前播放的消息 ID。</returns> 
+        private List<Guid> GetPlayingItemIds(string Station, string Location, string DeviceID)
         {
-            var messageId = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
+            var messageId = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemIds(Station, Location, DeviceID);
             if (messageId == null)
                 throw new InvalidOperationException("無法從資料庫中取得正在播放的消息 ID。");
             return messageId;
@@ -191,8 +220,8 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// <returns>TextStringBody 文字訊息主體物件。</returns>
         private TextStringBody CreateTextStringBody(dmd_pre_record_message messageLayout)
         {
-            //  var fontColor = ProcessMessageColor(messageLayout.font_color);
-            var fontColor = new byte[] { 0xff, 0xff, 0x00 };
+            var fontColor = ProcessMessageColor(messageLayout.font_color);
+            //   var fontColor = new byte[] { 0xff, 0xff, 0x00 }; 
             if (fontColor == null || fontColor.Length != 3)
                 throw new InvalidOperationException("無法處理消息顏色或 RGB 值無效。");
 
@@ -220,13 +249,12 @@ namespace ASI.Wanda.DCU.TaskPDN
                 MessageScroll = new ScrollInfo
                 {
                     ScrollMode = 0x64,
-                    ScrollSpeed = (byte)messageLayout.move_speed,
+                    ScrollSpeed = 05,
                     PauseTime = 10
                 },
                 MessageContent = new List<StringMessage> { new StringMessage { StringMode = 0x2A, StringBody = textStringBody } }
             };
         }
-
         /// <summary>
         /// 建立顯示序列物件，設定序列號、字體與消息內容。
         /// </summary>
@@ -254,14 +282,14 @@ namespace ASI.Wanda.DCU.TaskPDN
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, true);
 
             var processor = new PacketProcessor();
-            return processor.CreatePacket(startCode, new List<byte> { 0x17,0x18 }, new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
+            return processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(back), Convert.ToByte(front) }, new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
         }
 
         /// <summary>
         /// 序列化封包並透過串口傳送封包資料。
         /// </summary>
         /// <param name="packet">要傳送的資料封包。</param>
-        /// <returns>序列化的字節陣列。</returns>
+        /// <returns>序列化的字節陣列。</returns> 
         private byte[] SerializeAndSendPacket(Packet packet)
         {
             var processor = new PacketProcessor();
@@ -278,7 +306,7 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// </summary>
         /// <param name="ex">捕獲的異常物件。</param>
         /// <param name="result">包含操作結果的 DisplayMessageResult 物件。</param>
-        private void HandleError(Exception ex, ref DisplayMessageResult result)
+        private void HandleError(Exception ex, DisplayMessageResult result)
         {
             switch (ex)
             {
@@ -299,87 +327,57 @@ namespace ASI.Wanda.DCU.TaskPDN
 
 
         /// <summary>
-        /// 左測月台碼
-        /// </summary>
-        public void SendMessageToDisplay2(string target_du, string dbName1, string dbName2)
-        {
-            var deviceInfo = SplitStringToDeviceInfo(target_du);
-            var processor = new PacketProcessor();
-
-            var textStringBody = new TextStringBody
-            {
-                RedColor = 0xFF,
-                GreenColor = 0xFF,
-                BlueColor = 0xFF,
-                StringText = "萬大線"
-            };
-            var stringMessage = new StringMessage
-            {
-                StringMode = 0x2A, // TextMode (Static)
-                StringBody = textStringBody
-            };
-            var leftPlatform = new LeftPlatform //Display version
-            {
-                MessageType = 0x72, // FullWindow message
-                MessageLevel = 0x04, //  level 
-                MessageScroll = new ScrollInfo { ScrollMode = 0x61, ScrollSpeed = 07, PauseTime = 10 },
-                RedColor = 0xFF,
-                GreenColor = 0xFF,
-                BlueColor = 0xFF,
-                PhotoIndex = 1,
-                MessageContent = new List<StringMessage> { stringMessage }
-            };
-            var sequence1 = new Display.Sequence
-            {
-                SequenceNo = 1,
-                Font = new FontSetting { Size = FontSize.Font24x24, Style = FontStyle.Ming },
-                Messages = new List<IMessage> { leftPlatform }
-            };
-
-            var startCode = new byte[] { 0x55, 0xAA };
-            var function = new PassengerInfoHandler(); // Use PassengerInfoHandler  
-            var packet = processor.CreatePacket(startCode, new List<byte> { 0x01 }, function.FunctionCode, new List<Sequence> { sequence1 });
-            var serializedData = processor.SerializePacket(packet);
-            ASI.Lib.Log.DebugLog.Log(_mProcName + "送到看板上", "Serialized display packet: " + BitConverter.ToString(serializedData));
-
-        }
-        /// <summary>
-        /// 處理訊息
+        /// /緊急訊息
         /// </summary>
         /// <param name="FireContentChinese"></param>
         /// <param name="FireContentEnglish"></param>
         /// <param name="situation"></param>
-        /// <returns></returns>
-        public async Task<Tuple<byte[], byte[], byte[]>> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
+        public Tuple<byte[], byte[], byte[]> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
         {
             byte[] serializedDataChinese = new byte[] { };
             byte[] serializedDataEnglish = new byte[] { };
-            byte[] serializedDataOff = new byte[] { };  // 新增存放關閉訊息的序列化數據
+            byte[] serializedDataOff = new byte[] { }; // 新增存放關閉訊息的序列化數據
 
             try
             {
-                // 設定警示的視為固定內容  
+                // 設定警示的固定內容
                 var processor = new PacketProcessor();
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
                 var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
                 var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+
                 // 序列化中文訊息
                 var sequence1 = CreateSequence(FireContentChinese, 1);
-                var packet1 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence1 });
+                var packet1 = processor.CreatePacket(
+                    startCode,
+                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                    function.FunctionCode,
+                    new List<Display.Sequence> { sequence1 }
+                );
                 serializedDataChinese = processor.SerializePacket(packet1);
 
                 // 序列化英文訊息
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
-                var packet2 = processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, new List<Display.Sequence> { sequence2 });
+                var packet2 = processor.CreatePacket(
+                    startCode,
+                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                    function.FunctionCode,
+                    new List<Display.Sequence> { sequence2 }
+                );
                 serializedDataEnglish = processor.SerializePacket(packet2);
 
-                // Optional delay and turn off if situation is 84  
+                // 如果情境為 84，執行延遲並關閉
                 if (situation == 84)
                 {
-                    await Task.Delay(10000); // 延遲十秒
+                    System.Threading.Thread.Sleep(10000); // 同步延遲十秒
                     var OffMode = new byte[] { 0x02 };
-                    var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, OffMode);
+                    var packetOff = processor.CreatePacketOff(
+                        startCode,
+                        new List<byte> { 0x11, 0x12 },
+                        function.FunctionCode,
+                        OffMode
+                    );
                     serializedDataOff = processor.SerializePacket(packetOff);
                 }
             }
@@ -391,42 +389,99 @@ namespace ASI.Wanda.DCU.TaskPDN
             // 返回中文、英文和關閉訊息的序列化數據
             return Tuple.Create(serializedDataChinese, serializedDataEnglish, serializedDataOff);
         }
+        /// <summary>
+        /// 找尋車站Id並且判斷是否需要關閉
+        /// </summary>
+        /// <param name="messageID"></param>
+        /// <returns></returns>
+        public dmdPowerSetting PowerSetting(string stationID)
+        {
+            try
+            {
+                //從資料庫讀取資料
+                var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
+                string[] notEcoDays = stationData.not_eco_day.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                if (stationData.eco_mode == "on")
+                {
+                    // 獲取當前日期的月和日以及現在的時間（時和分）
+                    int currentMonth = DateTime.Now.Month;
+                    int currentDay = DateTime.Now.Day;
+                    int currentHour = DateTime.Now.Hour;
+                    int currentMinute = DateTime.Now.Minute;
+                    // 使用 List 儲存不啟動節能模式的日期
+                    var nonEcoDates = new List<(int Month, int Day)>();
 
-        /// <summary>
-        /// 顯示器的畫面開啟
-        /// </summary>
-        public void PowerSettingOpen()
-        {
-            var startCode = new byte[] { 0x55, 0xAA };
-            var processor = new PacketProcessor();
-            var function = new PowerControlHandler();
-            var Open = new byte[] { 0x3A, 0X00 };
-            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Open);
-            var serializedDataOpen = processor.SerializePacket(packetOpen);
-            _mSerial.Send(serializedDataOpen);
-            ASI.Lib.Log.DebugLog.Log(_mProcName + "顯示畫面開啟", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
-        }
-        /// <summary>
-        /// 顯示器的畫面關閉 
-        /// </summary>
-        public void PowerSettingOff()
-        {
-            var startCode = new byte[] { 0x55, 0xAA };
-            var processor = new PacketProcessor();
-            var function = new PowerControlHandler();
-            var Off = new byte[] { 0x3A, 0X01 };
-            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
-            var serializedDataOff = processor.SerializePacket(packetOff);
-            _mSerial.Send(serializedDataOff);
-            ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
+                    foreach (string day in notEcoDays)
+                    {
+                        ASI.Lib.Log.DebugLog.Log("PowerSetting", day.ToString());
+                        if (day.Length == 4)
+                        {
+                            int month = int.Parse(day.Substring(0, 2));
+                            int dayOfMonth = int.Parse(day.Substring(2, 2));
+                            nonEcoDates.Add((month, dayOfMonth));
+
+                            // 檢查當前日期是否在不啟動節能模式的日期列表中
+                            if (month == currentMonth && dayOfMonth == currentDay)
+                            {
+                                // 當前日期不啟動節能模式
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            // 處理長度不是 4 的情況，代表日期格式錯誤
+                            Console.WriteLine("無效的日期格式：" + day);
+                            continue;
+                        }
+                        // 檢查開關顯示器的時間
+                        string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (autoPlayTimes.Length == 1 && autoEcoTimes.Length == 1)
+                        {
+                            // 解析時間字串
+                            int autoPlayHour = int.Parse(autoPlayTimes[0].Substring(0, 2));//開啟的時間單位 時
+                            int autoPlayMinute = int.Parse(autoPlayTimes[0].Substring(3, 2));//開啟的時間單位 分
+                            int autoEcoHour = int.Parse(autoEcoTimes[0].Substring(0, 2));//關閉的時間單位 時
+                            int autoEcoMinute = int.Parse(autoEcoTimes[0].Substring(3, 2));//關閉的時間單位 分
+                                                                                           // 判斷當前時間是否在自動播放時間範圍內 
+                            if (currentHour == autoPlayHour && currentMinute == autoPlayMinute)
+                            {
+                                // 關閉顯示器
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, "關閉顯示器");
+                                PowerSettingOff();
+                            }
+                            // 判斷當前時間是否在節能模式時間範圍內
+                            else if (currentHour == autoEcoHour && currentMinute == autoEcoMinute)
+                            {
+                                // 開啟顯示器
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, "開啟顯示器");
+                                PowerSettingOpen();
+                            }
+                            else
+                            {
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, "當前時間不在自動播放或節能模式時間範圍內");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // 不需要做任何處理
+                    ASI.Lib.Log.DebugLog.Log("PowerSetting", "目前沒有開啟節能模式");
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                // 加入詳細的錯誤信息
+                ASI.Lib.Log.ErrorLog.Log($"Error ProcessMessage PowerSetting: {ex.Message}\nStack Trace: {ex.StackTrace}", ex);
+                return null;
+            }
+
         }
         #endregion
-        /// <summary>
-        /// 建立緊急訊息的封包  放入訊息內容以及上下排
-        /// </summary>
-        /// <param name="messageContent"></param>
-        /// <param name="sequenceNo"></param>
-        /// <returns></returns>
         Display.Sequence CreateSequence(string messageContent, int sequenceNo)
         {
             var textStringBody = new TextStringBody
@@ -445,7 +500,7 @@ namespace ASI.Wanda.DCU.TaskPDN
             {
                 UrgntMessageType = 0x79, // message
                 MessageType = 0x71,
-                MessageLevel = 0x01, // level 
+                MessageLevel = 0x01, // level
                 MessageScroll = new ScrollInfo { ScrollMode = 0x64, ScrollSpeed = 07, PauseTime = 10 },
                 MessageContent = new List<StringMessage> { stringMessage }
             };
@@ -458,7 +513,42 @@ namespace ASI.Wanda.DCU.TaskPDN
                 Messages = new List<IMessage> { urgentMessage }
             };
         }
-        #region 資料庫的method   
+        /// <summary>
+        /// 顯示器的畫面開啟
+        /// </summary>
+        public void PowerSettingOpen()
+        {
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Open = new byte[] { 0x3A, 0X00 };
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+
+            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Open);
+            var serializedDataOpen = processor.SerializePacket(packetOpen);
+            _mSerial.Send(serializedDataOpen);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
+        }
+        /// <summary>
+        /// 顯示器的畫面關閉
+        /// </summary>
+        public void PowerSettingOff()
+        {
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Off = new byte[] { 0x3A, 0X01 };
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+
+            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Off);
+            var serializedDataOff = processor.SerializePacket(packetOff);
+            _mSerial.Send(serializedDataOff);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
+        }
+
+        #region  資料庫的操作
         /// <summary>
         /// 色碼轉換成byte
         /// </summary>
@@ -468,7 +558,6 @@ namespace ASI.Wanda.DCU.TaskPDN
         {
             try
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName + "470", colorName);
                 var ConfigDate = ASI.Wanda.DCU.DB.Tables.System.sysConfig.SelectColor(colorName);
                 ASI.Lib.Log.DebugLog.Log(_mProcName, ConfigDate.config_value.ToString());
                 return DataConversion.FromHex(ConfigDate.config_value);
@@ -480,82 +569,7 @@ namespace ASI.Wanda.DCU.TaskPDN
             }
         }
 
-        /// <summary>
-        /// 找尋車站Id並且判斷是否需要關閉
-        /// </summary>
-        /// <param name="messageID"></param>
-        /// <returns></returns>
-        public dmdPowerSetting PowerSetting(string stationID)
-        {
-            var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
-            string[] notEcoDays = stationData.not_eco_day.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (stationData.eco_mode == "ON")
-            {
-                // 獲取當前日期的月和日以及現在的時間（時和分）
-                int currentMonth = DateTime.Now.Month;
-                int currentDay = DateTime.Now.Day;
-                int currentHour = DateTime.Now.Hour;
-
-                // 使用 List 儲存不啟動節能模式的日期 
-                var nonEcoDates = new List<(int Month, int Day)>();
-
-                foreach (string day in notEcoDays)
-                {
-                    if (day.Length == 4)
-                    {
-                        int month = int.Parse(day.Substring(0, 2));
-
-                        int dayOfMonth = int.Parse(day.Substring(2, 2));
-                        nonEcoDates.Add((month, dayOfMonth));
-
-                        // 檢查當前日期是否在不啟動節能模式的日期列表中 
-                        if (month == currentMonth && dayOfMonth == currentDay)
-                        {
-                            // 當前日期不啟動節能模式
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        // 處理長度不是 4 的情況，代表日期格式錯誤 
-                        ASI.Lib.Log.ErrorLog.Log(_mProcName, "無效的日期格式：" + day);
-                        continue;
-                    }
-
-                    // 檢查開關顯示器的時間   
-                    string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                    string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    if (autoPlayTimes.Length == 2 && autoEcoTimes.Length == 2)
-                    {
-                        int autoPlayStartHour = int.Parse(autoPlayTimes[0]);
-                        int autoPlayEndHour = int.Parse(autoPlayTimes[1]);
-                        int autoEcoStartHour = int.Parse(autoEcoTimes[0]);
-                        int autoEcoEndHour = int.Parse(autoEcoTimes[1]);
-
-                        if (currentHour >= autoPlayStartHour && currentHour <= autoPlayEndHour)
-                        {
-                            // 關閉顯示器
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, "關閉顯示器");
-                            PowerSettingOff();
-                        }
-                        else if (currentHour >= autoEcoStartHour && currentHour <= autoEcoEndHour)
-                        {
-                            // 開啟顯示器
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, "開啟顯示器");
-                            PowerSettingOpen();
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // 不需要做任何處理  
-            }
-
-            return null;
-        }
         #endregion
     }
 }
+

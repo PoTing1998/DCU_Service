@@ -20,7 +20,7 @@ namespace Display
         public byte[] ToBytes()
         {
             var messageBytes = Messages.SelectMany(m => m.ToBytes()).ToArray();
-            var length = (ushort)(messageBytes.Length + 1); // 訊息長度 + SequenceEnd 的長度  
+            var length = (ushort)(messageBytes.Length+2 ); // 訊息長度 + SequenceEnd 的長度 
 
             // 如果是緊急訊息，包含緊急指令
             if (IsUrgent)
@@ -30,7 +30,7 @@ namespace Display
             else
             {
                 var fontBytes = Font.ToBytes();
-                length += (ushort)fontBytes.Length; // 加上字體設定的長度
+                length += (ushort)fontBytes.Length; // 加上字體設定的長度 
             }
 
             var lengthBytes = BitConverter.GetBytes(length); // 低位元組在前

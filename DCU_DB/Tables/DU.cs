@@ -19,8 +19,13 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
               , equip.is_back
               , equip_status
               , equip.ins_user
-              
               );
+        }
+
+        public static List<string> GetPanelIDs(string DU_ID)
+        {
+            var data = SelectWhere(string.Format("WHERE du_id = '{0}'", DU_ID)).ToList();
+            return data.Select(d => d.equip_id).ToList();
         }
 
         /// <summary>
@@ -32,7 +37,7 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
         public static int GetPanelIDByDuAndOrientation(string du_id, bool is_back)
         {
             var data = SelectWhere(string.Format("WHERE du_id = '{0}' and is_back = '{1}'", du_id, is_back)).SingleOrDefault();
-            return data.panel_id;
+            return data.panel_id; 
         }
     }
 

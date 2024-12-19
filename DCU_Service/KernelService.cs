@@ -28,24 +28,24 @@ namespace ASI.Wanda.DCU
                 // set current directory to execution file folder 
                 System.IO.Directory.SetCurrentDirectory(System.AppDomain.CurrentDomain.BaseDirectory);
                 mServer = ASI.Lib.Config.ConfigApp.Instance.HostName;
-
+                
                 //ASI.Lib.Log.DebugLog.Log("KernelService", $"OnStart CurrentDomain.BaseDirectory = [{System.AppDomain.CurrentDomain.BaseDirectory}]");
                 System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(ExecTaskKernel));  // startup TaskKernel
-            }
+            } 
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log("KernelService", ex.Message);
+                ASI.Lib.Log.ErrorLog.Log("KernelService", ex.Message); 
             }
         }
         private void ExecTaskKernel(object pNull)
         {
             try
-            {
+            {   
                 ASI.Lib.Log.LogFile.Log(mServer, "KernelService", $"ExecTaskKernel CurrentDirectory = [{System.IO.Directory.GetCurrentDirectory()}]");
                 taskkernel_domain = AppDomain.CreateDomain("TaskKernel");
-                string exe_name = System.AppDomain.CurrentDomain.BaseDirectory + "TaskKernel.exe";
-                taskkernel_domain.ExecuteAssembly(exe_name, new string[] { "TaskKernel" });
-                //taskkernel_domain.ExecuteAssemblyByName("ASI.Wanda.DMD.TaskKernel");
+                string exe_name = System.AppDomain.CurrentDomain.BaseDirectory + "TaskKernel.exe"; 
+                taskkernel_domain.ExecuteAssembly(exe_name, new string[] { "TaskKernel" });  
+                //taskkernel_domain.ExecuteAssemblyByName("ASI.Wanda.DMD.TaskKernel"); 
             }
             catch (Exception ex)
             {

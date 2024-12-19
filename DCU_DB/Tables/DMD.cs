@@ -112,10 +112,15 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
             string whereString = string.Format("where station_id = '{0}' AND area_id = '{1}' AND  device_id = '{2}' ", stationID, area_id, deviceID);
             DeleteWhere(whereString);
         }
-        static public Guid GetPlayingItemId(string stationID, string area_id, string deviceID)
-        {
-            var temp = SelectWhere( string.Format("where station_id = '{0}' AND area_id = '{1}' AND  device_id = '{2}' ", stationID, area_id, deviceID)).SingleOrDefault();
-            return    temp.message_id;
+        static public List<Guid> GetPlayingItemIds(string stationID, string area_id, string deviceID)
+        { 
+            // 僅傳入篩選條件
+            var temp = SelectWhere(
+                string.Format(" where station_id = '{0}' AND area_id = '{1}' AND device_id = '{2}'",
+                stationID, area_id, deviceID), eSortWay.Desc /*或 Ascending */);
+
+            // 回傳所有符合條件的 message_id，若無資料則回傳空的 List<Guid>
+            return temp?.Select(item => item.message_id).ToList() ?? new List<Guid>();
         }
 
 
@@ -299,6 +304,17 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
         {
             Update(
                   messageID, messageType, messageSubType, messagePriority
+                , moveMode, moveSpeed, displayTimes, countDownDisplayInterval
+                , messageContentCHN, fontTypeCHN, fontSizeCHN, fontColorCHN
+                , messageContentENG, fontTypeENG, fontSizeENG, fontColorENG);
+        }
+
+        public static void InsertTrainMessages(string messageID, int messageType, int messageSubType, int messagePriority
+            , int moveMode, int moveSpeed, int displayTimes, int countDownDisplayInterval
+            , string messageContentCHN, string fontTypeCHN, int fontSizeCHN, string fontColorCHN
+            , string messageContentENG, string fontTypeENG, int fontSizeENG, string fontColorENG)
+        {
+            Insert(messageID, messageType, messageSubType, messagePriority
                 , moveMode, moveSpeed, displayTimes, countDownDisplayInterval
                 , messageContentCHN, fontTypeCHN, fontSizeCHN, fontColorCHN
                 , messageContentENG, fontTypeENG, fontSizeENG, fontColorENG);

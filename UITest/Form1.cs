@@ -1,5 +1,4 @@
-﻿using ASI.Lib.Msg.Parsing;
-using ASI.Wanda.DCU.TaskSDU;
+﻿using ASI.Wanda.DCU.TaskCDU;
 
 using Display;
 using Display.DisplayMode;
@@ -7,19 +6,15 @@ using Display.Function;
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.IO.Ports;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 using UITest.Verify;
 
 using static Display.DisplaySettingsEnums;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace UITest
 {
@@ -27,7 +22,6 @@ namespace UITest
     {
         #region  construct
         private string _mProcName;
-        ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
         private string StationID;
         private string AreaID;
         private string DeviceID;
@@ -39,68 +33,22 @@ namespace UITest
         public Form1()
         {
             InitializeComponent();
-            _mProcName = "SDUHelper";
-            StationID = "LG01";
-            AreaID = "UPF";
-            DeviceID = "PDU-1";
-            //  取得預錄訊息
-            var message_id = ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.GetPlayingItemId(StationID, AreaID, DeviceID);
-            //  取得單一一筆預錄訊息的資料
-            var message_layout = ASI.Wanda.DCU.DB.Tables.DMD.dmdPreRecordMessage.SelectMessage(message_id);
-            data(message_layout);
-            var fontColorString = ASI.Wanda.DCU.DB.Tables.System.sysConfig.PickColor(message_layout.font_color);
-            var fontColor = DataConversion.FromHex(fontColorString);
+            Console.WriteLine();
             
-            var textStringBody = new TextStringBody
-            {
-                RedColor = fontColor[0],
-                GreenColor = fontColor[1],
-                BlueColor = fontColor[2],
-                StringText = message_layout.message_content
-            };
-            var stringMessage = new StringMessage
-            {
-                StringMode = 0x2A, // TextMode (Static)    
-                StringBody = textStringBody
-            };
-            var fullWindowMessage = new FullWindow //Display version
-            {
-                MessageType = 0x71, // FullWindow message 
-                MessageLevel = (byte)message_layout.message_priority, // level
-                //滾動模式
-                MessageScroll = new ScrollInfo
-                {
-                    ScrollMode = 0x64,
-                    ScrollSpeed = (byte)message_layout.move_speed,
-                    PauseTime = 10
-                },
-                MessageContent = new List<StringMessage> { stringMessage }
-            };
-            var sequence1 = new Display.Sequence
-            {
-                SequenceNo = 1,
-                Font = new FontSetting { Size = FontSize.Font24x24, Style = Display.FontStyle.Ming },
-                Messages = new List<IMessage> { fullWindowMessage }
-            };
-            var processor = new PacketProcessor();
-            var startCode = new byte[] { 0x55, 0xAA };
-            var function = new PassengerInfoHandler(); // Use PassengerInfoHandler 
-            var packet = processor.CreatePacket(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, new List<Sequence> { sequence1 });
-            var serializedData = processor.SerializePacket(packet);
         }
 
         #endregion
         #region Button
         private void button1_Click(object sender, EventArgs e)
         {
-            // 獲取當前 textBox1 中的內容
+            // 獲取當前 textBox1 中的內容  
             string textBoxContent = textBox1.Text;
 
-            // 提取字體顏色和字體內容
+            // 提取字體顏色和字體內容 
             string fontColor = ExtractValue(textBoxContent, "字體顏色 : ");
             string messageContent = ExtractValue(textBoxContent, "字體內容 : ");
 
-            // 將 messageContent 轉換為字節數組
+            // 將 messageContent 轉換為字節數組 
             var messageContentByte = Encoding.GetEncoding(950).GetBytes(messageContent);
 
             // 將字體顏色轉換為字節數組
@@ -168,7 +116,7 @@ namespace UITest
                     StringMode = 0x2A, // TextMode (Static) 
                     StringBody = textStringBody
                 };
-                // 進行規則判斷
+                // 進行規則判斷 
                 bool isMessageValid = ValidateStringMessage(stringMessage);
 
                 // 顯示規則判斷結果
@@ -176,7 +124,7 @@ namespace UITest
                 {
                     textBox2.Text += "StringMessage 符合規則。\r\n";
                     byte[] byteArray = stringMessage.ToBytes();
-                    string messageContentHexString = string.Join(" ", byteArray.Select(b => b.ToString("X2"))); // "X2" 將每個字節格式化為兩位16進制數
+                    string messageContentHexString = string.Join(" ", byteArray.Select(b => b.ToString("X2"))); // "X2" 將每個字節格式化為兩位16進制數 
                     textBox2.Text += $"{messageContentHexString}\r\n";
                     textBox2.Text += "========================\r\n";
                 }
@@ -189,8 +137,7 @@ namespace UITest
             else
             {
                 textBox2.Text = "尚未初始化 textStringBody。\r\n";
-            }
-
+            } 
         }
         private void button3_Click(object sender, EventArgs e)
         {
@@ -280,10 +227,10 @@ namespace UITest
         {
 
             var ByteData = textBox6.Text;
-            // 將十六進制字串轉換為字節陣列
+            // 將十六進制字串轉換為字節陣列 
             var temp = ConvertHexStringToByteArray(ByteData);
             // 驗證封包是否符合
-            string errorMessage;
+            string errorMessage; 
             LeftPlatformHandlerVerify test = new LeftPlatformHandlerVerify();
             var result = test.ValidatePacket(temp, out errorMessage);
             //根據結果更新畫面
@@ -347,9 +294,9 @@ namespace UITest
         private void Version7BT_Click(object sender, EventArgs e)
         {
             var ByteData = textBox12.Text;
-            // 將十六進制字串轉換為字節陣列
+            // 將十六進制字串轉換為字節陣列 
             var temp = ConvertHexStringToByteArray(ByteData);
-            // 驗證封包是否符合
+            // 驗證封包是否符合 
             string errorMessage;
             IdentifierStatusImageTopLeft24x48HandlerVerify Verify = new IdentifierStatusImageTopLeft24x48HandlerVerify();
             var result = Verify.ValidatePacket(temp, out errorMessage);
@@ -376,16 +323,7 @@ namespace UITest
         }
         #endregion
         #region 組成封包的Method
-        private void data(ASI.Wanda.DCU.DB.Models.DMD.dmd_pre_record_message data)
-        {
-            textBox1.Text += "字體顏色 : " + data.font_color + "\r\n"; 
-            textBox1.Text += "字體內容 : " + data.message_content + "\r\n"; 
-            textBox1.Text += "訊息等級 : " + data.message_priority + "\r\n"; 
-            textBox1.Text += "訊息速度 :" + data.move_speed + "\r\n";
-            textBox1.Text += "訊息間格 : " + data.Interval + "\r\n";
-            textBox1.Text += "訊息字體大小 : " + data.font_size + "\r\n";
-            textBox1.Text += "訊息字體風格 : " + data.font_type + "\r\n";
-        }
+       
         // 用於提取文本中指定標籤後的值
         private string ExtractValue(string source, string label)
         {
@@ -817,27 +755,85 @@ namespace UITest
 
         private void button6_Click(object sender, EventArgs e)
         {
-            // 获取输入内容
+            // 獲取輸入內容 
             var s = textBox3.Text;
 
-            // 创建一个 StringBuilder 来构建带有空格的输出
+            // 建立一個 StringBuilder 來構建帶有空格的輸出
             StringBuilder formattedString = new StringBuilder();
 
-            // 遍历字符串，每两个字符添加一个空格
+            // 遍歷字串，每兩個字元添加一個空格
             for (int i = 0; i < s.Length; i += 2)
             {
+                // 如果有兩個字元，則加入這兩個字元；否則僅加入最後一個字元 
                 if (i + 2 <= s.Length)
                 {
-                    formattedString.Append(s.Substring(i, 2));  // 取两个字符
-                    if (i + 2 < s.Length)  // 如果不是最后一组字符，添加空格
-                    {
-                        formattedString.Append(" ");
-                    }
+                    formattedString.Append(s.Substring(i, 2));  // 取兩個字元 
+                }
+                else
+                {
+                    formattedString.Append(s[i]);  // 僅取最後一個字元  
+                }
+                // 如果不是最後一組字元，添加空格
+                if (i + 2 < s.Length)
+                {
+                    formattedString.Append(" ");
                 }
             }
 
-            // 将结果显示在另一个 TextBox 中（假设你有一个 textBox4）
+            // 將結果顯示在另一個 TextBox 中（假設你有一個 textBox4）
             textBox4.Text = formattedString.ToString();
         }
+
+        private const string Pattern = @"LG01_UPF_PDU-1"; // 定義要篩選的模式
+        private void button7_Click(object sender, EventArgs e)
+        {
+         
+            string[] deviceStrings = textBox8.Text.Split(',');
+            string matchedDevice = null;
+            foreach (var deviceString in deviceStrings)
+            {
+                string trimmedDevice = deviceString.Trim();
+                if (Regex.IsMatch(trimmedDevice, Pattern))
+                {
+                    matchedDevice = trimmedDevice;
+                    break; // 找到匹配裝置後立即退出迴圈
+                }
+
+            }
+
+            var result = matchedDevice;
+            textBox14.Text = result.ToString();
+        }
+       
+
+        /// <summary>
+        /// 色碼轉換成byte  
+        /// </summary>
+        /// <param name="colorName"></param>
+        /// <returns></returns>
+        private byte[] ProcessMessageColor(string colorName)
+        {
+            try 
+            {
+                var ConfigDate = ASI.Wanda.DCU.DB.Tables.System.sysConfig.SelectColor(colorName);
+                ASI.Lib.Log.DebugLog.Log(_mProcName, ConfigDate.config_value.ToString());
+
+                return DataConversion.FromHex(ConfigDate.config_value);  
+            }
+            catch (Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("Error ProcessMessage ProcessMessageColor", ex);
+                return null;
+            }
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            var temp = ProcessMessageColor(textBox15.Text); 
+            textBox16.Text = temp.ToString();
+        }
+
+      
+        
     }
 }

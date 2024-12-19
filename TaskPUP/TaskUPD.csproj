@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EF86CF63-6868-4CE0-BE6C-DEF082B7EDD0}</ProjectGuid>
+    <ProjectGuid>{F2D4FFB9-1335-419B-A514-259B23A3FEA2}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>TaskPDN</RootNamespace>
-    <AssemblyName>TaskPDN</AssemblyName>
+    <RootNamespace>TaskPUP</RootNamespace>
+    <AssemblyName>TaskPUP</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -34,7 +34,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -43,19 +45,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProcTaskPUP.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProTaskPDN.cs" />
-    <Compile Include="TaskPDNHelper.cs" />
+    <Compile Include="TaskPUPHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ASILib\ASILib.csproj">
-      <Project>{5b6fc193-a36d-409e-8e9b-2c45fe574189}</Project>
-      <Name>ASILib</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DCU_DB\DCU_DB.csproj">
       <Project>{a6951f86-d11c-427e-b294-f3d4d34dffb3}</Project>
       <Name>DCU_DB</Name>
@@ -69,12 +67,16 @@
       <Name>Display</Name>
     </ProjectReference>
     <ProjectReference Include="..\DMD_Frame\DMD_Frame.csproj">
-      <Project>{a169f312-d665-4361-9a74-edd9d2e807f8}</Project>
+      <Project>{A169F312-D665-4361-9A74-EDD9D2E807F8}</Project>
       <Name>DMD_Frame</Name>
     </ProjectReference>
     <ProjectReference Include="..\PA_Frame\PA_Frame.csproj">
-      <Project>{a55f3208-0803-474d-b13d-c93abc96854e}</Project>
+      <Project>{A55F3208-0803-474D-B13D-C93ABC96854E}</Project>
       <Name>PA_Frame</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ASILib\ASILib.csproj">
+      <Project>{5b6fc193-a36d-409e-8e9b-2c45fe574189}</Project>
+      <Name>ASILib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
