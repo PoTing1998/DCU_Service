@@ -24,16 +24,5 @@ namespace Display.Function
             { 0x38, new EmergencyMessagePlaybackHandler() }
         };
         }
-
-        public IFunctionHandler GetHandler(byte functionCode)
-        {
-            if (_handlers.TryGetValue(functionCode, out var handler))
-            {
-                return handler;
-            }
-            throw new InvalidOperationException($"找尋不到相關 FunctionCode {functionCode}");
-        }
     }
-
-
 }

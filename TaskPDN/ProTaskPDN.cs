@@ -217,8 +217,6 @@ namespace ASI.Wanda.DCU.TaskPDN
         {
             byte dataByteAtIndex8 = dataBytes[8];
             var taskUPDHelper = new ASI.Wanda.DCU.TaskPDN.TaskPDNHelper(_mProcName, _mSerial);
-            Tuple<byte[], byte[], byte[]> serializedData;
-
             switch (dataByteAtIndex8)
             {
                 case 0x81:

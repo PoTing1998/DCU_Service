@@ -663,8 +663,6 @@ namespace ASI.Wanda.DCU.TaskCDU
             return messageLayout;
         }
 
-
-
         /// <summary>
         /// 找尋車站Id並且判斷是否需要關閉 
         /// </summary>

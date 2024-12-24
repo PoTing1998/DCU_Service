@@ -105,7 +105,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 ASI.Lib.Log.DebugLog.Log(_mProcName, "嘗試啟動 ScheduledTask...");
                 var task = new ScheduledTask();
 
-                task.StartPowerSettingScheduler("LG01");
+                task.StartPowerSettingScheduler("LG01");  
                 ASI.Lib.Log.DebugLog.Log(_mProcName, "ScheduledTask 已啟動成功.");
 
                 // 2. 初始化資料庫連線
@@ -223,14 +223,14 @@ namespace ASI.Wanda.DCU.TaskDMD
                     }
                     else if (mSGFromTaskDCU.MessageType == 3)
                     {
-                        //DMD內部通訊定義:Response  
+                        //DMD內部通訊定義:Response   
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
                         ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);
                         //將訊息傳給DMD
                         var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(mSGFromTaskDCU.JsonData);
 
-                        //組封包 
+                        //組封包  
                         var Res_SendPreRecordMessage = new ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage(ASI.Wanda.DMD.Enum.Station.OCC);
                         Res_SendPreRecordMessage.seatID = oJsonObject.seatID;
                         Res_SendPreRecordMessage.msg_id = oJsonObject.msg_id;
@@ -322,7 +322,6 @@ namespace ASI.Wanda.DCU.TaskDMD
         {
             if (mDMD_API != null)
             {
-                mDMD_API.ReceivedEvent -= DMD_API_ReceivedEvent;
                 mDMD_API.DisconnectedEvent -= DMD_API_DisconnectedEvent;
                 mDMD_API.Dispose();
                 ASI.Lib.Log.DebugLog.Log(_mProcName, "Existing DMD_API disconnected and disposed.");
@@ -446,9 +445,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 SqlCommand = oJsonObjectPowerTimeSetting.SqlCommand
             };
             SendToAllTasks(DMDHelper, PowerTimeSetting);
-            
         }
-
 
         private void HandleTrainMessageSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
@@ -502,7 +499,6 @@ namespace ASI.Wanda.DCU.TaskDMD
                 ASI.Lib.Log.ErrorLog.Log("SendToAllTasks", $"序列化消息時發生錯誤: {ex.Message}");
             }
         }
-
 
         #endregion
 

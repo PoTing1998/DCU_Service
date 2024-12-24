@@ -30,6 +30,7 @@ public class ScheduledTask
         try
         {
             _task.Invoke();
+
         }
         catch (Exception ex)
         {

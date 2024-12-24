@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.34112.143
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelService", "DCU_Service\KernelService.csproj", "{06A10D57-2C08-4DB5-898C-0145C3CDDEE4}"
 EndProject
@@ -45,7 +45,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskCDU", "TaskCDU\TaskCDU.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskPDN", "TaskPDN\TaskPDN.csproj", "{F3507095-8AF4-4388-A9DF-DF1AE41BC0EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskUPD", "TaskPUP\TaskUPD.csproj", "{F2D4FFB9-1335-419B-A514-259B23A3FEA2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskPUP", "TaskPUP\TaskPUP.csproj", "{F2D4FFB9-1335-419B-A514-259B23A3FEA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

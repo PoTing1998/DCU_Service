@@ -67,14 +67,12 @@ namespace Display
         /// <returns></returns>
         public static byte[] FromHex(string hex)
         {
-            if (string.IsNullOrWhiteSpace(hex))
-                throw new ArgumentException("Hex color code cannot be null or empty.");
+
+            if (string.IsNullOrWhiteSpace(hex) || (hex.Length != 6 && hex.Length != 7))
+                throw new ArgumentException("Hex color code must be 6 characters long.");
 
             if (hex.StartsWith("#"))
                 hex = hex.Substring(1);
-
-            if (hex.Length != 6)
-                throw new ArgumentException("Hex color code must be 6 characters long.");
 
             int r = int.Parse(hex.Substring(0, 2), NumberStyles.HexNumber);
             int g = int.Parse(hex.Substring(2, 2), NumberStyles.HexNumber);
