@@ -146,7 +146,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                                     DbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1"), 
                                     DbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2")
                                 };
-                                    // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄  
+                                    // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄 
                                     string formattedLog = JsonConvert.SerializeObject(logData, Formatting.Indented);
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, formattedLog);
                                     // 處理消息並記錄結果   
@@ -294,8 +294,6 @@ namespace ASI.Wanda.DCU.TaskCDU
         {
             byte dataByteAtIndex8 = dataBytes[8];
             var taskUPDHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(_mProcName, _mSerial);
-            Tuple<byte[], byte[], byte[]> serializedData;
-
             switch (dataByteAtIndex8)
             {
                 case 0x81:

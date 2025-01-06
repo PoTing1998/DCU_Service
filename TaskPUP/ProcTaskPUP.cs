@@ -1,5 +1,4 @@
 ﻿using ASI.Lib.Config;
-using ASI.Lib.DB;
 using ASI.Lib.Log;
 using ASI.Lib.Process;
 using ASI.Wanda.DCU.ProcMsg;
@@ -7,20 +6,11 @@ using ASI.Wanda.DMD.ProcMsg;
 using ASI.Wanda.PA.ProcMsg;
 
 using Display;
-using Display.DisplayMode;
 using Display.Function;
 
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Text;
-
-using System.Threading.Tasks;
-
-using System.Xml;
-using System.Timers;
-
-using System.Xml.Linq;
+using Newtonsoft.Json;
 
 
 
@@ -137,82 +127,6 @@ namespace ASI.Wanda.DCU.TaskPUP
             return base.StartTask(pComputer, pProcName);
         }
 
-
-        /// <summary>
-        /// 處理TaskDMD的訊息
-        /// </summary>
-        //private int ProMsgFromDMD(string pMessage)
-        //{
-        //    try
-        //    {
-        //        ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
-        //        if (mSGFromTaskDMD.UnPack(pMessage) > 0)
-        //        {
-        //            try
-        //            {
-        //                string sJsonData = mSGFromTaskDMD.JsonData;
-        //                string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-        //                var taskPUPHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, _mSerial);
-
-        //                switch (sJsonObjectName)
-        //                {
-        //                    case ASI.Wanda.DCU.TaskPUP.Constants.SendPreRecordMsg: //預錄訊息 
-        //                        string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
-        //                        string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
-        //                        string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
-        //                        string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
-        //                        string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
-
-        //                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
-
-        //                        if (dbName1 == "dmd_pre_record_message") //預錄訊息
-        //                        {
-        //                            string result = "";
-        //                            ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
-        //                            byte[] SerialiazedData = new byte[] { };
-        //                            //傳送到面板上    
-        //                            taskPUPHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result);
-        //                            ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message" + result);
-        //                        }
-        //                        else
-        //                        {
-        //                            //判斷收到的訊息ID
-        //                            ASI.Lib.Log.DebugLog.Log(_mProcName, "處理其他訊息");
-        //                        }
-        //                        break;
-        //                    case ASI.Wanda.DCU.TaskPUP.Constants.SendInstantMsg: //即時訊息
-
-        //                        break;
-        //                    case ASI.Wanda.DCU.TaskPUP.Constants.SendPowerTimeSetting:
-        //                        taskPUPHelper.PowerSetting(Station_ID);
-        //                        break;
-        //                    case ASI.Wanda.DCU.TaskPUP.Constants.SendTrainMessageSetting:
-        //                        break;
-        //                    case "節能模式開啟":
-        //                       //  OpenDisplay();
-        //                        break;
-        //                    case "節能模式關閉":
-        //                       // CloseDisplay();
-        //                        break;
-        //                }
-
-
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex.ToString());
-        //            }
-
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ASI.Lib.Log.ErrorLog.Log(_mProcName, ex);
-        //    }
-
-        //    return -1;
-        //}
-
         /// <summary>
         /// 主方法：處理來自 TaskDMD 的消息
         /// </summary>
@@ -222,76 +136,82 @@ namespace ASI.Wanda.DCU.TaskPUP
         {
             try
             {
-                // 嘗試解包消息並檢查有效性
-                var mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
+                ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
                 if (mSGFromTaskDMD.UnPack(pMessage) > 0)
                 {
+
                     try
                     {
-                        // 取得 JSON 數據和指令名稱  
                         string sJsonData = mSGFromTaskDMD.JsonData;
-                        string sJsonObjectName = JsonHelper.GetValue(sJsonData, "JsonObjectName");
+                        string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
+                        var taskCDUHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, _mSerial);
 
-                        // 初始化任務處理助手
-                        var taskPUPHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, _mSerial);
-
-                        // 創建指令分發器並分發指令
-                        var dispatcher = new CommandDispatcher(taskPUPHelper, _mProcName);
-                        dispatcher.Dispatch(sJsonObjectName, sJsonData);
+                        switch (sJsonObjectName)
+                        {
+                            case ASI.Wanda.DCU.TaskPUP.Constants.SendPreRecordMsg: //預錄訊息 
+                            case ASI.Wanda.DCU.TaskPUP.Constants.SendInstantMsg: //即時訊息
+                                // 從 JSON 數據中提取相關值
+                                var logData = new
+                                {
+                                    Message = "收到來自TaskDMD的訊息",
+                                    JsonData = sJsonData,
+                                    SeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID"),
+                                    MsgID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id"),
+                                    TargetDU = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du"),
+                                    DbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1"),
+                                    DbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2")
+                                };
+                                // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄  
+                                string formattedLog = JsonConvert.SerializeObject(logData, Formatting.Indented);
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, formattedLog);
+                                // 處理消息並記錄結果   
+                                string result = "";
+                                switch (logData.DbName1)
+                                {
+                                    case "dmd_pre_record_message":
+                                        ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
+                                        // 發送消息到顯示面板（針對預錄訊息的處理）
+                                        taskCDUHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result);
+                                        ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message: " + result);
+                                        break;
+                                    case "dmd_instant_message":
+                                        ASI.Lib.Log.DebugLog.Log(_mProcName, "處理即時消息 dmd_instant_message");
+                                        // 發送消息到顯示面板（針對即時訊息的處理） 
+                                        taskCDUHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result);
+                                        ASI.Lib.Log.DebugLog.Log(_mProcName, "處理即時消息 dmd_instant_message: " + result);
+                                        break;
+                                    default:
+                                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"未知的 DbName1 值：{logData.DbName1}");
+                                        break;
+                                }
+                                break;
+                            case ASI.Wanda.DCU.TaskPUP.Constants.SendPowerTimeSetting:
+                                taskCDUHelper.PowerSetting(Station_ID);
+                                break;
+                            case "節能模式開啟":
+                                OpenDisplay();
+                                break;
+                            case "節能模式關閉":
+                                CloseDisplay();
+                                break;
+                        }
                     }
                     catch (Exception ex)
                     {
-                        // 處理指令時出現異常，記錄錯誤日誌
-                        Logger.LogError(_mProcName, ex.ToString());
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, ex.ToString());
                     }
+
                 }
             }
             catch (Exception ex)
             {
-                // 消息解析過程中出現異常，記錄錯誤日誌  
-                Logger.LogError(_mProcName, ex.ToString ());
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex);
             }
 
-            // 返回 -1 表示處理失敗
             return -1;
         }
 
-        public class CommandDispatcher
-        {
-            private readonly TaskPUPHelper _taskPUPHelper;
-            private readonly string _procName;
-
-            private readonly Dictionary<string, ICommandHandler> _handlers;
-
-            public CommandDispatcher(TaskPUPHelper taskPUPHelper, string procName)
-            {
-                _taskPUPHelper = taskPUPHelper;
-                _procName = procName;
-
-                _handlers = new Dictionary<string, ICommandHandler>
-        {
-            { ASI.Wanda.DCU.TaskPUP.Constants.SendPreRecordMsg, new SendPreRecordMsgHandler() },
-            { ASI.Wanda.DCU.TaskPUP.Constants.SendInstantMsg, new SendInstantMsgHandler() },
-            { ASI.Wanda.DCU.TaskPUP.Constants.SendPowerTimeSetting, new PowerTimeSettingHandler() },
-            { ASI.Wanda.DCU.TaskPUP.Constants.SendTrainMessageSetting, new TrainMessageSettingHandler() },
-            { "節能模式開啟", new EnergySavingModeHandler(true) },
-            { "節能模式關閉", new EnergySavingModeHandler(false) } 
-        };
-            }
-
-            public void Dispatch(string commandName, string jsonData)
-            {
-                if (_handlers.TryGetValue(commandName, out var handler))
-                {
-                    handler.Handle(jsonData, _taskPUPHelper, _procName);
-                }
-                else
-                {
-                    Logger.LogDebug(_procName, $"未處理的指令: {commandName}");
-                }
-            }
-        }
-
+       
         /// <summary>
         /// 定義指令處理器的接口
         /// </summary>
@@ -302,122 +222,6 @@ namespace ASI.Wanda.DCU.TaskPUP
             /// </summary>
             void Handle(string jsonData, TaskPUPHelper helper, string procName);
         }
-        /// <summary>
-        /// 處理預錄訊息指令
-        /// </summary>
-        public class SendPreRecordMsgHandler : ICommandHandler
-        {
-            public void Handle(string jsonData, TaskPUPHelper helper, string procName)
-            {
-                // 解析 JSON 數據
-                string sSeatID = JsonHelper.GetValue(jsonData, "seatID");
-                string msg_id = JsonHelper.GetValue(jsonData, "msg_id");
-                string dbName1 = JsonHelper.GetValue(jsonData, "dbName1");
-                string dbName2 = JsonHelper.GetValue(jsonData, "dbName2");
-                string target_du = JsonHelper.GetValue(jsonData, "target_du");
-
-                // 記錄接收到的消息
-                Logger.LogDebug(procName, $"收到預錄訊息，SeatID: {sSeatID}, MsgID: {msg_id}, target_du: {target_du}, dbName1: {dbName1}, dbName2: {dbName2}");
-
-                // 根據 dbName1 的值進行處理
-                if (dbName1 == "dmd_pre_record_message")
-                {
-                    Logger.LogDebug(procName, "處理 dmd_pre_record_message");
-                    helper.SendMessageToDisplay(target_du, dbName1, dbName2, out string result);
-                    Logger.LogDebug(procName, "處理結果: " + result);
-                }
-                else
-                {
-                    Logger.LogDebug(procName, "處理其他訊息");
-                }
-            }
-        }
-
-
-        public class SendInstantMsgHandler : ICommandHandler
-        {
-            public void Handle(string jsonData, TaskPUPHelper helper, string procName)
-            {
-                // 解析 JSON 數據
-                string sSeatID = JsonHelper.GetValue(jsonData, "seatID");
-                string msg_id = JsonHelper.GetValue(jsonData, "msg_id");
-                string dbName1 = JsonHelper.GetValue(jsonData, "dbName1");
-                string dbName2 = JsonHelper.GetValue(jsonData, "dbName2");
-                string target_du = JsonHelper.GetValue(jsonData, "target_du");
-
-                // 記錄接收到的消息
-                Logger.LogDebug(procName, $"收到預錄訊息，SeatID: {sSeatID}, MsgID: {msg_id}, target_du: {target_du}, dbName1: {dbName1}, dbName2: {dbName2}");
-
-                // 根據 dbName1 的值進行處理
-                if (dbName1 == "dmd_pre_record_message")
-                {
-                    Logger.LogDebug(procName, "處理 dmd_pre_record_message");
-                    helper.SendMessageToDisplay(target_du, dbName1, dbName2, out string result);
-                    Logger.LogDebug(procName, "處理結果: " + result);
-                }
-                else
-                {
-                    Logger.LogDebug(procName, "處理其他訊息");
-                }
-            }
-        }
-        /// <summary>
-        /// 處理電源時間設定指令
-        /// </summary>
-        public class PowerTimeSettingHandler : ICommandHandler
-        {
-            public void Handle(string jsonData, TaskPUPHelper helper, string procName)
-            {
-                helper.PowerSetting(Station_ID); // 替換為適當的上下文
-                Logger.LogDebug(procName, "處理電源設定");
-            }
-        }
-        /// <summary>
-        /// 處理節能模式開啟與關閉指令
-        /// </summary>
-        public class EnergySavingModeHandler : ICommandHandler 
-        {
-            private readonly bool _isEnabled; // 節能模式狀態 
-            public EnergySavingModeHandler(bool isEnabled)
-            {
-                _isEnabled = isEnabled;
-            }
-            public  void Handle(string jsonData, TaskPUPHelper helper, string procName)
-            {
-
-            }
-            
-
-        }
-        public class TrainMessageSettingHandler : ICommandHandler 
-        {
-
-            public void Handle(string jsonData, TaskPUPHelper helper, string procName)
-            {
-                // 解析 JSON 數據 
-                string sSeatID = JsonHelper.GetValue(jsonData, "seatID");
-                string msg_id = JsonHelper.GetValue(jsonData, "msg_id");
-                string dbName1 = JsonHelper.GetValue(jsonData, "dbName1");
-                string dbName2 = JsonHelper.GetValue(jsonData, "dbName2");
-                string target_du = JsonHelper.GetValue(jsonData, "target_du");
-
-                // 記錄接收到的消息  
-                Logger.LogDebug(procName, $"收到預錄訊息，SeatID: {sSeatID}, MsgID: {msg_id}, target_du: {target_du}, dbName1: {dbName1}, dbName2: {dbName2}");
-
-                // 根據 dbName1 的值進行處理  
-                if (dbName1 == "dmd_pre_record_message")
-                {
-                    Logger.LogDebug(procName, "處理 dmd_pre_record_message");
-                    helper.SendMessageToDisplay(target_du, dbName1, dbName2, out string result);
-                    Logger.LogDebug(procName, "處理結果: " + result);
-                }
-                else
-                {
-                    Logger.LogDebug(procName, "處理其他訊息");
-                }
-            }
-        }
-        
 
         /// <summary>
         /// JSON 處理工具類
@@ -432,28 +236,6 @@ namespace ASI.Wanda.DCU.TaskPUP
                 return ASI.Lib.Text.Parsing.Json.GetValue(jsonData, key);
             }
         }
-        /// <summary>
-        /// 日誌工具類
-        /// </summary>
-        public static class Logger
-        {
-            /// <summary>
-            /// 記錄調試日誌
-            /// </summary>
-            public static void LogDebug(string procName, string message)
-            {
-                ASI.Lib.Log.DebugLog.Log(procName, message);
-            }
-
-            /// <summary>
-            /// 記錄錯誤日誌
-            /// </summary>
-            public static void LogError(string procName, string message)
-            {
-                ASI.Lib.Log.ErrorLog.Log(procName, message);
-            }
-        }
-
         /// <summary>
         /// 處理TaskPA的訊息   
         /// </summary>  
@@ -576,7 +358,7 @@ namespace ASI.Wanda.DCU.TaskPUP
                 MSGFromTaskPUP.JsonData = ContentDataBytes;
                 ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPUP);
                  
-                // 假設 contentDataBytes 需要序列化為十六進制字符串 
+                // 假設 contentDataBytes 需要序列化為十六進制字符串  
                 string serializedContent = ASI.Lib.Text.Parsing.Json.SerializeObject(ContentDataBytes);
                 var msg = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, serializedContent);
                 msg.JsonContent = serializedContent;
@@ -593,7 +375,7 @@ namespace ASI.Wanda.DCU.TaskPUP
         /// 計算LRC 
         /// </summary>
         /// <param name="text"></param>
-        /// <returns></returns>  
+        /// <returns></returns>   
         private byte CalculateLRC(byte[] text)
         {
             byte xor = 0;
@@ -729,7 +511,35 @@ namespace ASI.Wanda.DCU.TaskPUP
                 return null;
             }
         }
+        public void CloseDisplay()
+        {
+            // 關閉顯示器的邏輯 
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Off = new byte[] { 0x3A, 0X01 };
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Off);
+            var serializedDataOff = processor.SerializePacket(packetOff);
+            _mSerial.Send(serializedDataOff);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
+        }
+        public void OpenDisplay()
+        {
+            // 開啟顯示器的邏輯
+            var startCode = new byte[] { 0x55, 0xAA };
+            var processor = new PacketProcessor();
+            var function = new PowerControlHandler();
+            var Open = new byte[] { 0x3A, 0X00 };
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Open);
+            var serializedDataOpen = processor.SerializePacket(packetOpen);
+            _mSerial.Send(serializedDataOpen);
+            ASI.Lib.Log.DebugLog.Log(_mProcName + "顯示畫面開啟", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
 
+        }
         #endregion
     }
 }

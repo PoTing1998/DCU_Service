@@ -462,7 +462,7 @@ namespace ASI.Wanda.DCU.TaskDMD
 
         private void HandleGroupSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
-            DMDHelper.UpDateDMDGroup();
+            DMDHelper.UpDateDMDGroup(); 
             var oJsonObjectGroupSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
             var GroupSetting = new DMD.JsonObject.DCU.FromDMD.GroupSetting(ASI.Wanda.DMD.Enum.Station.OCC)
             {
@@ -472,7 +472,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             };
             SendToAllTasks(DMDHelper, GroupSetting);
         }
-        #endregion
+        #endregion  
 
         private void HandleUnexpectedResponse(ASI.Wanda.DMD.Message.Message DMDServerMessage) 
         {
