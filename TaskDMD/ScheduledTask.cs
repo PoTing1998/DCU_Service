@@ -34,7 +34,7 @@ public class ScheduledTask
         }
         catch (Exception ex)
         {
-            // 處理錯誤，例如記錄錯誤日誌
+            // 處理錯誤，例如記錄錯誤日誌 
             ASI.Lib.Log.ErrorLog.Log(_mProcName, $"Error occurred during scheduled task: {ex.Message}");
         }
     }
@@ -49,7 +49,7 @@ public class ScheduledTask
         _timer.Stop();
     }
 
-    public void StartPowerSettingScheduler(string stationID)
+    public void StartPowerSettingScheduler(string stationID) 
     {
         // 建立一個 Action，來定義要執行的工作
         Action PowerSettingTask = () => PowerSetting(stationID);
@@ -60,11 +60,11 @@ public class ScheduledTask
     }
 
     /// <summary>
-    /// 找尋車站Id並且判斷是否需要關閉
+    /// 找尋車站Id並且判斷是否需要關閉 
     /// </summary>
-    /// <param name="stationID"></param>
+    /// <param name="stationID"></param> 
     /// <returns></returns> 
-    public void PowerSetting(string stationID)
+    public void PowerSetting(string stationID) 
     {
         var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
         if (stationData == null)
@@ -81,7 +81,7 @@ public class ScheduledTask
             if (!isDisplayCurrentlyOn)
             {
                 OpenDisplay();
-                isDisplayCurrentlyOn = true;
+                isDisplayCurrentlyOn = true;  
             }
             return;
         }
@@ -92,7 +92,7 @@ public class ScheduledTask
         int currentDay = currentDate.Day;
         TimeSpan currentTime = currentDate.TimeOfDay;
 
-        // 使用 HashSet 儲存不啟動節能模式的日期，增強查找效能
+        // 使用 HashSet 儲存不啟動節能模式的日期，增強查找效能  
         var nonEcoDates = new HashSet<string>();
         bool isNonEcoDay = false;
 
@@ -114,7 +114,7 @@ public class ScheduledTask
             }
         }
 
-        // 如果是非節能日，始終保持播放
+        // 如果是非節能日，始終保持播放  
         if (isNonEcoDay)
         {
             ASI.Lib.Log.DebugLog.Log(_mProcName, "今天是非節能日，始終保持播放");
@@ -200,4 +200,10 @@ public class ScheduledTask
         var DMDHelper = new TaskDMDHelper<ASI.Wanda.DMD.DMD_API>(mDMD_API, (api, msg) => api.Send(msg));
         DMDHelper.SendToTaskCDU(2, 1, message);
     }
-}
+   
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}               

@@ -160,11 +160,11 @@ namespace UITest
                 errorMessage = $"Invalid RGB values: Red={RedColor}, Green={GreenColor}, Blue={BlueColor}. Each should be between 0 and 255.";
                 return false;
             }
-            // 檢查 StartValue 和 EndValue 的條件
+            // 檢查 StartValue 和 EndValue 的條件    
             if (StartValue == 0x00)
             {
                 // StartValue 為 0x00 時，表示顯示標準時間，EndValue 可以忽略
-                // 不做進一步檢查
+                // 不做進一步檢查 
             }
             else if (StartValue >= 0x01 && StartValue <= 0xFF)
             {

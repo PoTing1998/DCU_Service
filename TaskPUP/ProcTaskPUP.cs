@@ -211,31 +211,6 @@ namespace ASI.Wanda.DCU.TaskPUP
             return -1;
         }
 
-       
-        /// <summary>
-        /// 定義指令處理器的接口
-        /// </summary>
-        public interface ICommandHandler
-        {
-            /// <summary>
-            /// 處理指令邏輯
-            /// </summary>
-            void Handle(string jsonData, TaskPUPHelper helper, string procName);
-        }
-
-        /// <summary>
-        /// JSON 處理工具類
-        /// </summary>
-        public static class JsonHelper
-        {
-            /// <summary>
-            /// 從 JSON 數據中提取指定鍵的值
-            /// </summary>
-            public static string GetValue(string jsonData, string key)
-            {
-                return ASI.Lib.Text.Parsing.Json.GetValue(jsonData, key);
-            }
-        }
         /// <summary>
         /// 處理TaskPA的訊息   
         /// </summary>  

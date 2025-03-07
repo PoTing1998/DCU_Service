@@ -34,7 +34,6 @@ namespace ASI.Wanda.DCU.TaskCDU
         static string sClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
         static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
-
         static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         static string _mDU_ID = "LG01_CDU_09";
         #endregion
@@ -153,13 +152,13 @@ namespace ASI.Wanda.DCU.TaskCDU
                                     string result = "";
                                 switch (logData.DbName1)
                                 {
-                                    case "dmd_pre_record_message":
+                                    case "dmd_pre_record_message": 
                                         ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
                                         // 發送消息到顯示面板（針對預錄訊息的處理）
                                         taskCDUHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result);
                                         ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message: " + result);
                                         break;
-                                    case "dmd_instant_message":
+                                    case "dmd_instant_message": 
                                         ASI.Lib.Log.DebugLog.Log(_mProcName, "處理即時消息 dmd_instant_message");
                                         // 發送消息到顯示面板（針對即時訊息的處理） 
                                         taskCDUHelper.SendMessageToDisplay(logData.TargetDU, logData.DbName1, logData.DbName2, out result);
@@ -172,8 +171,8 @@ namespace ASI.Wanda.DCU.TaskCDU
                                 break;
                             case ASI.Wanda.DCU.TaskCDU.Constants.SendPowerTimeSetting:
                                 taskCDUHelper.PowerSetting(Station_ID);
-                                break;
-                            case "節能模式開啟":
+                                break; 
+                            case "節能模式開啟": 
                                 OpenDisplay(); 
                                 break;
                             case "節能模式關閉":
@@ -196,7 +195,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             return -1;
         }
 
-        #region 處理訊息
+        #region 處理廣播的訊息
         /// <summary>
         /// 處理TaskPA的訊息
         /// </summary>
@@ -314,17 +313,6 @@ namespace ASI.Wanda.DCU.TaskCDU
             }
         }
 
-        private void SendSerializedData(byte[] serializedData, string logMessage)
-        {
-            // 記錄日誌
-            ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToUrgnt", logMessage + ": " + BitConverter.ToString(serializedData));
-
-            // 發送數據
-            var temp = _mSerial.Send(serializedData);
-
-            // 記錄是否發送成功
-            ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + _mProcName, temp.ToString());
-        }
         private void ProcessByteAtIndex2(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
             byte dataByte2 = dataBytes[2];
@@ -381,9 +369,9 @@ namespace ASI.Wanda.DCU.TaskCDU
         }
 
         #endregion
-        void SerialPort_DisconnectedEvent(string source) //斷線處理  
+        void SerialPort_DisconnectedEvent(string source) //斷線處理 
         {
-            try
+            try 
             {
                 _mSerial.Close();
                 _mSerial = null;
@@ -441,7 +429,7 @@ namespace ASI.Wanda.DCU.TaskCDU
 
         public void CloseDisplay()
         {
-            // 關閉顯示器的邏輯 
+            // 關閉顯示器的邏輯  
             var startCode = new byte[] { 0x55, 0xAA };
             var processor = new PacketProcessor(); 
             var function = new PowerControlHandler(); 
@@ -455,7 +443,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         }
         public void OpenDisplay()
         {
-            // 開啟顯示器的邏輯
+            // 開啟顯示器的邏輯 
             var startCode = new byte[] { 0x55, 0xAA };
             var processor = new PacketProcessor();
             var function = new PowerControlHandler(); 

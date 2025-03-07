@@ -33,8 +33,6 @@ namespace UITest
         public Form1()
         {
             InitializeComponent();
-            Console.WriteLine();
-            
         }
 
         #endregion
@@ -294,7 +292,7 @@ namespace UITest
         private void Version7BT_Click(object sender, EventArgs e)
         {
             var ByteData = textBox12.Text;
-            // 將十六進制字串轉換為字節陣列 
+            // 將十六進制字串轉換為字節陣列   
             var temp = ConvertHexStringToByteArray(ByteData);
             // 驗證封包是否符合 
             string errorMessage;
@@ -525,13 +523,13 @@ namespace UITest
                 if (currentIndex + idLength > receivedData.Length || idLength < 1)
                 {
                     errorMessage = $"ID length is invalid or exceeds data length at byte {currentIndex}";
-                    return false;
+                    return false; 
                 }
 
-                // 跳過 ID 字段，移動 currentIndex 到 FunctionCode 位置
+                // 跳過 ID 字段，移動 currentIndex 到 FunctionCode 位置 
                 currentIndex += idLength;
 
-                // Step 3: 檢查 FunctionCode 是否為 0x34
+                // Step 3: 檢查 FunctionCode 是否為 0x34  
                 if (receivedData[currentIndex] != 0x34)
                 {
                     errorMessage = $"FunctionCode mismatch at byte {currentIndex}, expected 0x34";
@@ -602,7 +600,7 @@ namespace UITest
                     return false;
                 }
 
-                currentIndex++;
+                currentIndex++; 
 
                 // Step 11: 檢查字體樣式 (FontStyle)
                 Display.FontStyle fontStyle = (Display.FontStyle)receivedData[currentIndex];
@@ -708,7 +706,7 @@ namespace UITest
                 byte[] textBytes = new byte[endIndex - currentIndex];
                 Array.Copy(receivedData, currentIndex, textBytes, 0, textBytes.Length);
 
-                // 將訊息內容轉換為 BIG-5 編碼的字節數組
+                // 將訊息內容轉換為 BIG-5 編碼的字節數組 
                 string messageText = Encoding.GetEncoding(950).GetString(textBytes);
 
                 // 在這裡可以進一步檢查 messageText 是否符合特定格式或條件

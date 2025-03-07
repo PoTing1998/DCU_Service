@@ -7,10 +7,7 @@ using ASI.Wanda.DMD.TaskDMD;
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Timers;
 
 
 
@@ -149,9 +146,9 @@ namespace ASI.Wanda.DCU.TaskDMD
                 var sJsonData = DMDServerMessage.JsonContent;
                 var sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
 
-                //建立DMDHelper並將 DMD_API的send 委派 
+                //建立DMDHelper並將 DMD_API的send 委派  
                 var DMDHelper = new TaskDMDHelper<ASI.Wanda.DMD.DMD_API>(mDMD_API, (api, message) => api.Send(message));
-                ////判斷車站
+                ////判斷車站  
                 int iMsgID = DMDServerMessage.MessageID;
 
                 if (DMDServerMessage.MessageType == ASI.Wanda.DMD.Message.Message.eMessageType.Ack)
@@ -298,7 +295,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                     {
                         // 連接成功
                         _isConnected = true;
-                        _isConnecting = false;  // 停止連接狀態標記
+                        _isConnecting = false;  // 停止連接狀態標記   
                         ASI.Lib.Log.DebugLog.Log(_mProcName, "與 DMD Server 的 socket 開啟成功");
                         LastHeartbeatTime = DateTime.Now;
                     }
@@ -328,8 +325,6 @@ namespace ASI.Wanda.DCU.TaskDMD
             }
         }
 
-
-
         #region 訊息處理
         private void HandleAckMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
@@ -341,7 +336,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
             ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
 
-            // 根據 JsonObjectName 處理不同的訊息類型       
+            // 根據 JsonObjectName 處理不同的訊息類型    
             switch (sJsonObjectName)
             {
                 case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMsg:
@@ -351,12 +346,12 @@ namespace ASI.Wanda.DCU.TaskDMD
                     HandleSendInstantMessage(DMDServerMessage, DMDHelper);
                     break;
                 case ASI.Wanda.DMD.TaskDMD.Constants.ScheduleSetting:
-                    HandleScheduleSetting(DMDServerMessage, DMDHelper);
+                    HandleScheduleSetting(DMDServerMessage, DMDHelper); 
                     break;
                 case ASI.Wanda.DMD.TaskDMD.Constants.PreRecordMessageSetting:
                     HandlePreRecordMessageSetting(DMDServerMessage, DMDHelper);
                     break;
-                case ASI.Wanda.DMD.TaskDMD.Constants.TrainMessageSetting:
+                case ASI.Wanda.DMD.TaskDMD.Constants.TrainMessageSetting:  
                     HandleTrainMessageSetting(DMDServerMessage, DMDHelper);
                     break;
                 case ASI.Wanda.DMD.TaskDMD.Constants.GroupSetting:
@@ -446,7 +441,7 @@ namespace ASI.Wanda.DCU.TaskDMD
             };
             SendToAllTasks(DMDHelper, PowerTimeSetting);
         }
-
+        
         private void HandleTrainMessageSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
             DMDHelper.UpDateDMDTrainMessage();
@@ -488,7 +483,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                     01,
                     ASI.Lib.Text.Parsing.Json.SerializeObject(messageObject)
                 );
-
+                
                 DMDHelper.SendToTaskPUP(2, 1, serializedMessage.JsonContent);
                 DMDHelper.SendToTaskCDU(2, 1, serializedMessage.JsonContent);
                 DMDHelper.SendToTaskSDU(2, 1, serializedMessage.JsonContent);

@@ -148,7 +148,7 @@ namespace ASI.Wanda.DCU.TaskKernel
             LogFile.Log(mComputerName, _mProcName, "Start Process " + pInfo.Name + " Fail");
             return -1;
         }
-
+        
         /// <summary>
         /// stop a process by unload his application domain
         /// </summary>

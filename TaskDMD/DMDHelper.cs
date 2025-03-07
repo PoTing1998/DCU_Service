@@ -44,12 +44,12 @@ namespace ASI.Wanda.DMD.TaskDMD
         }
 
         ///傳送到內部MSG 
-        public void SendToTaskPUP(int msgType, int msgID, string jsonData)
+        public void SendToTaskPUP(int msgType, int msgID, string jsonData) 
         {
             try
             {
                 var MSGFromTaskPUP = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskpup"));
-                //組相對應的封包 
+                //組相對應的封包  
                 MSGFromTaskPUP.MessageType = msgType;
                 MSGFromTaskPUP.MessageID = msgID;
                 MSGFromTaskPUP.JsonData = jsonData;
@@ -101,7 +101,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                 //組相對應的封包 
                 MSGFromTaskPDN.MessageType = msgType;
                 MSGFromTaskPDN.MessageID = msgID;
-                MSGFromTaskPDN.JsonData = jsonData;
+                MSGFromTaskPDN.JsonData = jsonData; 
                 ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPDN);
             }
             catch (System.Exception ex)
@@ -109,16 +109,10 @@ namespace ASI.Wanda.DMD.TaskDMD
                 ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex);
             }
         }
-
-
-        ///收到DCU回傳的資料後 傳給CMFT
-        public void SendResponsePreRecordMSGToCMFT(ASI.Wanda.DMD.Message.Message DMDServerMessage, string stationId, bool isSuccess, List<string> failedTargets)
-        {
-            var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-        }
+        
         #region 資料庫的操作
         /// <summary>
-        /// 更新dmd_playlist的資料庫
+        /// 更新dmd_playlist的資料庫 
         /// </summary>  
         public IEnumerable<ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList> UpdateDCUPlayList()
         {
@@ -127,7 +121,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                 ///抓取CMFT的資料表 
                 var tempList = DMD.DB.Tables.DMD.dmdPlayList.SelectAll();
                 ///轉換過程 
-                var convertedList = tempList
+                var convertedList = tempList 
                     .Select(item => new DB.Models.dmd_playlist
                     {
                         playlist_id = item.playlist_id,
@@ -143,7 +137,7 @@ namespace ASI.Wanda.DMD.TaskDMD
                         upd_user = item.upd_user,
                     })
                     .ToList();
-                ///刪除原本的資料  
+                ///刪除原本的資料 
                 convertedList.ForEach(item =>
                 {
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.DeletePlayingItem(

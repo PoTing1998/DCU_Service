@@ -130,11 +130,5 @@ namespace ASI.Wanda.DCU.TaskPA
                 xor ^= text[i];
             return xor;
         }
-
-  
-
-
     }
-
-
 }

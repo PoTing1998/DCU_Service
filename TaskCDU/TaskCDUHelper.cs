@@ -37,10 +37,8 @@ namespace ASI.Wanda.DCU.TaskCDU
         public string DeviceWithNumber { get; set; }
     }
 
-
-
-
     #endregion
+  
     public class TaskCDUHelper
     {
         #region constructor
@@ -62,9 +60,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             public string Result { get; set; }
             public byte[] DataByte { get; set; }
         }
-
-
-        #endregion
+     #endregion
 
         #region  版型的操作    
 
@@ -127,14 +123,14 @@ namespace ASI.Wanda.DCU.TaskCDU
             {
                 // 假設每筆資料的 DataByte 是 byte[]，這裡進行合併  
                 using (var memoryStream = new MemoryStream())
-                { 
-                        foreach (var result in successfulResults)
+                {
+                    foreach (var result in successfulResults)
+                    {
+                        if (result.DataByte != null)
                         {
-                            if (result.DataByte != null)
-                            {
-                                memoryStream.Write(result.DataByte, 0, result.DataByte.Length);
-                            }
+                            memoryStream.Write(result.DataByte, 0, result.DataByte.Length);
                         }
+                    }
                     return memoryStream.ToArray();
                 }
             }
@@ -148,7 +144,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         private void LogError(string message)
         {
             // 替換成你的日誌框架或存檔邏輯
-           ASI.Lib.Log.ErrorLog.Log( "信息處理錯誤" ,$"[Error] {message}");
+            ASI.Lib.Log.ErrorLog.Log("信息處理錯誤", $"[Error] {message}");
         }
 
         /// <summary>
@@ -174,7 +170,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     string trimmedDevice = deviceString.Trim();
                     if (Regex.IsMatch(trimmedDevice, Pattern))
                     {
-                        matchedDevice = trimmedDevice; 
+                        matchedDevice = trimmedDevice;
                         break;
                     }
                 }
@@ -184,10 +180,10 @@ namespace ASI.Wanda.DCU.TaskCDU
                 if (dbName1 == "dmd_instant_message" && messageIds.Count == 1)
                 {
                     // 專門處理即時訊息的邏輯
-                    results.Add(SendInstantMessage(matchedDevice, messageIds.First())); 
+                    results.Add(SendInstantMessage(matchedDevice, messageIds.First()));
                 }
                 else
-                { 
+                {
                     // 批量處理預錄訊息  
                     foreach (var messageId in messageIds)
                     {
@@ -208,14 +204,14 @@ namespace ASI.Wanda.DCU.TaskCDU
                         }
                         catch (Exception ex)
                         {
-                            HandleError(ex, result); 
+                            HandleError(ex, result);
                         }
 
                         results.Add(result);
                     }
-                    
+
                     // 統一創建並發送 sequence 最多五則  
-                    if (fullWindowMessages.Any()) 
+                    if (fullWindowMessages.Any())
                     {
                         results.Add(SendBatchMessage(matchedDevice, fullWindowMessages));
                     }
@@ -265,7 +261,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             try
             {
                 var messageLayout = GetInstantMessageLayoutById(messageId);
-                var textStringBody = CreateTextStringBody(messageLayout);  
+                var textStringBody = CreateTextStringBody(messageLayout);
                 var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
 
                 var instantSequence = CreateDisplaySequence(fullWindowMessage);
@@ -318,7 +314,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             var messageContentEnProperty = typeof(T).GetProperty("message_content_en");
 
             if (fontColorProperty == null || messageContentProperty == null || messageContentEnProperty == null)
-                ASI.Lib.Log.ErrorLog.Log( "資料庫取的相關資料" ,$"類型 {typeof(T).Name} 缺少必要屬性。");
+                ASI.Lib.Log.ErrorLog.Log("資料庫取的相關資料", $"類型 {typeof(T).Name} 缺少必要屬性。");
 
             // 提取屬性值 
             var fontColor = (string)fontColorProperty.GetValue(messageLayout);
@@ -402,7 +398,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// </summary>
         /// <param name="sequence">顯示序列物件。</param>
         /// <returns>資料封包物件。</returns>
-        private Packet CreatePacket(string DU_ID, Display.Sequence sequence) 
+        private Packet CreatePacket(string DU_ID, Display.Sequence sequence)
         {
             var startCode = new byte[] { 0x55, 0xAA };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, false);
@@ -417,7 +413,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <returns>序列化的字節陣列。</returns> 
         private byte[] SerializeAndSendPacket(Packet packet)
         {
-            var processor = new PacketProcessor();   
+            var processor = new PacketProcessor();
             var serializedData = processor.SerializePacket(packet);
             string result = BitConverter.ToString(serializedData).Replace("-", " ");
             ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + result);
@@ -531,9 +527,9 @@ namespace ASI.Wanda.DCU.TaskCDU
         public void PowerSettingOff()
         {
             var startCode = new byte[] { 0x55, 0xAA };
-            var processor = new PacketProcessor();  
+            var processor = new PacketProcessor();
             var function = new PowerControlHandler();
-            var Off = new byte[] { 0x3A, 0X01 }; 
+            var Off = new byte[] { 0x3A, 0X01 };
             var packetOff = processor.CreatePacketOff(startCode, new List<byte> { 0x11, 0x12 }, function.FunctionCode, Off);
             var serializedDataOff = processor.SerializePacket(packetOff);
             _mSerial.Send(serializedDataOff);
@@ -558,7 +554,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             var stringMessage = new StringMessage
             {
                 StringMode = 0x2A, // TextMode (Static)     
-                StringBody = textStringBody  
+                StringBody = textStringBody
             };
             var urgentMessage = new Urgent // Display version  
             {
@@ -721,7 +717,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                         {
                             // 關閉顯示器  
                             ASI.Lib.Log.DebugLog.Log(_mProcName, "關閉顯示器");
-                            PowerSettingOff(); 
+                            PowerSettingOff();
                         }
                         else if (currentHour >= autoEcoStartHour && currentHour <= autoEcoEndHour)
                         {
@@ -734,7 +730,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             }
             else
             {
-                
+
             }
 
             return null;

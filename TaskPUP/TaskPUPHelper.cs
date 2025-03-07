@@ -36,9 +36,10 @@ namespace ASI.Wanda.DCU.TaskPUP
     public class TaskPUPHelper
     {
         private string _mProcName;
-        ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
         public const string _mDU_ID = "LG01_UPF_PDU-1";
         private const string Pattern = @"LG01_UPF_PDU-1"; // 定義要篩選的模式
+        static string StationID = ConfigApp.Instance.GetConfigSetting("Station_ID");
+        ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
         public TaskPUPHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
         {
             _mProcName = mProcName;

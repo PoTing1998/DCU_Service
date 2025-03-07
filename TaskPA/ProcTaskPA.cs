@@ -169,7 +169,7 @@ namespace ASI.Wanda.DCU.TaskPA
                 serial.Send(arrPacketByte);
                 ASI.Lib.Log.DebugLog.Log("發送到 PA 的封包內容第二次", sHexString.ToString());
 
-                // 發送到各個看板
+                // 發送到各個看板 
                 PAHelper.SendToTaskCDU(2, 1, msg.JsonContent);
                 PAHelper.SendToTaskSDU(2, 1, msg.JsonContent);
                 PAHelper.SendToTaskPUP(2, 1, msg.JsonContent);
@@ -215,14 +215,7 @@ namespace ASI.Wanda.DCU.TaskPA
             serial.Send(arrPacketByte); // 重新發送 
             ASI.Lib.Log.DebugLog.Log("未收到回覆，重新傳送一次", sHexString.ToString()); // 紀錄log
         }
-        private void StartResponseTimer()
-        {
-            if (responseTimer != null)
-            {
-                responseTimer.Start();
-            }
-        }
-
+        private void StartResponseTimer() => responseTimer?.Start();
         static private byte CalculateLRC(byte[] text)
         {
             byte xor = 0;
@@ -239,7 +232,7 @@ namespace ASI.Wanda.DCU.TaskPA
         /// </summary> 
         private int ProMsgFromPUP(string pMessage)
         {
-            string sLog = "";
+            var sLog = "";
          
             try
             {
@@ -258,7 +251,7 @@ namespace ASI.Wanda.DCU.TaskPA
                         //DMD內部通訊定義:Change/Command
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
                         sLog = $"sJsonObjectName = {sJsonObjectName}"; 
-                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);  
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog); 
                     }
                     else if (mSGFromTaskDCU.MessageType == 3)
                     {
@@ -303,7 +296,7 @@ namespace ASI.Wanda.DCU.TaskPA
         private int ProMsgFromDCU(string pMessage)
         {
             DataBase oDB = null;
-            string sLog = "";
+            var sLog = "";
             try
             {
                 ASI.Wanda.DMD.ProcMsg.MSGFromTaskDCU mSGFromTaskDCU = new DMD.ProcMsg.MSGFromTaskDCU(new MSGFrameBase(""));
