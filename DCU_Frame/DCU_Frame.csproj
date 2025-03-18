@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DU_ID.cs" />
     <Compile Include="Message\Helper.cs" />
     <Compile Include="Message\Message.cs" />
     <Compile Include="ProMsg\ProMsg.cs" />
