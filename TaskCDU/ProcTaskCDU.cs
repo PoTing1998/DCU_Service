@@ -1,6 +1,4 @@
 ﻿using ASI.Lib.Config;
-using ASI.Lib.DB;
-using ASI.Lib.Log;
 using ASI.Lib.Process;
 using ASI.Wanda.DCU.ProcMsg;
 using ASI.Wanda.DMD.ProcMsg;
@@ -9,10 +7,8 @@ using Display;
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-
-
+using Newtonsoft.Json;
+using DCU_Frame;
 
 
 namespace ASI.Wanda.DCU.TaskCDU
@@ -22,20 +18,27 @@ namespace ASI.Wanda.DCU.TaskCDU
     {
         #region constructor
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
-
         /// <summary>
-        /// 讀取火災資料
+        /// 火災相關訊息
         /// </summary>
-        static string sCheckChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressChinese");
-        static string sCheckEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressEnglish");
-        static string sEmergencyChinese = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyChinese");
-        static string sEmergencyEnglish = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyEnglish");
-        static string sClearedChinese = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedChinese");
-        static string sClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
-        static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
-        static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
+        private static class FireAlarmMessages
+        {
+            public static readonly string CheckChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressChinese");
+            public static readonly string CheckEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressEnglish");
+            public static readonly string EmergencyChinese = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyChinese");
+            public static readonly string EmergencyEnglish = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyEnglish");
+            public static readonly string ClearedChinese = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedChinese");
+            public static readonly string ClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
+            public static readonly string DetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
+            public static readonly string DetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
+        }
+
         static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
-        static string _mDU_ID = "LG01_CDU_09";
+        static string _mDU_ID = DU_ID.LG01_CDU_01.ToString();
+        static bool _mFront = true;
+        static bool _mBack = false;
+
+
         #endregion
         /// <summary>
         /// 處理DMD模組執行程序所收到之訊息 
@@ -45,6 +48,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <returns></returns>
         public override int ProcEvent(string pLabel, string pBody)
         {
+         
             if (pLabel == MSGFinish.Label)
             {
                 return 0;
@@ -296,16 +300,16 @@ namespace ASI.Wanda.DCU.TaskCDU
             switch (dataByteAtIndex8)
             {
                 case 0x81:
-                    taskUPDHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
+                    taskUPDHelper.SendMessageToUrgnt(FireAlarmMessages.CheckChinese, FireAlarmMessages.CheckEnglish, 81);
                     break;
                 case 0x82:
-                    taskUPDHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
+                    taskUPDHelper.SendMessageToUrgnt(FireAlarmMessages.EmergencyChinese, FireAlarmMessages.EmergencyEnglish, 82);
                     break;
                 case 0x83:
-                    taskUPDHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
+                    taskUPDHelper.SendMessageToUrgnt(FireAlarmMessages.ClearedChinese, FireAlarmMessages.ClearedEnglish, 83);
                     break;
                 case 0x84:
-                    taskUPDHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
+                    taskUPDHelper.SendMessageToUrgnt(FireAlarmMessages.DetectorChinese, FireAlarmMessages.DetectorEnglish, 84);
                     break;
                 default:
                     ASI.Lib.Log.DebugLog.Log(_mProcName + " ", $"{_mProcName} unknown byte value at index 9: {dataByteAtIndex8.ToString("X2")}");
@@ -389,7 +393,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         {
             string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
             string str = "";
-            foreach (byte b in dataBytes)
+            foreach (byte b in dataBytes) 
             {
                 str += Convert.ToString(b, 16).ToUpper().PadLeft(2, '0') + " ";  
             } 
@@ -434,8 +438,8 @@ namespace ASI.Wanda.DCU.TaskCDU
             var processor = new PacketProcessor(); 
             var function = new PowerControlHandler(); 
             var Off = new byte[] { 0x3A, 0X01 };
-            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
-            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, _mBack);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, _mFront);
             var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Off);
             var serializedDataOff = processor.SerializePacket(packetOff);
              _mSerial.Send(serializedDataOff);
@@ -448,8 +452,8 @@ namespace ASI.Wanda.DCU.TaskCDU
             var processor = new PacketProcessor();
             var function = new PowerControlHandler(); 
             var Open = new byte[] { 0x3A, 0X00 };
-            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
-            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, _mBack);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, _mFront);
             var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Open);
             var serializedDataOpen = processor.SerializePacket(packetOpen);
              _mSerial.Send(serializedDataOpen);

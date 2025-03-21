@@ -25,6 +25,6 @@ namespace DCU_Frame
         LG01_PDU_21,
         LG01_PDU_22,
         LG01_PDU_23,
-        LG01_PDU_14
+        LG01_PDU_24
     }
 }
