@@ -18,27 +18,27 @@ namespace ASI.Wanda.DCU.TaskCDU
     {
         #region constructor
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
-        /// <summary>
-        /// 火災相關訊息
-        /// </summary>
-        private static class FireAlarmMessages
-        {
-            public static readonly string CheckChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressChinese");
-            public static readonly string CheckEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressEnglish");
-            public static readonly string EmergencyChinese = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyChinese");
-            public static readonly string EmergencyEnglish = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyEnglish");
-            public static readonly string ClearedChinese = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedChinese");
-            public static readonly string ClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
-            public static readonly string DetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
-            public static readonly string DetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
-        }
-
         static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         static string _mDU_ID = DU_ID.LG01_CDU_01.ToString();
         static bool _mFront = true;
         static bool _mBack = false;
 
+        /// <summary>
+        /// 火災相關訊息
+        /// </summary>
+        private static class FireAlarmMessages
+        {
+            public static readonly string CheckChinese = Get("FireDetectorCheckInProgressChinese");
+            public static readonly string CheckEnglish = Get("FireDetectorCheckInProgressEnglish");
+            public static readonly string EmergencyChinese = Get("FireEmergencyEvacuateCalmlyChinese");
+            public static readonly string EmergencyEnglish = Get("FireEmergencyEvacuateCalmlyEnglish");
+            public static readonly string ClearedChinese = Get("FireAlarmClearedChinese");
+            public static readonly string ClearedEnglish = Get("FireAlarmClearedEnglish");
+            public static readonly string DetectorChinese = Get("FireDetectorClearConfirmedChinese");
+            public static readonly string DetectorEnglish = Get("FireDetectorClearConfirmedEnglish");
 
+            private static string Get(string key) => ConfigApp.Instance.GetConfigSetting(key);
+        }
         #endregion
         /// <summary>
         /// 處理DMD模組執行程序所收到之訊息 
@@ -48,23 +48,15 @@ namespace ASI.Wanda.DCU.TaskCDU
         /// <returns></returns>
         public override int ProcEvent(string pLabel, string pBody)
         {
-         
             if (pLabel == MSGFinish.Label)
-            {
                 return 0;
-            }
-            else if (pLabel == MSGFromTaskDMD.Label)
-            {
+
+            if (pLabel == MSGFromTaskDMD.Label || pLabel == MSGFromTaskDCU.Label)
                 return ProMsgFromDMD(pBody);
-            }
-            else if (pLabel == MSGFromTaskDCU.Label)
-            {
-                return ProMsgFromDMD(pBody);
-            }
-            else if (pLabel == PA.ProcMsg.MSGFromTaskPA.Label)
-            {
+
+            if (pLabel == PA.ProcMsg.MSGFromTaskPA.Label)
                 return ProMsgFromPA(pBody);
-            }
+
             return base.ProcEvent(pLabel, pBody);
         }
         /// <summary>
@@ -149,7 +141,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                                     DbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1"), 
                                     DbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2")
                                 };
-                                    // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄 
+                                    // 將 logData 物件序列化為 JSON 格式以進行結構化日誌記錄  
                                     string formattedLog = JsonConvert.SerializeObject(logData, Formatting.Indented);
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, formattedLog);
                                     // 處理消息並記錄結果   

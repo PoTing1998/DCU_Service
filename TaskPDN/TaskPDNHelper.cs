@@ -12,6 +12,7 @@ using ASI.Wanda.DCU.DB.Models.DMD;
 using ASI.Wanda.DCU.DB.Tables.DMD;
 using System.Text.RegularExpressions;
 using ASI.Lib.Config;
+using System.IO;
 
 namespace ASI.Wanda.DCU.TaskPDN
 {
@@ -84,20 +85,88 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// <param name="dataByte">封包資料輸出參數。</param>
         public void SendMessageToDisplay(string targetDu, string dbName1, string dbName2, out string result)
         {
+            //var results = CreateAndSendMessage(targetDu, dbName1, dbName2);
+            //var successCount = results.Count(r => r.Result == "成功傳送");
+
+            //result = successCount > 0 ? $"成功傳送 {successCount} 筆訊息" : "傳送失敗";
+
+            //foreach (var displayResult in results)
+            //{
+            //    if (displayResult.DataByte != null)
+            //    {
+            //        _mSerial.Send(displayResult.DataByte);
+            //    }
+            //}
             var results = CreateAndSendMessage(targetDu, dbName1, dbName2);
+
             var successCount = results.Count(r => r.Result == "成功傳送");
+            var failureCount = results.Count(r => r.Result != "成功傳送");
+            var failedMessages = results.Where(r => r.Result != "成功傳送").ToList();
 
-            result = successCount > 0 ? $"成功傳送 {successCount} 筆訊息" : "傳送失敗";
+            // 統一生成回應結果
+            result = successCount > 0
+                ? $"成功處理 {successCount} 筆訊息，失敗 {failureCount} 筆。"
+                : "所有訊息處理失敗。";
 
-            foreach (var displayResult in results)
+            try
             {
-                if (displayResult.DataByte != null)
+                // 整理所有成功的資料，組合成一筆訊息
+                var combinedData = CombineMessages(results.Where(r => r.Result == "成功傳送").ToList());
+
+                if (combinedData != null && combinedData.Length > 0)
                 {
-                    _mSerial.Send(displayResult.DataByte);
+                    // 傳送組合後的訊息
+                    _mSerial.Send(combinedData);
+                }
+                else
+                {
+                    LogError("組合後的訊息為空，未能發送。");
+                }
+            }
+            catch (Exception ex)
+            {
+                // 捕捉發送時的例外並記錄
+                LogError($"組合訊息傳送失敗: {ex.Message}");
+            }
+
+            // 可選：記錄失敗訊息的詳細資訊  
+            if (failedMessages.Any())
+            {
+                foreach (var failed in failedMessages)
+                {
+                    LogError($"處理失敗的訊息 : {failed.Result}");
                 }
             }
         }
-
+        // 新增的輔助方法：將多筆資料組合成一筆訊息 
+        private byte[] CombineMessages(List<DisplayMessageResult> successfulResults)
+        {
+            try
+            {
+                // 假設每筆資料的 DataByte 是 byte[]，這裡進行合併  
+                using (var memoryStream = new MemoryStream())
+                {
+                    foreach (var result in successfulResults)
+                    {
+                        if (result.DataByte != null)
+                        {
+                            memoryStream.Write(result.DataByte, 0, result.DataByte.Length);
+                        }
+                    }
+                    return memoryStream.ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"組合訊息時發生錯誤: {ex.Message}");
+                return null;
+            }
+        }
+        private void LogError(string message)
+        {
+            // 替換成你的日誌框架或存檔邏輯
+            ASI.Lib.Log.ErrorLog.Log("信息處理錯誤", $"[Error] {message}");
+        }
         /// <summary>
         /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。
         /// </summary>
@@ -373,13 +442,6 @@ namespace ASI.Wanda.DCU.TaskPDN
             ASI.Lib.Log.DebugLog.Log(_mProcName + "送到看板上", "Serialized display packet: " + BitConverter.ToString(serializedData));
 
         }
-        /// <summary>
-        /// 處理訊息
-        /// </summary>
-        /// <param name="FireContentChinese"></param>
-        /// <param name="FireContentEnglish"></param>
-        /// <param name="situation"></param>
-        /// <returns></returns>
         /// <summary>
         /// 處理訊息
         /// </summary>

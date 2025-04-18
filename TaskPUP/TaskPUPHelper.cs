@@ -16,17 +16,7 @@ using System.Threading.Tasks;
 
 namespace ASI.Wanda.DCU.TaskPUP
 {
-    public static class Constants
-    {
-        public const string SendPreRecordMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage";
-        public const string SendInstantMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendInstantMessage";
-        public const string SendScheduleSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ScheduleSetting";
-        public const string SendPreRecordMessageSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting";
-        public const string SendTrainMessageSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMessageSetting";
-        public const string SendPowerTimeSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PowerTimeSetting";
-        public const string SendGroupSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting";
-        public const string SendParameterSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ParameterSetting";
-    }
+
     public class DeviceInfo
     {
         public string Station { get; set; }
@@ -157,16 +147,6 @@ namespace ASI.Wanda.DCU.TaskPUP
             // 替換成你的日誌框架或存檔邏輯
             ASI.Lib.Log.ErrorLog.Log("信息處理錯誤", $"[Error] {message}");
         }
-
-        /// <summary>
-        /// 創建並傳送消息，使用泛型處理不同的消息類型
-        /// </summary>
-        /// <typeparam name="TMessageLayout">消息佈局類型</typeparam>
-        /// <param name="targetDu">目標設備 ID 字符串</param>
-        /// <param name="dbName1">數據庫名稱 1</param>
-        /// <param name="dbName2">數據庫名稱 2</param>
-        /// <param name="selectMessageFunc">選擇消息佈局的方法委託</param>
-        /// <returns>包含結果的列表</returns>
         /// <summary>
         /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。 
         /// </summary>
@@ -483,7 +463,7 @@ namespace ASI.Wanda.DCU.TaskPUP
 
 
         /// <summary>
-        /// /緊急訊息
+        /// 緊急訊息
         /// </summary>
         /// <param name="FireContentChinese"></param>
         /// <param name="FireContentEnglish"></param>
@@ -721,7 +701,6 @@ namespace ASI.Wanda.DCU.TaskPUP
             var Open = new byte[] { 0x3A, 0X00 };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
-
             var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Open);
             var serializedDataOpen = processor.SerializePacket(packetOpen);
             _mSerial.Send(serializedDataOpen);

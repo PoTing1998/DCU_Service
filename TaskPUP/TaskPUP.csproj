@@ -46,9 +46,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants\TaskPUPConstants.cs" />
+    <Compile Include="PAMessage.cs" />
     <Compile Include="ProcTaskPUP.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Strategies\DisplayMessageStrategy.cs" />
+    <Compile Include="Strategies\EcoModeStrategy.cs" />
+    <Compile Include="Strategies\IMessageStrategy.cs" />
+    <Compile Include="Strategies\MessageStrategyFactory.cs" />
+    <Compile Include="Strategies\PowerSettingStrategy.cs" />
     <Compile Include="TaskPUPHelper.cs" />
   </ItemGroup>
   <ItemGroup>

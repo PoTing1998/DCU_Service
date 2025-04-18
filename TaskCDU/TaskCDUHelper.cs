@@ -728,10 +728,6 @@ namespace ASI.Wanda.DCU.TaskCDU
                     }
                 }
             }
-            else
-            {
-
-            }
 
             return null;
         }

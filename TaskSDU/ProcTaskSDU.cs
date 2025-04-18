@@ -17,23 +17,25 @@ namespace ASI.Wanda.DCU.TaskSDU
         #region constructor
         static int mSEQ = 0; // 計算累進發送端的次數  
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
-
+        static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
+        static string _mDU_ID = DU_ID.LG01_SDU_05.ToString();
         /// <summary>
         /// 火災相關訊息
         /// </summary>
         private static class FireAlarmMessages
         {
-            public static readonly string CheckChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressChinese");
-            public static readonly string CheckEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorCheckInProgressEnglish");
-            public static readonly string EmergencyChinese = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyChinese");
-            public static readonly string EmergencyEnglish = ConfigApp.Instance.GetConfigSetting("FireEmergencyEvacuateCalmlyEnglish");
-            public static readonly string ClearedChinese = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedChinese");
-            public static readonly string ClearedEnglish = ConfigApp.Instance.GetConfigSetting("FireAlarmClearedEnglish");
-            public static readonly string DetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
-            public static readonly string DetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
+            public static readonly string CheckChinese = Get("FireDetectorCheckInProgressChinese");
+            public static readonly string CheckEnglish = Get("FireDetectorCheckInProgressEnglish");
+            public static readonly string EmergencyChinese = Get("FireEmergencyEvacuateCalmlyChinese");
+            public static readonly string EmergencyEnglish = Get("FireEmergencyEvacuateCalmlyEnglish");
+            public static readonly string ClearedChinese = Get("FireAlarmClearedChinese");
+            public static readonly string ClearedEnglish = Get("FireAlarmClearedEnglish");
+            public static readonly string DetectorChinese = Get("FireDetectorClearConfirmedChinese");
+            public static readonly string DetectorEnglish = Get("FireDetectorClearConfirmedEnglish");
+
+            private static string Get(string key) => ConfigApp.Instance.GetConfigSetting(key);
         }
-        static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
-        static string _mDU_ID = DU_ID.LG01_SDU_05.ToString();
+
         #endregion
         /// <summary>
         /// 處理DMD模組執行程序所收到之訊息 
