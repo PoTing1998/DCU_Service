@@ -163,6 +163,10 @@ namespace ASI.Wanda.DCU.TaskDMD
                 {
                     HandleUnexpectedResponse(DMDServerMessage);
                 }
+                else if (DMDServerMessage.MessageType == DMD.Message.Message.eMessageType.trainMessage)
+                {
+                    HandletrainMessage(DMDServerMessage, DMDHelper, sByteArray, sJsonData, sJsonObjectName);
+                }
                 else
                 {
                     sLog = string.Format("無此種訊息類別:[{0}]", DMDServerMessage.MessageType);
@@ -365,6 +369,35 @@ namespace ASI.Wanda.DCU.TaskDMD
                     break;
             }
         }
+        /// <summary>
+        /// 處理號誌訊號
+        /// </summary>
+        /// <param name="DMDServerMessage"></param>
+        private void HandletrainMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, string sByteArray, string sJsonData, string sJsonObjectName)
+        {
+
+            string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
+            ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
+       
+            var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMSG)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
+            var TrainMSG = new DMD.JsonObject.DCU.FromDMD.TrainMSG(ASI.Wanda.DMD.Enum.Station.OCC)
+            {
+                Type = oJsonObject.Type,
+                Command = oJsonObject.Command,
+                Platform_id = oJsonObject.Platform_id,
+                Arrive_time1 = oJsonObject.Arrive_time1,
+                Depart_time1 = oJsonObject.Depart_time1,
+                Destination1 = oJsonObject.Destination1,
+                Depart_time2 = oJsonObject.Depart_time2,
+                Arrive_time2 = oJsonObject.Arrive_time2,
+                Destination2 = oJsonObject.Depart_time2
+            };
+            //更新資料庫 尚未討論
+
+
+            SendToPlatform(DMDHelper, TrainMSG);
+        }
+
         #region 各處理的method
         private void HandleSendPreRecordMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
         {
@@ -394,7 +427,7 @@ namespace ASI.Wanda.DCU.TaskDMD
 
             DMDHelper.UpdataConfig();
             DMDHelper.UpdateDCUPlayList();
-            DMDHelper.UpdataDCUInstantMessage();
+            DMDHelper.UpdataDCUInstantMessage(); 
             SendToAllTasks(DMDHelper, sendInstantMessage); 
         }
 
@@ -473,7 +506,7 @@ namespace ASI.Wanda.DCU.TaskDMD
         {
             ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從CMFT來的訊息不應有Response，MessageType:{DMDServerMessage.MessageType}");
         }
-
+      
         private void SendToAllTasks<T>(TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, T messageObject)
         {
             try
@@ -495,6 +528,26 @@ namespace ASI.Wanda.DCU.TaskDMD
             }
         }
 
+
+
+        private void SendToPlatform<T>(TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, T messageObject)
+        {
+            try
+            {
+                var serializedMessage = new ASI.Wanda.DCU.Message.Message(
+                    ASI.Wanda.DCU.Message.Message.eMessageType.Command,
+                    0,
+                    ASI.Lib.Text.Parsing.Json.SerializeObject(messageObject)
+                );
+
+                DMDHelper.SendToTaskPUP(2, 1, serializedMessage.JsonContent);
+                DMDHelper.SendToTaskPDN(2, 1, serializedMessage.JsonContent);
+            }
+            catch (System.Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("SendToPlatform", $"序列化消息時發生錯誤: {ex.Message}");
+            }
+        }
         #endregion
 
     }
