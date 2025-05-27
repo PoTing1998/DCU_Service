@@ -46,6 +46,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DMDHelper.cs" />
+    <Compile Include="Handlers\DMDMessageHandlerFactory.cs" />
+    <Compile Include="Handlers\GroupSettingHandler.cs" />
+    <Compile Include="Handlers\IDMDMessageHandler.cs" />
+    <Compile Include="Handlers\PowerTimeSettingHandler.cs" />
+    <Compile Include="Handlers\PreRecordMessageSettingHandler.cs" />
+    <Compile Include="Handlers\ScheduleSettingHandler.cs" />
+    <Compile Include="Handlers\SendInstantMessageHandler.cs" />
+    <Compile Include="Handlers\SendPreRecordMessageHandler.cs" />
+    <Compile Include="Handlers\TrainMessageSettingHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProTaskDMD.cs" />

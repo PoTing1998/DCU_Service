@@ -8,9 +8,7 @@ using ASI.Wanda.DMD.TaskDMD;
 
 using System;
 using System.Threading;
-
-
-
+using TaskDMD.Handlers;
 
 namespace ASI.Wanda.DCU.TaskDMD
 {
@@ -335,40 +333,28 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sLog = string.Format("Ack，訊息識別碼:[{0}]", DMDServerMessage.MessageID);
             DMDHelper.HandleAckMessage(DMDServerMessage);
         }
+
+        private readonly DMDMessageHandlerFactory _handlerFactory = new DMDMessageHandlerFactory();
         private void HandleCommandMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, string sByteArray, string sJsonData, string sJsonObjectName, int iMsgID)
         {
             string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
             ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
-
-            // 根據 JsonObjectName 處理不同的訊息類型    
-            switch (sJsonObjectName)
+            var handler = _handlerFactory.GetHandler(sJsonObjectName);
+            if (handler != null)
             {
-                case ASI.Wanda.DMD.TaskDMD.Constants.SendPreRecordMsg:
-                    HandleSendPreRecordMessage(DMDServerMessage, DMDHelper);
-                    break;
-                case ASI.Wanda.DMD.TaskDMD.Constants.SendInstantMsg:
-                    HandleSendInstantMessage(DMDServerMessage, DMDHelper);
-                    break;
-                case ASI.Wanda.DMD.TaskDMD.Constants.ScheduleSetting:
-                    HandleScheduleSetting(DMDServerMessage, DMDHelper); 
-                    break;
-                case ASI.Wanda.DMD.TaskDMD.Constants.PreRecordMessageSetting:
-                    HandlePreRecordMessageSetting(DMDServerMessage, DMDHelper);
-                    break;
-                case ASI.Wanda.DMD.TaskDMD.Constants.TrainMessageSetting:  
-                    HandleTrainMessageSetting(DMDServerMessage, DMDHelper);
-                    break;
-                case ASI.Wanda.DMD.TaskDMD.Constants.GroupSetting:
-                    HandleGroupSetting(DMDServerMessage, DMDHelper);
-                    break;
-                case ASI.Wanda.DMD.TaskDMD.Constants.ParameterSetting:
-                    DMDHelper.HandleAckMessage(DMDServerMessage);
-                    break;
-                case ASI.Wanda.DMD.TaskDMD.Constants.PowerTimeSetting:
-                    HandlePowerTimeSetting(DMDServerMessage, DMDHelper);
-                    break;
+                handler.Handle(DMDServerMessage, DMDHelper);
+            }
+            else if (sJsonObjectName == ASI.Wanda.DMD.TaskDMD.Constants.ParameterSetting)
+            {
+                DMDHelper.HandleAckMessage(DMDServerMessage);
+            }
+            else
+            {
+                ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"未找到處理器: {sJsonObjectName}");
             }
         }
+
+
         /// <summary>
         /// 處理號誌訊號
         /// </summary>
@@ -390,145 +376,17 @@ namespace ASI.Wanda.DCU.TaskDMD
                 Destination1 = oJsonObject.Destination1,
                 Depart_time2 = oJsonObject.Depart_time2,
                 Arrive_time2 = oJsonObject.Arrive_time2,
-                Destination2 = oJsonObject.Depart_time2
+                Destination2 = oJsonObject.Destination2
             };
             //更新資料庫 尚未討論
 
-
             SendToPlatform(DMDHelper, TrainMSG);
         }
-
-        #region 各處理的method
-        private void HandleSendPreRecordMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
-        {
-            var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-            var sendPreRecordMessage = new DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage(ASI.Wanda.DMD.Enum.Station.OCC)
-            {
-                seatID = oJsonObject.seatID,
-                msg_id = oJsonObject.msg_id,
-                target_du = oJsonObject.target_du
-            };
-
-            DMDHelper.UpdataConfig();
-            DMDHelper.UpdateDCUPlayList();
-            DMDHelper.UpdataDCUPreRecordMessage();
-            SendToAllTasks(DMDHelper, sendPreRecordMessage);
-        }
-
-        private void HandleSendInstantMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
-        {
-            var oJsonObjectInstantMessage = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendInstantMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-            var sendInstantMessage = new DMD.JsonObject.DCU.FromDMD.SendInstantMessage(ASI.Wanda.DMD.Enum.Station.OCC)
-            {
-                seatID = oJsonObjectInstantMessage.seatID,
-                msg_id = oJsonObjectInstantMessage.msg_id,
-                target_du = oJsonObjectInstantMessage.target_du
-            };
-
-            DMDHelper.UpdataConfig();
-            DMDHelper.UpdateDCUPlayList();
-            DMDHelper.UpdataDCUInstantMessage(); 
-            SendToAllTasks(DMDHelper, sendInstantMessage); 
-        }
-
-        private void HandleScheduleSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
-        {
-            var oJsonObjectSendScheduleSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendScheduleSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-            var sendScheduleSetting = new DMD.JsonObject.DCU.FromDMD.SendScheduleSetting(ASI.Wanda.DMD.Enum.Station.OCC)
-            {
-                seatID = oJsonObjectSendScheduleSetting.seatID,
-                sched_id = oJsonObjectSendScheduleSetting.sched_id,
-                SqlCommand = oJsonObjectSendScheduleSetting.SqlCommand
-            };
-            
-            DMDHelper.UpSchedule();
-            DMDHelper.UpDMDSchedulePlaylist();
-            DMDHelper.UpdataDCUPreRecordMessage();
-            SendToAllTasks(DMDHelper, sendScheduleSetting);
-        }
-
-        private void HandlePreRecordMessageSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
-        {
-            var oJsonObjectPreRecordMessageSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-            var PreRecordMessageSetting = new DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting(ASI.Wanda.DMD.Enum.Station.OCC)
-            {
-                seatID = oJsonObjectPreRecordMessageSetting.seatID,
-                msg_id = oJsonObjectPreRecordMessageSetting.msg_id,
-                SqlCommand = oJsonObjectPreRecordMessageSetting.SqlCommand
-            };
-
-            DMDHelper.UpdataConfig();
-            DMDHelper.UpdateDCUPlayList();
-            DMDHelper.UpdataDCUPreRecordMessage(); 
-            SendToAllTasks(DMDHelper, PreRecordMessageSetting);
-        }
-
-        private void HandlePowerTimeSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
-        {
-            DMDHelper.UpDateDMDPowerSetting();
-            var oJsonObjectPowerTimeSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PowerTimeSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-            var PowerTimeSetting = new DMD.JsonObject.DCU.FromDMD.PowerTimeSetting(ASI.Wanda.DMD.Enum.Station.OCC)
-            {
-                seatID = oJsonObjectPowerTimeSetting.seatID,
-                SqlCommand = oJsonObjectPowerTimeSetting.SqlCommand
-            };
-            SendToAllTasks(DMDHelper, PowerTimeSetting);
-        }
-        
-        private void HandleTrainMessageSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
-        {
-            DMDHelper.UpDateDMDTrainMessage();
-            var oJsonObjectTrainMessageSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMessageSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-            var TrainMessageSetting = new DMD.JsonObject.DCU.FromDMD.TrainMessageSetting(ASI.Wanda.DMD.Enum.Station.OCC)
-            {
-                msg_id = oJsonObjectTrainMessageSetting.msg_id,
-                seatID = oJsonObjectTrainMessageSetting.seatID,
-                SqlCommand = oJsonObjectTrainMessageSetting.SqlCommand
-            };
-            SendToAllTasks(DMDHelper, TrainMessageSetting);
-        }
-
-        private void HandleGroupSetting(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
-        {
-            DMDHelper.UpDateDMDGroup(); 
-            var oJsonObjectGroupSetting = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-            var GroupSetting = new DMD.JsonObject.DCU.FromDMD.GroupSetting(ASI.Wanda.DMD.Enum.Station.OCC)
-            {
-                group_id = oJsonObjectGroupSetting.group_id,
-                seatID = oJsonObjectGroupSetting.seatID,
-                SqlCommand = oJsonObjectGroupSetting.SqlCommand
-            };
-            SendToAllTasks(DMDHelper, GroupSetting);
-        }
-        #endregion  
 
         private void HandleUnexpectedResponse(ASI.Wanda.DMD.Message.Message DMDServerMessage) 
         {
             ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從CMFT來的訊息不應有Response，MessageType:{DMDServerMessage.MessageType}");
         }
-      
-        private void SendToAllTasks<T>(TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, T messageObject)
-        {
-            try
-            {
-                var serializedMessage = new ASI.Wanda.DCU.Message.Message(
-                    ASI.Wanda.DCU.Message.Message.eMessageType.Command,
-                    01,
-                    ASI.Lib.Text.Parsing.Json.SerializeObject(messageObject)
-                );
-                
-                DMDHelper.SendToTaskPUP(2, 1, serializedMessage.JsonContent);
-                DMDHelper.SendToTaskCDU(2, 1, serializedMessage.JsonContent);
-                DMDHelper.SendToTaskSDU(2, 1, serializedMessage.JsonContent);
-                DMDHelper.SendToTaskPDN(2, 1, serializedMessage.JsonContent);
-            }
-            catch (System.Exception ex)
-            {
-                ASI.Lib.Log.ErrorLog.Log("SendToAllTasks", $"序列化消息時發生錯誤: {ex.Message}");
-            }
-        }
-
-
 
         private void SendToPlatform<T>(TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, T messageObject)
         {
