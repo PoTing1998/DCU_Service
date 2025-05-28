@@ -52,6 +52,7 @@
     <Compile Include="Tables\DU.cs" />
     <Compile Include="Tables\System.cs" />
     <Compile Include="Tables\Table.cs" />
+    <Compile Include="Tables\Train.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ASILib\ASILib.csproj">

@@ -379,6 +379,8 @@ namespace ASI.Wanda.DCU.TaskDMD
                 Destination2 = oJsonObject.Destination2
             };
             //更新資料庫 尚未討論
+           
+
 
             SendToPlatform(DMDHelper, TrainMSG);
         }
