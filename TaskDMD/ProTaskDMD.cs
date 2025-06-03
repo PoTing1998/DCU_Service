@@ -4,9 +4,9 @@ using ASI.Lib.Log;
 using ASI.Lib.Process;
 using ASI.Wanda.DMD.ProcMsg;
 using ASI.Wanda.DMD.TaskDMD;
-
-
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using TaskDMD.Handlers;
 
@@ -365,24 +365,30 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
             ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
        
-            var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMSG)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-            var TrainMSG = new DMD.JsonObject.DCU.FromDMD.TrainMSG(ASI.Wanda.DMD.Enum.Station.OCC)
+           // var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMSG)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
+          
+            var oJsonObjects = JsonConvert.DeserializeObject<List<ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMSG>>(DMDServerMessage.JsonContent);
+
+
+            foreach (var oJsonObject in oJsonObjects)
             {
-                Type = oJsonObject.Type,
-                Command = oJsonObject.Command,
-                Platform_id = oJsonObject.Platform_id,
-                Arrive_time1 = oJsonObject.Arrive_time1,
-                Depart_time1 = oJsonObject.Depart_time1,
-                Destination1 = oJsonObject.Destination1,
-                Depart_time2 = oJsonObject.Depart_time2,
-                Arrive_time2 = oJsonObject.Arrive_time2,
-                Destination2 = oJsonObject.Destination2
-            };
-            //更新資料庫 尚未討論
-           
-
-
-            SendToPlatform(DMDHelper, TrainMSG);
+                var TrainMSG = new DMD.JsonObject.DCU.FromDMD.TrainMSG(ASI.Wanda.DMD.Enum.Station.OCC)
+                {
+                    Type = oJsonObject.Type,
+                    Command = oJsonObject.Command,
+                    Platform_id = oJsonObject.Platform_id,
+                    Arrive_time1 = oJsonObject.Arrive_time1,
+                    Depart_time1 = oJsonObject.Depart_time1,
+                    Destination1 = oJsonObject.Destination1,
+                    Depart_time2 = oJsonObject.Depart_time2,
+                    Arrive_time2 = oJsonObject.Arrive_time2,
+                    Destination2 = oJsonObject.Destination2
+                };
+                //更新資料庫 
+                ASI.Wanda.DCU.DB.Tables.Train.trainMessage.InsertTrain_MSG(TrainMSG);
+                SendToPlatform(DMDHelper, TrainMSG);
+            }
+          
         }
 
         private void HandleUnexpectedResponse(ASI.Wanda.DMD.Message.Message DMDServerMessage) 

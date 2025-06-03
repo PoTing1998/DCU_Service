@@ -1,4 +1,5 @@
 ﻿using ASI.Wanda.DCU.DB.Models.Train;
+using ASI.Wanda.DMD.JsonObject.DCU.FromDMD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,15 +17,17 @@ namespace ASI.Wanda.DCU.DB.Tables.Train
                 Delete(type);
             }
             #region Methods
-            static public void InsertTrain_MSG(int platform_id, int arrive_time1, int depart_time1, int destination1, int arrive_time2, int depart_time2, int destination2)
+            static public void InsertTrain_MSG(TrainMSG trainMSG)
             {
+            
                 Insert(
-                    arrive_time1,
-                    depart_time1,
-                    destination1,
-                    arrive_time2,
-                    depart_time2,
-                    destination2
+                    trainMSG.Platform_id,
+                    trainMSG.Arrive_time1,
+                    trainMSG.Depart_time1,
+                    trainMSG.Destination1,
+                    trainMSG.Arrive_time2,
+                    trainMSG.Depart_time2,
+                    trainMSG.Destination2
                     );
             }
 
