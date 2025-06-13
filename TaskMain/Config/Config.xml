@@ -13,11 +13,11 @@
 	<add key="DMD_Server" value="IP=10.107.26.1;Port=7000;Type=Client" />
 	<add key="Process" value="TaskDMD" />
 	<add key="Process" value="TaskPA" />
-  	<add key="Process" value="TaskPUP" />
+  <add key="Process" value="TaskPUP" />
 	<add key="Process" value="TaskCDU" />
 	<add key="Process" value="TaskSDU" />
 	<add key="Process" value="TaskPDN" />
-	<add key="CDUComPort" value="28" />
+	<add key="CDUComPort" value="3" />
 	<add key="CDUBaudrate" value="38400" />
 	<add key="PUPComPort" value="4" />
 	<add key="PUPBaudrate" value="38400" />

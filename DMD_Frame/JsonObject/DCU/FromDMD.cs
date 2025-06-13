@@ -147,20 +147,19 @@ namespace ASI.Wanda.DMD.JsonObject.DCU.FromDMD
         public TrainMSG(ASI.Wanda.DMD.Enum.Station station) : base(station) { }
         public string Type;
         public string Command { get; set; }
-        //public List<TrainItem> list;  // 改成具體型別
-        public string Platform_id; //U：上行(含大廳層、月台層)
-                                   //N：下行(含大廳層、月台層)
-        public string Arrive_time1;
-        public string Depart_time1;
-        public string Destination1;
-        public string Depart_time2;
-        public string Arrive_time2;
-        public string Destination2;
+        public int Platform_id; //U：上行(含大廳層、月台層)
+                               //N：下行(含大廳層、月台層)
+        public int Arrive_time1;
+        public int Depart_time1;
+        public int Destination1;
+        public int Depart_time2;
+        public int Arrive_time2;
+        public int Destination2;
 
-        //public string Special1;  // 1. Cancelled Train = 2      2. NextTrainWillNotStop = 1 3. TrainEndOfService = 1 
-        //                         // 4. TrainWillNotOpenDoor = 1 5. Train Not in service = 1 6. Test Train = 1
+        public int Special1;  // 1. Cancelled Train = 2      2. NextTrainWillNotStop = 1 3. TrainEndOfService = 1 
+                                // 4. TrainWillNotOpenDoor = 1 5. Train Not in service = 1 6. Test Train = 1
 
-        //public string Special2; //同上 
+        public int Special2; //同上 
 
     }
 }

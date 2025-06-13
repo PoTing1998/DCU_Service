@@ -335,7 +335,8 @@ namespace ASI.Wanda.DCU.TaskDMD
         }
 
         private readonly DMDMessageHandlerFactory _handlerFactory = new DMDMessageHandlerFactory();
-        private void HandleCommandMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, string sByteArray, string sJsonData, string sJsonObjectName, int iMsgID)
+        private void HandleCommandMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, 
+            TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, string sByteArray, string sJsonData, string sJsonObjectName, int iMsgID)
         {
             string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
             ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
@@ -364,14 +365,9 @@ namespace ASI.Wanda.DCU.TaskDMD
 
             string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
             ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
-       
-           // var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMSG)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-          
-            var oJsonObjects = JsonConvert.DeserializeObject<List<ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMSG>>(DMDServerMessage.JsonContent);
 
+             var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMSG)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
 
-            foreach (var oJsonObject in oJsonObjects)
-            {
                 var TrainMSG = new DMD.JsonObject.DCU.FromDMD.TrainMSG(ASI.Wanda.DMD.Enum.Station.OCC)
                 {
                     Type = oJsonObject.Type,
@@ -387,7 +383,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 //更新資料庫 
                 ASI.Wanda.DCU.DB.Tables.Train.trainMessage.InsertTrain_MSG(TrainMSG);
                 SendToPlatform(DMDHelper, TrainMSG);
-            }
+         
           
         }
 

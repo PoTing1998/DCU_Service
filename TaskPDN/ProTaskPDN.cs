@@ -8,8 +8,7 @@ using Display.Function;
 using System;
 using System.Collections.Generic;
 using DCU_Frame;
-
-
+using Newtonsoft.Json;
 
 namespace ASI.Wanda.DCU.TaskPDN
 {
@@ -135,7 +134,7 @@ namespace ASI.Wanda.DCU.TaskPDN
                         string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
                         string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
                         string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
-
+                        List<string> targetDuList = JsonConvert.DeserializeObject<List<string>>(target_du);
                         ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
                         var taskPDNHelper = new ASI.Wanda.DCU.TaskPDN.TaskPDNHelper(_mProcName, _mSerial);
                         string result = "";

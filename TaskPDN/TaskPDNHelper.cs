@@ -85,7 +85,6 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// <param name="dataByte">封包資料輸出參數。</param>
         public void SendMessageToDisplay(string targetDu, string dbName1, string dbName2, out string result)
         {
-            //var results = CreateAndSendMessage(targetDu, dbName1, dbName2);
             //var successCount = results.Count(r => r.Result == "成功傳送");
 
             //result = successCount > 0 ? $"成功傳送 {successCount} 筆訊息" : "傳送失敗";
