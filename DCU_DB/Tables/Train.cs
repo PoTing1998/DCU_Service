@@ -31,10 +31,12 @@ namespace ASI.Wanda.DCU.DB.Tables.Train
                     );
             }
 
-            static public void UpdateTrain_MSG(int strat_address)
+            
+
+            static public void UpdateTrain_MSG(int strat_address , TrainMSG trainMSG)
             {
                 string whereString = string.Format("where start_address = '{0}'   ", strat_address);
-                Update();
+                Update(trainMSG);
             }
 
             static public void selectAddressID(int startAddress)

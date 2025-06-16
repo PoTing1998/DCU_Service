@@ -161,7 +161,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 {
                     HandleUnexpectedResponse(DMDServerMessage);
                 }
-                else if (DMDServerMessage.MessageType == DMD.Message.Message.eMessageType.trainMessage)
+                else if (DMDServerMessage.MessageType == DMD.Message.Message.eMessageType.trainMessage) //判斷號誌資料
                 {
                     HandletrainMessage(DMDServerMessage, DMDHelper, sByteArray, sJsonData, sJsonObjectName);
                 }

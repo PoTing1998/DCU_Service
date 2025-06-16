@@ -83,7 +83,7 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// <param name="dbName2">資料庫名稱 2。</param>
         /// <param name="result">操作結果輸出參數。</param>
         /// <param name="dataByte">封包資料輸出參數。</param>
-        public void SendMessageToDisplay(string targetDu, string dbName1, string dbName2, out string result)
+        public void SendMessageToDisplay(List<string> targetDuList, string dbName1, string dbName2, out string result)
         {
             //var successCount = results.Count(r => r.Result == "成功傳送");
 
@@ -96,7 +96,7 @@ namespace ASI.Wanda.DCU.TaskPDN
             //        _mSerial.Send(displayResult.DataByte);
             //    }
             //}
-            var results = CreateAndSendMessage(targetDu, dbName1, dbName2);
+            var results = CreateAndSendMessage(targetDuList, dbName1, dbName2);
 
             var successCount = results.Count(r => r.Result == "成功傳送");
             var failureCount = results.Count(r => r.Result != "成功傳送");
@@ -109,7 +109,7 @@ namespace ASI.Wanda.DCU.TaskPDN
 
             try
             {
-                // 整理所有成功的資料，組合成一筆訊息
+                // 整理所有成功的資料，組合成一筆訊息 
                 var combinedData = CombineMessages(results.Where(r => r.Result == "成功傳送").ToList());
 
                 if (combinedData != null && combinedData.Length > 0)
@@ -173,33 +173,36 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// <param name="dbName1">資料庫名稱 1。</param>
         /// <param name="dbName2">資料庫名稱 2。</param>
         /// <returns>包含操作結果與封包資料的 DisplayMessageResult 物件。</returns>
-        private List<DisplayMessageResult> CreateAndSendMessage(string targetDu, string dbName1, string dbName2)
+        private List<DisplayMessageResult> CreateAndSendMessage(List<string> targetDuList, string dbName1, string dbName2)
         {
             var results = new List<DisplayMessageResult>();
 
             try
             {
-                // 驗證輸入參數 
-                ValidateInput(targetDu);
+                if (targetDuList == null || targetDuList.Count == 0)
+                    throw new ArgumentException("targetDuList 不可為空");
 
-                string[] deviceStrings = targetDu.Split(',');
                 string matchedDevice = null;
-                foreach (var deviceString in deviceStrings)
+
+                foreach (var deviceString in targetDuList)
                 {
                     string trimmedDevice = deviceString.Trim();
                     if (Regex.IsMatch(trimmedDevice, Pattern))
                     {
                         matchedDevice = trimmedDevice;
-                        break;
+                        break; // 只處理第一個符合的裝置
                     }
                 }
+
+                if (matchedDevice == null)
+                    throw new ArgumentException("找不到符合條件的裝置");
 
                 var deviceInfo = GetDeviceInfo(matchedDevice);
                 var messageIds = GetPlayingItemIds(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
 
                 foreach (var messageId in messageIds)
                 {
-                    var result = new DisplayMessageResult(); // 每個 messageId 的結果
+                    var result = new DisplayMessageResult();
 
                     try
                     {
@@ -210,7 +213,7 @@ namespace ASI.Wanda.DCU.TaskPDN
                         var sequence = CreateDisplaySequence(fullWindowMessage);
                         var DUID = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDs(matchedDevice);
                         var packet = CreatePacket(_mDU_ID, sequence);
-                        //組成封包的架構
+
                         result.DataByte = SerializeAndSendPacket(packet);
                         result.Result = "成功傳送";
                     }
@@ -226,11 +229,12 @@ namespace ASI.Wanda.DCU.TaskPDN
             {
                 var result = new DisplayMessageResult { Result = "傳送失敗：未知錯誤", DataByte = null };
                 HandleError(ex, result);
-                results.Add(result); // 添加通用的異常結果
+                results.Add(result);
             }
 
             return results;
         }
+
 
         /// <summary>
         /// 驗證輸入的目標設備單元標識符是否為空值。

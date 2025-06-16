@@ -150,7 +150,7 @@ namespace ASI.Wanda.DCU.TaskPDN
 
                         byte[] SerialiazedData = new byte[] { };
                             //傳送到面板上
-                        taskPDNHelper.SendMessageToDisplay(target_du, dbName1, dbName2 ,out result);
+                        taskPDNHelper.SendMessageToDisplay(targetDuList, dbName1, dbName2 ,out result);
                     }
                     catch (Exception ex)
                     {
