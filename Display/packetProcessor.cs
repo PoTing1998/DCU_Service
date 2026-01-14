@@ -32,8 +32,8 @@ namespace Display
             // Generate CheckSum after all other fields are set
             // packet.CheckSum = (byte)(packet.ToBytes().Sum(b => b) & 0xFF);
             // 計算 CheckSum，不包含 CheckSum 本身
-            var tempBytes = packet.ToBytes().Take(packet.ToBytes().Length - 1).ToArray();
-            packet.CheckSum = (byte)(tempBytes.Sum(b => b) & 0xFF);
+            // CheckSum is calculated automatically in Packet.ToBytes() method
+            // No need to manually set CheckSum here
             return packet;
         }
 

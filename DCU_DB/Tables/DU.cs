@@ -37,7 +37,36 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
         public static int GetPanelIDByDuAndOrientation(string du_id, bool is_back)
         {
             var data = SelectWhere(string.Format("WHERE du_id = '{0}' and is_back = '{1}'", du_id, is_back)).SingleOrDefault();
-            return data.panel_id; 
+            return data.panel_id;
+        }
+
+        /// <summary>
+        /// 獲取所有不重複的設備ID列表
+        /// </summary>
+        /// <returns>設備ID列表</returns>
+        public static List<string> GetAllDeviceIds()
+        {
+            var allData = SelectWhere("").ToList();
+            return allData.Select(d => d.du_id).Distinct().OrderBy(id => id).ToList();
+        }
+
+        /// <summary>
+        /// 根據設備類型關鍵字獲取設備ID列表（例如：PDU, CDU, SDU）
+        /// </summary>
+        /// <param name="deviceTypeKeyword">設備類型關鍵字（如 "PDU", "CDU"）</param>
+        /// <param name="stationId">可選的站點ID篩選</param>
+        /// <returns>符合條件的設備ID列表</returns>
+        public static List<string> GetDeviceIdsByType(string deviceTypeKeyword, string stationId = null)
+        {
+            var allDeviceIds = GetAllDeviceIds();
+            var filtered = allDeviceIds.Where(id => id.Contains("_" + deviceTypeKeyword + "-"));
+
+            if (!string.IsNullOrEmpty(stationId))
+            {
+                filtered = filtered.Where(id => id.StartsWith(stationId));
+            }
+
+            return filtered.OrderBy(id => id).ToList();
         }
     }
 

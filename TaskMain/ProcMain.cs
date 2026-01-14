@@ -115,7 +115,7 @@ namespace ASI.Wanda.DCU.TaskMain
         /// </summary>
 		private List<ProcInfo> mProcInfo = new List<ProcInfo>();
         /// <summary>
-        /// Åª¨úconfig.xml¸Ì¦U­Óprocess¸ê°T¨Ã¦s©ñ¦bProcInfoª«¥ó
+        /// Åªï¿½ï¿½config.xmlï¿½Ì¦Uï¿½ï¿½processï¿½ï¿½Tï¿½Ã¦sï¿½ï¿½bProcInfoï¿½ï¿½ï¿½ï¿½
         /// </summary>
         /// <returns></returns>
         private List<ProcInfo> ReadProcInfo()
@@ -175,7 +175,7 @@ namespace ASI.Wanda.DCU.TaskMain
         }
 
         /// <summary>
-        /// ÀË¬dprocessªºª¬ºA
+        /// ï¿½Ë¬dprocessï¿½ï¿½ï¿½ï¿½ï¿½A
         /// </summary>
         /// <returns></returns> 
 		private int CheckProcInfo()

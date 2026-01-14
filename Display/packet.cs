@@ -8,7 +8,7 @@ namespace Display
 {
     public class Packet
     {
-        public byte[] StartCode { get; set; } = new byte[] { 0xAA, 0x55 }; // Start code： AAH 55H
+        public byte[] StartCode { get; set; } = new byte[] { 0x55, 0xAA }; // Start code: 55H AAH
         public List<byte> IDs { get; set; } = new List<byte>();
         public byte FunctionCode { get; set; }
         public List<Sequence> Sequences { get; set; } = new List<Sequence>();
@@ -39,7 +39,7 @@ namespace Display
 
         public class CustomPacket
         {
-            public byte[] StartCode { get; set; } = new byte[] { 0xAA, 0x55 }; // Start code: AAH 55H
+            public byte[] StartCode { get; set; } = new byte[] { 0x55, 0xAA }; // Start code: 55H AAH
             public List<byte> IDs { get; set; } = new List<byte>();
             public byte FunctionCode { get; set; }
             public byte[] Sequences { get; set; } = new byte[] { };

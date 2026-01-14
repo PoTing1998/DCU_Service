@@ -62,6 +62,12 @@ namespace ASI.Wanda.DCU.DB.Tables.System
             var color = SelectWhere(string.Format("where config_name = '{0}'", name))
                  .SingleOrDefault();
 
+            // 如果找不到颜色配置，返回默认白色
+            if (color == null)
+            {
+                return "FFFFFF";  // 默认白色
+            }
+
             return color.config_value;
         }
 

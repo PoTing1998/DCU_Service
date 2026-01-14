@@ -28,7 +28,7 @@ namespace ASI.Lib.Comm.MSMQ
             string sPath = sHostName + "\\Private$\\" + pFullQueName;
             return MessageQueue.Exists(sPath);
         }
-
+        
         public static int Create(string pComputer, string pFullQueName)
         {
             Delete(pFullQueName);

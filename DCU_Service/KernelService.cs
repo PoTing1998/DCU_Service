@@ -68,7 +68,7 @@ namespace ASI.Wanda.DCU
 
                 System.Threading.Thread.Sleep(10000);
 
-                if (taskkernel_domain != null)
+                if (taskkernel_domain != null) 
                     AppDomain.Unload(taskkernel_domain);
                 taskkernel_domain = null;
             }

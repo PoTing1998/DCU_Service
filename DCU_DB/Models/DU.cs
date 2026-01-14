@@ -15,6 +15,9 @@ namespace ASI.Wanda.DCU.DB.Models.DU
             get;
             set;
         }
+        /// <summary>
+        /// 顯示器的id
+        /// </summary>
         [Key]
         public int panel_id
         {
@@ -22,9 +25,25 @@ namespace ASI.Wanda.DCU.DB.Models.DU
             set;
         }
         /// <summary>
-        /// 顯示器的id
+        /// 看板種類區域
         /// </summary>
         public string du_id
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// 
+        /// </summary> 
+        public string du_position
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string du_type
         {
             get;
             set;

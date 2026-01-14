@@ -35,13 +35,91 @@ namespace ASI.Wanda.DCU.TaskPUP
     public class TaskPUPHelper
     {
         private string _mProcName;
+        private List<string> _managedDevices;  // 此 Task 管理的所有設備
+        private string _currentDeviceId;       // 當前操作的設備
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
-        public const string _mDU_ID = "LG01_UPF_PDU-1";
-        private const string Pattern = @"LG01_UPF_PDU-1"; // 定義要篩選的模式
-        public TaskPUPHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial)
+
+        public TaskPUPHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial, string stationId = null)
         {
             _mProcName = mProcName;
             _mSerial = serial;
+
+            // 從資料庫載入此 Task 負責的設備
+            LoadManagedDevices(stationId);
+
+            // 設定預設設備（第一個PDU設備）
+            _currentDeviceId = _managedDevices.FirstOrDefault() ?? "LG01_UPF_PDU-1";
+
+            ASI.Lib.Log.DebugLog.Log(_mProcName,
+                $"載入 {_managedDevices.Count} 個 PDU 設備: {string.Join(", ", _managedDevices)}");
+        }
+
+        /// <summary>
+        /// 從資料庫載入此 Task 負責管理的設備列表（PDU設備）
+        /// </summary>
+        private void LoadManagedDevices(string stationId)
+        {
+            _managedDevices = new List<string>();
+
+            try
+            {
+                // TaskPUP 負責 PDU 設備（包含 UPF_PDU 和 DPF_PDU）
+                var upfDevices = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetDeviceIdsByType("UPF_PDU", stationId);
+                var dpfDevices = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetDeviceIdsByType("DPF_PDU", stationId);
+
+                _managedDevices.AddRange(upfDevices);
+                _managedDevices.AddRange(dpfDevices);
+
+                if (_managedDevices.Count == 0)
+                {
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, "警告：未找到任何 PDU 設備，使用預設值");
+                    _managedDevices.Add("LG01_UPF_PDU-1");
+                }
+            }
+            catch (Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"載入設備列表失敗: {ex.Message}");
+                // 使用預設值
+                _managedDevices.Add("LG01_UPF_PDU-1");
+            }
+        }
+
+        /// <summary>
+        /// 檢查設備ID是否由此 Task 管理
+        /// </summary>
+        public bool IsDeviceManaged(string deviceId)
+        {
+            return _managedDevices.Contains(deviceId, StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 從 target_du 字串中找出此 Task 負責的設備
+        /// </summary>
+        private List<string> ExtractManagedDevices(string targetDu)
+        {
+            var result = new List<string>();
+
+            if (string.IsNullOrEmpty(targetDu))
+                return result;
+
+            string[] deviceStrings = targetDu.Split(',');
+            foreach (var deviceString in deviceStrings)
+            {
+                string trimmed = deviceString.Trim();
+                if (IsDeviceManaged(trimmed))
+                {
+                    result.Add(trimmed);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 獲取此 Task 管理的所有設備列表
+        /// </summary>
+        public List<string> GetManagedDevices()
+        {
+            return new List<string>(_managedDevices);
         }
         private static DeviceInfo SplitStringToDeviceInfo(string deviceString)
         {
@@ -98,7 +176,7 @@ namespace ASI.Wanda.DCU.TaskPUP
 
 
         /// <summary>
-        /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。 
+        /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。
         /// </summary>
         /// <param name="targetDu">目標設備單元標識符。</param>
         /// <param name="dbName1">資料庫名稱 1。</param>
@@ -110,47 +188,57 @@ namespace ASI.Wanda.DCU.TaskPUP
 
             try
             {
-                // 驗證輸入參數 
+                // 驗證輸入參數
                 ValidateInput(targetDu);
 
-                string[] deviceStrings = targetDu.Split(',');
-                string matchedDevice = null;
-                foreach (var deviceString in deviceStrings)
+                // 從 target_du 中提取此 Task 負責的設備
+                var devicesToProcess = ExtractManagedDevices(targetDu);
+
+                if (devicesToProcess.Count == 0)
                 {
-                    string trimmedDevice = deviceString.Trim();
-                    if (Regex.IsMatch(trimmedDevice, Pattern))
+                    // 如果 target_du 中沒有此 Task 的設備
+                    ASI.Lib.Log.DebugLog.Log(_mProcName,
+                        $"target_du 中無 PDU 設備，跳過處理: {targetDu}");
+                    var skipResult = new DisplayMessageResult
                     {
-                        matchedDevice = trimmedDevice;
-                        break;
-                    }
+                        Result = "無相關設備",
+                        DataByte = null
+                    };
+                    results.Add(skipResult);
+                    return results;
                 }
 
-                var deviceInfo = GetDeviceInfo(matchedDevice);
-                var messageIds = GetPlayingItemIds(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
-
-                foreach (var messageId in messageIds)
+                // 對每個設備發送訊息
+                foreach (var deviceId in devicesToProcess)
                 {
-                    var result = new DisplayMessageResult(); // 每個 messageId 的結果
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"處理設備: {deviceId}");
 
-                    try
+                    var deviceInfo = GetDeviceInfo(deviceId);
+                    var messageIds = GetPlayingItemIds(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
+
+                    foreach (var messageId in messageIds)
                     {
-                        var messageLayout = GetMessageLayout(messageId);
-                        var textStringBody = CreateTextStringBody(messageLayout);
-                        var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
+                        var result = new DisplayMessageResult(); // 每個 messageId 的結果
 
-                        var sequence = CreateDisplaySequence(fullWindowMessage);
-                        var DUID = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDs(matchedDevice);
-                        var packet = CreatePacket(_mDU_ID, sequence);
+                        try
+                        {
+                            var messageLayout = GetMessageLayout(messageId);
+                            var textStringBody = CreateTextStringBody(messageLayout);
+                            var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
 
-                        result.DataByte = SerializeAndSendPacket(packet);
-                        result.Result = "成功傳送";
+                            var sequence = CreateDisplaySequence(fullWindowMessage);
+                            var packet = CreatePacket(deviceId, sequence);  // 使用特定設備ID
+
+                            result.DataByte = SerializeAndSendPacket(packet);
+                            result.Result = "成功傳送";
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleError(ex, result);
+                        }
+
+                        results.Add(result);
                     }
-                    catch (Exception ex)
-                    {
-                        HandleError(ex, result);
-                    }
-
-                    results.Add(result);
                 }
             }
             catch (Exception ex)
@@ -286,10 +374,10 @@ namespace ASI.Wanda.DCU.TaskPUP
         }
 
         /// <summary>
-        /// 序列化封包並透過串口傳送封包資料。
+        /// 序列化封包並記錄日誌。
         /// </summary>
-        /// <param name="packet">要傳送的資料封包。</param>
-        /// <returns>序列化的字節陣列。</returns> 
+        /// <param name="packet">要序列化的資料封包。</param>
+        /// <returns>序列化的字節陣列。</returns>
         private byte[] SerializeAndSendPacket(Packet packet)
         {
             var processor = new PacketProcessor();
@@ -297,7 +385,7 @@ namespace ASI.Wanda.DCU.TaskPUP
             string result = BitConverter.ToString(serializedData).Replace("-", " ");
             ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + result);
 
-            _mSerial.Send(serializedData);
+            // 移除重複發送：封包會在 SendMessageToDisplay 方法中統一發送
             return serializedData;
         }
 
@@ -329,14 +417,25 @@ namespace ASI.Wanda.DCU.TaskPUP
         /// <summary>
         /// /緊急訊息
         /// </summary>
-        /// <param name="FireContentChinese"></param>
-        /// <param name="FireContentEnglish"></param>
-        /// <param name="situation"></param>
-        public Tuple<byte[], byte[], byte[]> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
+        /// <param name="FireContentChinese">中文緊急訊息內容</param>
+        /// <param name="FireContentEnglish">英文緊急訊息內容</param>
+        /// <param name="situation">情境代碼</param>
+        /// <param name="targetDeviceId">目標設備ID（可選，預設為第一個管理的設備）</param>
+        public Tuple<byte[], byte[], byte[]> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation, string targetDeviceId = null)
         {
             byte[] serializedDataChinese = new byte[] { };
             byte[] serializedDataEnglish = new byte[] { };
             byte[] serializedDataOff = new byte[] { }; // 新增存放關閉訊息的序列化數據
+
+            // 決定使用的設備ID
+            string effectiveDeviceId = targetDeviceId ?? _currentDeviceId;
+
+            // 驗證設備是否由此Task管理
+            if (!IsDeviceManaged(effectiveDeviceId))
+            {
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"設備 {effectiveDeviceId} 不由此 Task 管理");
+                return Tuple.Create(serializedDataChinese, serializedDataEnglish, serializedDataOff);
+            }
 
             try
             {
@@ -344,8 +443,8 @@ namespace ASI.Wanda.DCU.TaskPUP
                 var processor = new PacketProcessor();
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
-                var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
-                var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+                var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(effectiveDeviceId, false);
+                var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(effectiveDeviceId, true);
 
                 // 序列化中文訊息
                 var sequence1 = CreateSequence(FireContentChinese, 1);
@@ -357,6 +456,10 @@ namespace ASI.Wanda.DCU.TaskPUP
                 );
                 serializedDataChinese = processor.SerializePacket(packet1);
 
+                // 發送中文訊息
+                _mSerial.Send(serializedDataChinese);
+                ASI.Lib.Log.DebugLog.Log(_mProcName, $"已發送緊急訊息(中文) situation={situation}: {BitConverter.ToString(serializedDataChinese)}");
+
                 // 序列化英文訊息
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
                 var packet2 = processor.CreatePacket(
@@ -366,6 +469,10 @@ namespace ASI.Wanda.DCU.TaskPUP
                     new List<Display.Sequence> { sequence2 }
                 );
                 serializedDataEnglish = processor.SerializePacket(packet2);
+
+                // 發送英文訊息
+                _mSerial.Send(serializedDataEnglish);
+                ASI.Lib.Log.DebugLog.Log(_mProcName, $"已發送緊急訊息(英文) situation={situation}: {BitConverter.ToString(serializedDataEnglish)}");
 
                 // 如果情境為 84，執行延遲並關閉
                 if (situation == 84)
@@ -379,6 +486,10 @@ namespace ASI.Wanda.DCU.TaskPUP
                         OffMode
                     );
                     serializedDataOff = processor.SerializePacket(packetOff);
+
+                    // 發送關閉訊息
+                    _mSerial.Send(serializedDataOff);
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"已發送緊急訊息關閉指令: {BitConverter.ToString(serializedDataOff)}");
                 }
             }
             catch (Exception ex)
@@ -386,13 +497,13 @@ namespace ASI.Wanda.DCU.TaskPUP
                 ASI.Lib.Log.ErrorLog.Log("SendMessageToUrgnt", ex);
             }
 
-            // 返回中文、英文和關閉訊息的序列化數據
+            // 返回中文、英文和關閉訊息的序列化數據（供日誌或測試使用） 
             return Tuple.Create(serializedDataChinese, serializedDataEnglish, serializedDataOff);
         }
         /// <summary>
-        /// 找尋車站Id並且判斷是否需要關閉
+        /// 找尋車站Id並且判斷是否需要開關顯示器（節能模式）
         /// </summary>
-        /// <param name="messageID"></param>
+        /// <param name="stationID">車站ID</param>
         /// <returns></returns>
         public dmdPowerSetting PowerSetting(string stationID)
         {
@@ -400,75 +511,80 @@ namespace ASI.Wanda.DCU.TaskPUP
             {
                 //從資料庫讀取資料
                 var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
-                string[] notEcoDays = stationData.not_eco_day.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                if (stationData.eco_mode == "on")
+
+                if (stationData.eco_mode != "on")
                 {
-                    // 獲取當前日期的月和日以及現在的時間（時和分）
-                    int currentMonth = DateTime.Now.Month;
-                    int currentDay = DateTime.Now.Day;
-                    int currentHour = DateTime.Now.Hour;
-                    int currentMinute = DateTime.Now.Minute;
-                    // 使用 List 儲存不啟動節能模式的日期
-                    var nonEcoDates = new List<(int Month, int Day)>();
+                    ASI.Lib.Log.DebugLog.Log("PowerSetting", "目前沒有開啟節能模式");
+                    return null;
+                }
 
-                    foreach (string day in notEcoDays)
+                // 獲取當前日期和時間
+                int currentMonth = DateTime.Now.Month;
+                int currentDay = DateTime.Now.Day;
+                int currentHour = DateTime.Now.Hour;
+                int currentMinute = DateTime.Now.Minute;
+
+                // 解析不啟動節能模式的日期列表
+                string[] notEcoDays = stationData.not_eco_day.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                bool isNonEcoDay = false;
+
+                foreach (string day in notEcoDays)
+                {
+                    if (day.Length != 4)
                     {
-                        ASI.Lib.Log.DebugLog.Log("PowerSetting", day.ToString());
-                        if (day.Length == 4)
-                        {
-                            int month = int.Parse(day.Substring(0, 2));
-                            int dayOfMonth = int.Parse(day.Substring(2, 2));
-                            nonEcoDates.Add((month, dayOfMonth));
-
-                            // 檢查當前日期是否在不啟動節能模式的日期列表中
-                            if (month == currentMonth && dayOfMonth == currentDay)
-                            {
-                                // 當前日期不啟動節能模式
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            // 處理長度不是 4 的情況，代表日期格式錯誤
-                            Console.WriteLine("無效的日期格式：" + day);
-                            continue;
-                        }
-                        // 檢查開關顯示器的時間
-                        string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                        string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-                        if (autoPlayTimes.Length == 1 && autoEcoTimes.Length == 1)
-                        {
-                            // 解析時間字串
-                            int autoPlayHour = int.Parse(autoPlayTimes[0].Substring(0, 2));//開啟的時間單位 時
-                            int autoPlayMinute = int.Parse(autoPlayTimes[0].Substring(3, 2));//開啟的時間單位 分
-                            int autoEcoHour = int.Parse(autoEcoTimes[0].Substring(0, 2));//關閉的時間單位 時
-                            int autoEcoMinute = int.Parse(autoEcoTimes[0].Substring(3, 2));//關閉的時間單位 分
-                                                                                           // 判斷當前時間是否在自動播放時間範圍內 
-                            if (currentHour == autoPlayHour && currentMinute == autoPlayMinute)
-                            {
-                                // 關閉顯示器
-                                ASI.Lib.Log.DebugLog.Log(_mProcName, "關閉顯示器");
-                                PowerSettingOff();
-                            }
-                            // 判斷當前時間是否在節能模式時間範圍內
-                            else if (currentHour == autoEcoHour && currentMinute == autoEcoMinute)
-                            {
-                                // 開啟顯示器
-                                ASI.Lib.Log.DebugLog.Log(_mProcName, "開啟顯示器");
-                                PowerSettingOpen();
-                            }
-                            else
-                            {
-                                ASI.Lib.Log.DebugLog.Log(_mProcName, "當前時間不在自動播放或節能模式時間範圍內");
-                            }
-                        }
+                        ASI.Lib.Log.DebugLog.Log("PowerSetting", $"無效的日期格式：{day}");
+                        continue;
                     }
+
+                    int month = int.Parse(day.Substring(0, 2));
+                    int dayOfMonth = int.Parse(day.Substring(2, 2));
+
+                    // 檢查當前日期是否在不啟動節能模式的日期列表中
+                    if (month == currentMonth && dayOfMonth == currentDay)
+                    {
+                        isNonEcoDay = true;
+                        ASI.Lib.Log.DebugLog.Log("PowerSetting", $"今天 {currentMonth:D2}/{currentDay:D2} 是不啟動節能模式的日期");
+                        break;
+                    }
+                }
+
+                // 如果今天是不啟動節能模式的日期，直接返回
+                if (isNonEcoDay)
+                {
+                    return null;
+                }
+
+                // 解析自動播放和節能時間
+                string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (autoPlayTimes.Length != 1 || autoEcoTimes.Length != 1)
+                {
+                    ASI.Lib.Log.DebugLog.Log("PowerSetting", "時間設定格式錯誤");
+                    return null;
+                }
+
+                // 解析時間字串
+                int autoPlayHour = int.Parse(autoPlayTimes[0].Substring(0, 2));      // 開啟顯示器的時間（時）
+                int autoPlayMinute = int.Parse(autoPlayTimes[0].Substring(3, 2));   // 開啟顯示器的時間（分）
+                int autoEcoHour = int.Parse(autoEcoTimes[0].Substring(0, 2));       // 關閉顯示器的時間（時）
+                int autoEcoMinute = int.Parse(autoEcoTimes[0].Substring(3, 2));     // 關閉顯示器的時間（分）
+
+                // 判斷當前時間是否為自動播放時間（開啟顯示器）
+                if (currentHour == autoPlayHour && currentMinute == autoPlayMinute)
+                {
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"到達自動播放時間 {autoPlayHour:D2}:{autoPlayMinute:D2}，開啟顯示器");
+                    PowerSettingOpen();
+                }
+                // 判斷當前時間是否為節能模式時間（關閉顯示器）
+                else if (currentHour == autoEcoHour && currentMinute == autoEcoMinute)
+                {
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"到達節能模式時間 {autoEcoHour:D2}:{autoEcoMinute:D2}，關閉顯示器");
+                    PowerSettingOff();
                 }
                 else
                 {
-                    // 不需要做任何處理
-                    ASI.Lib.Log.DebugLog.Log("PowerSetting", "目前沒有開啟節能模式");
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, "當前時間不在自動播放或節能模式時間範圍內");
                 }
 
                 return null;
@@ -479,7 +595,6 @@ namespace ASI.Wanda.DCU.TaskPUP
                 ASI.Lib.Log.ErrorLog.Log($"Error ProcessMessage PowerSetting: {ex.Message}\nStack Trace: {ex.StackTrace}", ex);
                 return null;
             }
-
         }
         #endregion
         Display.Sequence CreateSequence(string messageContent, int sequenceNo)
@@ -516,14 +631,24 @@ namespace ASI.Wanda.DCU.TaskPUP
         /// <summary>
         /// 顯示器的畫面開啟
         /// </summary>
-        public void PowerSettingOpen()
+        /// <param name="targetDeviceId">目標設備ID（可選，預設為第一個管理的設備）</param>
+        public void PowerSettingOpen(string targetDeviceId = null)
         {
+            // 決定使用的設備ID
+            string effectiveDeviceId = targetDeviceId ?? _currentDeviceId;
+
+            if (!IsDeviceManaged(effectiveDeviceId))
+            {
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"設備 {effectiveDeviceId} 不由此 Task 管理");
+                return;
+            }
+
             var startCode = new byte[] { 0x55, 0xAA };
             var processor = new PacketProcessor();
             var function = new PowerControlHandler();
             var Open = new byte[] { 0x3A, 0X00 };
-            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
-            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(effectiveDeviceId, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(effectiveDeviceId, true);
 
             var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Open);
             var serializedDataOpen = processor.SerializePacket(packetOpen);
@@ -533,14 +658,24 @@ namespace ASI.Wanda.DCU.TaskPUP
         /// <summary>
         /// 顯示器的畫面關閉
         /// </summary>
-        public void PowerSettingOff()
+        /// <param name="targetDeviceId">目標設備ID（可選，預設為第一個管理的設備）</param>
+        public void PowerSettingOff(string targetDeviceId = null)
         {
+            // 決定使用的設備ID
+            string effectiveDeviceId = targetDeviceId ?? _currentDeviceId;
+
+            if (!IsDeviceManaged(effectiveDeviceId))
+            {
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"設備 {effectiveDeviceId} 不由此 Task 管理");
+                return;
+            }
+
             var startCode = new byte[] { 0x55, 0xAA };
             var processor = new PacketProcessor();
             var function = new PowerControlHandler();
             var Off = new byte[] { 0x3A, 0X01 };
-            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
-            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
+            var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(effectiveDeviceId, false);
+            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(effectiveDeviceId, true);
 
             var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Off);
             var serializedDataOff = processor.SerializePacket(packetOff);

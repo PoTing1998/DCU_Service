@@ -45,7 +45,7 @@ namespace ASI.Wanda.DCU.TaskPUP
         static string sDetectorChinese = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedChinese");
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
         static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
-        static string _mDU_ID = "LG01_CDU_01";
+        TaskPUPHelper _taskPUPHelper = null;  // 改為成員變數，只建立一次
         #endregion
 
         #region MSMQ Method
@@ -63,13 +63,13 @@ namespace ASI.Wanda.DCU.TaskPUP
             {
                 return 0;
             }
-            else if (pLabel == ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD.Label)
+            else if (pLabel == ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD.Label )
             {
-                return ProMsgFromDMD(pBody);
+                return ProMsgFromDMD(pBody, "TaskDMD");  // 直接來自 TaskDMD
             }
             else if (pLabel == MSGFromTaskDCU.Label)
             {
-                return ProMsgFromDMD(pBody);
+                return ProMsgFromDMD(pBody, "TaskDCU");  // 經由 TaskDCU 轉發
             }
             else if (pLabel == PA.ProcMsg.MSGFromTaskPA.Label)
             {
@@ -127,6 +127,11 @@ namespace ASI.Wanda.DCU.TaskPUP
                     return -1; // Return immediately if the database initialization failed
                 }
                 ASI.Lib.Log.DebugLog.Log(_mProcName, "資料庫連線初始化成功.");
+
+                // 4. 初始化 TaskPUPHelper（從資料庫載入設備列表）
+                _taskPUPHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, _mSerial, Station_ID);
+                ASI.Lib.Log.DebugLog.Log(_mProcName,
+                    $"TaskPUP 啟動成功，管理設備: {string.Join(", ", _taskPUPHelper.GetManagedDevices())}");
             }
             catch (System.Exception ex)
             {
@@ -139,9 +144,11 @@ namespace ASI.Wanda.DCU.TaskPUP
 
 
         /// <summary>
-        /// 處理TaskDMD的訊息
+        /// 處理來自 DMD 的訊息（可能直接來自 TaskDMD 或經由 TaskDCU 轉發）
         /// </summary>
-        private int ProMsgFromDMD(string pMessage)
+        /// <param name="pMessage">訊息內容</param>
+        /// <param name="source">訊息來源 (TaskDMD 或 TaskDCU)</param>
+        private int ProMsgFromDMD(string pMessage, string source = "TaskDMD")
         {
             try
             {
@@ -152,7 +159,6 @@ namespace ASI.Wanda.DCU.TaskPUP
                     {
                         string sJsonData = mSGFromTaskDMD.JsonData;
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-                        var taskCDUHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, _mSerial);
 
                         switch (sJsonObjectName)
                         {
@@ -163,15 +169,15 @@ namespace ASI.Wanda.DCU.TaskPUP
                                 string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
                                 string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
 
-                                ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自 {source} 的訊息，JsonData:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1:{dbName1}; dbName2:{dbName2}");
 
                                 if (dbName1 == "dmd_pre_record_message") //預錄訊息
                                 {
                                     string result = "";
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
                                     byte[] SerialiazedData = new byte[] { };
-                                    //傳送到面板上    
-                                    taskCDUHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result);
+                                    //傳送到面板上
+                                    _taskPUPHelper.SendMessageToDisplay(target_du, dbName1, dbName2, out result);
                                     ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message" + result);
                                 }
                                 else
@@ -182,10 +188,10 @@ namespace ASI.Wanda.DCU.TaskPUP
                                 break;
 
                             case ASI.Wanda.DCU.TaskPUP.Constants.SendInstantMsg: //即時訊息
-
+                                // 判斷讀取哪一個資料庫
                                 break;
                             case ASI.Wanda.DCU.TaskPUP.Constants.SendPowerTimeSetting:
-                                taskCDUHelper.PowerSetting(Station_ID);
+                                _taskPUPHelper.PowerSetting(Station_ID);
                                 break;
                             case "節能模式開啟":
                                //  OpenDisplay();
@@ -224,11 +230,19 @@ namespace ASI.Wanda.DCU.TaskPUP
                 if (MSGFromTaskPA.UnPack(pMessage) > 0)
                 {
                     var sJsonData = MSGFromTaskPA.JsonData;
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " received a message from TaskPA ", sJsonData); // Log the received message 
-                    // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除  
+                    ASI.Lib.Log.DebugLog.Log(_mProcName + " received a message from TaskPA ", sJsonData); // Log the received message
+                    // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除
                     // 假設sJsonData已經是十六進位字串格式，直接解析
                     var sHexString = sJsonData;
                     byte[] dataBytes = HexStringToBytes(sJsonData);
+
+                    // 檢查 HexStringToBytes 是否回傳 null
+                    if (dataBytes == null)
+                    {
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, $"HexStringToBytes 轉換失敗，資料為 null: {sJsonData}");
+                        return -1;
+                    }
+
                     if (dataBytes.Length >= 10) // 確保有足夠長度的陣列
                     {
                         ProcessDataBytes(dataBytes);
@@ -283,18 +297,28 @@ namespace ASI.Wanda.DCU.TaskPUP
             }
             var text = string.Format("{0} \r\n收到收包內容 {1} \r\n", sRcvTime, str);
             var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
-            if (dataBytes.Length >= 3 && dataBytes[4] == 0x00)
+
+            // 檢查陣列長度，存取 dataBytes[4] 需要至少 5 個元素
+            if (dataBytes.Length >= 5)
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName, _mProcName + "顯示器的狀態收到的訊息" + sHexString.ToString());  //處理顯示器回報的狀態
+                if (dataBytes[4] == 0x00)
+                {
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, _mProcName + "顯示器的狀態收到的訊息" + sHexString.ToString());  //處理顯示器回報的狀態
+                }
+                else
+                {
+                    if (dataBytes[4] == 0x01) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "曾經有通訊不良"); }
+                    else if (dataBytes[4] == 0x02) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "處於關機狀態 "); }
+                    else if (dataBytes[4] == 0x04) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "通訊逾時"); }
+                    else if (dataBytes[4] == 0x07) { ASI.Lib.Log.ErrorLog.Log(_mProcName, " 1/2/4 多重組合 "); }
+                }
             }
-            else if (dataBytes[4] != 0x00)
+            else
             {
-                if (dataBytes[4] == 0x01) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "曾經有通訊不良"); }
-                else if (dataBytes[4] == 0x02) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "處於關機狀態 "); }
-                else if (dataBytes[4] == 0x04) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "通訊逾時"); }
-                else if (dataBytes[4] == 0x07) { ASI.Lib.Log.ErrorLog.Log(_mProcName, " 1/2/4 多重組合 "); }
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從顯示器收到的訊息長度不足 (長度={dataBytes.Length}): {sHexString.ToString()}");
             }
-            ASI.Lib.Log.ErrorLog.Log(_mProcName, "從顯示器收到的訊息" + sHexString.ToString());//log紀錄 
+
+            ASI.Lib.Log.ErrorLog.Log(_mProcName, "從顯示器收到的訊息" + sHexString.ToString());//log紀錄
         }
         #endregion
         /// <summary> 
@@ -333,7 +357,7 @@ namespace ASI.Wanda.DCU.TaskPUP
                 MSGFromTaskPUP.MessageID = msgID;
                 MSGFromTaskPUP.JsonData = ContentDataBytes;
                 ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPUP);
-                 
+                
                 // 假設 contentDataBytes 需要序列化為十六進制字符串 
                 string serializedContent = ASI.Lib.Text.Parsing.Json.SerializeObject(ContentDataBytes);
                 var msg = new ASI.Wanda.DCU.Message.Message(ASI.Wanda.DCU.Message.Message.eMessageType.Command, 01, serializedContent);
@@ -367,20 +391,19 @@ namespace ASI.Wanda.DCU.TaskPUP
         private void ProcessDataBytes(byte[] dataBytes)
         {
             byte dataByteAtIndex8 = dataBytes[8];
-            var taskPUPHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, _mSerial);
             switch (dataByteAtIndex8)
             {
                 case 0x81:
-                    taskPUPHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
+                    _taskPUPHelper.SendMessageToUrgnt(sCheckChinese, sCheckEnglish, 81);
                     break;
                 case 0x82:
-                    taskPUPHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
+                    _taskPUPHelper.SendMessageToUrgnt(sEmergencyChinese, sEmergencyEnglish, 82);
                     break;
                 case 0x83:
-                    taskPUPHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
+                    _taskPUPHelper.SendMessageToUrgnt(sClearedChinese, sClearedEnglish, 83);
                     break;
                 case 0x84:
-                    taskPUPHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
+                    _taskPUPHelper.SendMessageToUrgnt(sDetectorChinese, sDetectorEnglish, 84);
                     break;
                 default:
                     ASI.Lib.Log.DebugLog.Log(_mProcName + " ", $"{_mProcName} unknown byte value at index 9: {dataByteAtIndex8.ToString("X2")}");
@@ -423,20 +446,29 @@ namespace ASI.Wanda.DCU.TaskPUP
         {
             ASI.Lib.Log.DebugLog.Log($"{_mProcName} processing 0x15 case", sJsonData);
             string errorLog;
-            switch (dataBytes[4])
+
+            // 檢查陣列長度，存取 dataBytes[4] 需要至少 5 個元素
+            if (dataBytes.Length >= 5)
             {
-                case 0x01:
-                    errorLog = "Indicates packet data length error";
-                    break;
-                case 0x02:
-                    errorLog = "Indicates LRC error";
-                    break;
-                case 0x03:
-                    errorLog = "Indicates other errors";
-                    break;
-                default:
-                    errorLog = "Indicates unknown error";
-                    break;
+                switch (dataBytes[4])
+                {
+                    case 0x01:
+                        errorLog = "Indicates packet data length error";
+                        break;
+                    case 0x02:
+                        errorLog = "Indicates LRC error";
+                        break;
+                    case 0x03:
+                        errorLog = "Indicates other errors";
+                        break;
+                    default:
+                        errorLog = "Indicates unknown error";
+                        break;
+                }
+            }
+            else
+            {
+                errorLog = $"Indicates error but dataBytes length insufficient (length={dataBytes.Length})";
             }
 
             ASI.Lib.Log.DebugLog.Log($"{_mProcName} received an error message from TaskPA: {errorLog} at {sRcvTime}", sJsonData);
@@ -461,7 +493,7 @@ namespace ASI.Wanda.DCU.TaskPUP
                 {
                     throw new ArgumentException("十六進位字串的長度必須是偶數");
                 }
-                // 確保所有字符都是有效的十六進位字符
+                // 確保所有字符都是有效的十六進位字符 
                 foreach (char c in hex)
                 {
                     if (!Uri.IsHexDigit(c))
@@ -470,8 +502,9 @@ namespace ASI.Wanda.DCU.TaskPUP
                     }
                 }
 
-                // 創建一個字節陣列，長度為字串長度的一半
-                byte[] bytes = new byte[hex.Length / 2];
+                // 創建一個字節陣列，長度為字串長度的一半 
+                byte[] bytes = new byte[hex.Length / 2]; 
+
 
                 // 循環遍歷十六進位字串，將每對十六進位字符轉換為一個字節
                 for (int i = 0; i < hex.Length; i += 2)

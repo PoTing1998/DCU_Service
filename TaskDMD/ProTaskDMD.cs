@@ -340,7 +340,7 @@ namespace ASI.Wanda.DCU.TaskDMD
         private void HandleCommandMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, string sByteArray, string sJsonData, string sJsonObjectName, int iMsgID)
         {
             string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
-            ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
+            ASI.Lib.Log.DebugLog.Log("ProTaskDMD_FromDMD_server", $"{sLog}\r\n");
 
             // 根據 JsonObjectName 處理不同的訊息類型       
             switch (sJsonObjectName)
