@@ -47,6 +47,8 @@ namespace UITest
             InitializeComponent();
             Console.WriteLine();
             LoadDatabaseSettings(); // 定義在 Form1.Database.cs
+            InitializePacketValidator(); // 定義在 Form1.PacketValidator.cs
+            InitializePacketBuilder(); // 定義在 Form1.PacketBuilder.cs
         }
 
         #endregion
@@ -66,21 +68,27 @@ namespace UITest
         //   - btnLoadDevicesFromDB_Click() - 從資料庫載入設備
         //   - ProcessMessageColor()
         //
-        // Form1.PacketBuilder.cs:
-        //   - button1_Click() - 建立 StringBody
-        //   - button2_Click_1() - 建立 StringMessage
-        //   - button3_Click() - 建立 FullWindow
-        //   - button4_Click() - 建立 Sequence
-        //   - button5_Click() - 建立 Packet
-        //   - btnClearPacketOutput_Click() - 清除輸出
-        //   - ExtractValue(), ValidateStringText(), ValidateStringMessage()
-        //   - ValidateStringBody(), ValidateMessageScroll(), ValidateMessageLevel()
-        //   - ValidateMessageFont()
+        // Form1.PacketBuilder.cs: (優化版)
+        //   - InitializePacketBuilder() - 初始化並載入預設範例
+        //   - GenerateFullPacketOneClick() - 一鍵生成完整封包
+        //   - CreateStringBodyInternal() - 內部建立 StringBody
+        //   - CreateStringMessageInternal() - 內部建立 StringMessage
+        //   - CreateFullWindowInternal() - 內部建立 FullWindow
+        //   - CreateSequenceInternal() - 內部建立 Sequence
+        //   - CreatePacketInternal() - 內部建立 Packet
+        //   - button1_Click() ~ button5_Click() - 分步建立（優化版）
+        //   - btnClearPacketOutput_Click() - 清除並重置
+        //   - ExtractValue() - 改進的值提取（支持多種格式）
+        //   - FormatHexOutput(), FormatPacketOutput() - 格式化輸出
+        //   - Validate*() - 各種驗證方法
         //
         // Form1.PacketValidator.cs:
-        //   - Version1BT_Click() 到 Version8BT_Click() - 8個版本的封包驗證
+        //   - InitializePacketValidator() - 初始化封包驗證器
+        //   - cmbPacketType_SelectedIndexChanged() - 封包類型選擇變更
+        //   - btnLoadSample_Click() - 載入範例封包
+        //   - btnValidatePacket_Click() - 驗證封包
         //   - ClearBT_Click() - 清除驗證結果
-        //   - ConvertHexStringToByteArray()
-        //   - UpdateValidationResult()
+        //   - ConvertHexStringToByteArray() - 十六進制轉換
+        //   - DisplayValidationResult() - 顯示驗證結果
     }
 }

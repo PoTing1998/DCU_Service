@@ -31,7 +31,7 @@ namespace ASI.Wanda.DCU.TaskPUP
     public class ProcTaskPUP : ProcBase
     {
         #region constructor
-        static int mSEQ = 0; // 計算累進發送端的次數  
+        static int mSEQ = 0; // 計算累進發送端的次數
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
         /// <summary>
         /// 讀取火災資料
@@ -46,6 +46,9 @@ namespace ASI.Wanda.DCU.TaskPUP
         static string sDetectorEnglish = ConfigApp.Instance.GetConfigSetting("FireDetectorClearConfirmedEnglish");
         static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         TaskPUPHelper _taskPUPHelper = null;  // 改為成員變數，只建立一次
+
+        // 電源設定定時器 - 每分鐘檢查是否需要開關顯示器
+        private System.Timers.Timer _powerSettingTimer = null;
         #endregion
 
         #region MSMQ Method
@@ -132,6 +135,23 @@ namespace ASI.Wanda.DCU.TaskPUP
                 _taskPUPHelper = new ASI.Wanda.DCU.TaskPUP.TaskPUPHelper(_mProcName, _mSerial, Station_ID);
                 ASI.Lib.Log.DebugLog.Log(_mProcName,
                     $"TaskPUP 啟動成功，管理設備: {string.Join(", ", _taskPUPHelper.GetManagedDevices())}");
+
+                // 5. 啟動電源設定定時器（每分鐘檢查一次）
+                _powerSettingTimer = new System.Timers.Timer(60000); // 60秒 = 1分鐘
+                _powerSettingTimer.Elapsed += (sender, e) =>
+                {
+                    try
+                    {
+                        _taskPUPHelper.CheckAndExecutePowerSetting(Station_ID);
+                    }
+                    catch (Exception ex)
+                    {
+                        ASI.Lib.Log.ErrorLog.Log(_mProcName, $"電源設定定時器執行錯誤: {ex.Message}");
+                    }
+                };
+                _powerSettingTimer.AutoReset = true; // 自動重複
+                _powerSettingTimer.Start();
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "電源設定定時器已啟動（每分鐘檢查一次）");
             }
             catch (System.Exception ex)
             {
@@ -142,6 +162,37 @@ namespace ASI.Wanda.DCU.TaskPUP
             return base.StartTask(pComputer, pProcName);
         }
 
+        /// <summary>
+        /// 停止 TaskPUP 任務，釋放資源
+        /// </summary>
+        public override void StopTask()
+        {
+            try
+            {
+                // 停止電源設定定時器
+                if (_powerSettingTimer != null)
+                {
+                    _powerSettingTimer.Stop();
+                    _powerSettingTimer.Dispose();
+                    _powerSettingTimer = null;
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, "電源設定定時器已停止");
+                }
+
+                // 關閉序列埠
+                if (_mSerial != null)
+                {
+                    _mSerial.Close();
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, "序列埠已關閉");
+                }
+            }
+            catch (Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"停止任務時發生錯誤: {ex.Message}");
+            }
+
+            // 呼叫基底類別的停止方法
+            base.StopTask();
+        }
 
         /// <summary>
         /// 處理來自 DMD 的訊息（可能直接來自 TaskDMD 或經由 TaskDCU 轉發）
@@ -379,7 +430,7 @@ namespace ASI.Wanda.DCU.TaskPUP
         private byte CalculateLRC(byte[] text)
         {
             byte xor = 0;
-            // if no data then done   
+            // if no data then done    
             if (text.Length <= 0)
                 return 0;
             // incorporate remaining bytes into the value  

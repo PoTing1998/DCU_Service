@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Display.DisplayMode
 {
-    public class trainDynamic
+    public class trainDynamic : IMessage
     {
 
         public byte MessageType { get; set; }

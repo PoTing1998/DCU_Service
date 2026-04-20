@@ -39,6 +39,10 @@ namespace ASI.Wanda.DCU.TaskPUP
         private string _currentDeviceId;       // 當前操作的設備
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
 
+        // 電源狀態追蹤 - 避免重複發送相同命令
+        private bool _isDisplayPowerOn = true;  // 預設顯示器為開啟狀態
+        private DateTime? _lastPowerSettingCheck = null;  // 最後檢查時間
+
         public TaskPUPHelper(string mProcName, ASI.Lib.Comm.SerialPort.SerialPortLib serial, string stationId = null)
         {
             _mProcName = mProcName;
@@ -499,30 +503,41 @@ namespace ASI.Wanda.DCU.TaskPUP
 
             // 返回中文、英文和關閉訊息的序列化數據（供日誌或測試使用） 
             return Tuple.Create(serializedDataChinese, serializedDataEnglish, serializedDataOff);
+            
         }
         /// <summary>
-        /// 找尋車站Id並且判斷是否需要開關顯示器（節能模式）
+        /// 定時檢查並執行電源設定（節能模式）- 由定時器每分鐘調用一次
         /// </summary>
         /// <param name="stationID">車站ID</param>
-        /// <returns></returns>
-        public dmdPowerSetting PowerSetting(string stationID)
+        public void CheckAndExecutePowerSetting(string stationID)
         {
             try
             {
-                //從資料庫讀取資料
+                DateTime now = DateTime.Now;
+
+                // 記錄檢查時間
+                _lastPowerSettingCheck = now;
+
+                // 從資料庫讀取資料
                 var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
 
-                if (stationData.eco_mode != "on")
+                if (stationData == null || stationData.eco_mode != "on")
                 {
-                    ASI.Lib.Log.DebugLog.Log("PowerSetting", "目前沒有開啟節能模式");
-                    return null;
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, "節能模式未啟用或無設定資料");
+                    // 確保顯示器保持開啟狀態
+                    if (!_isDisplayPowerOn)
+                    {
+                        PowerSettingOpen();
+                        _isDisplayPowerOn = true;
+                    }
+                    return;
                 }
 
                 // 獲取當前日期和時間
-                int currentMonth = DateTime.Now.Month;
-                int currentDay = DateTime.Now.Day;
-                int currentHour = DateTime.Now.Hour;
-                int currentMinute = DateTime.Now.Minute;
+                int currentMonth = now.Month;
+                int currentDay = now.Day;
+                int currentHour = now.Hour;
+                int currentMinute = now.Minute;
 
                 // 解析不啟動節能模式的日期列表
                 string[] notEcoDays = stationData.not_eco_day.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -530,11 +545,7 @@ namespace ASI.Wanda.DCU.TaskPUP
 
                 foreach (string day in notEcoDays)
                 {
-                    if (day.Length != 4)
-                    {
-                        ASI.Lib.Log.DebugLog.Log("PowerSetting", $"無效的日期格式：{day}");
-                        continue;
-                    }
+                    if (day.Length != 4) continue;
 
                     int month = int.Parse(day.Substring(0, 2));
                     int dayOfMonth = int.Parse(day.Substring(2, 2));
@@ -543,15 +554,21 @@ namespace ASI.Wanda.DCU.TaskPUP
                     if (month == currentMonth && dayOfMonth == currentDay)
                     {
                         isNonEcoDay = true;
-                        ASI.Lib.Log.DebugLog.Log("PowerSetting", $"今天 {currentMonth:D2}/{currentDay:D2} 是不啟動節能模式的日期");
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"今天 {currentMonth:D2}/{currentDay:D2} 是不啟動節能模式的日期");
                         break;
                     }
                 }
 
-                // 如果今天是不啟動節能模式的日期，直接返回
+                // 如果今天是不啟動節能模式的日期，確保顯示器開啟
                 if (isNonEcoDay)
                 {
-                    return null;
+                    if (!_isDisplayPowerOn)
+                    {
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, "非節能日期，確保顯示器開啟");
+                        PowerSettingOpen();
+                        _isDisplayPowerOn = true;
+                    }
+                    return;
                 }
 
                 // 解析自動播放和節能時間
@@ -560,8 +577,8 @@ namespace ASI.Wanda.DCU.TaskPUP
 
                 if (autoPlayTimes.Length != 1 || autoEcoTimes.Length != 1)
                 {
-                    ASI.Lib.Log.DebugLog.Log("PowerSetting", "時間設定格式錯誤");
-                    return null;
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, "時間設定格式錯誤");
+                    return;
                 }
 
                 // 解析時間字串
@@ -573,28 +590,40 @@ namespace ASI.Wanda.DCU.TaskPUP
                 // 判斷當前時間是否為自動播放時間（開啟顯示器）
                 if (currentHour == autoPlayHour && currentMinute == autoPlayMinute)
                 {
-                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"到達自動播放時間 {autoPlayHour:D2}:{autoPlayMinute:D2}，開啟顯示器");
-                    PowerSettingOpen();
+                    // 只在狀態改變時才發送命令
+                    if (!_isDisplayPowerOn)
+                    {
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"到達自動播放時間 {autoPlayHour:D2}:{autoPlayMinute:D2}，開啟顯示器");
+                        PowerSettingOpen();
+                        _isDisplayPowerOn = true;
+                    }
                 }
                 // 判斷當前時間是否為節能模式時間（關閉顯示器）
                 else if (currentHour == autoEcoHour && currentMinute == autoEcoMinute)
                 {
-                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"到達節能模式時間 {autoEcoHour:D2}:{autoEcoMinute:D2}，關閉顯示器");
-                    PowerSettingOff();
+                    // 只在狀態改變時才發送命令
+                    if (_isDisplayPowerOn)
+                    {
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"到達節能模式時間 {autoEcoHour:D2}:{autoEcoMinute:D2}，關閉顯示器");
+                        PowerSettingOff();
+                        _isDisplayPowerOn = false;
+                    }
                 }
-                else
-                {
-                    ASI.Lib.Log.DebugLog.Log(_mProcName, "當前時間不在自動播放或節能模式時間範圍內");
-                }
-
-                return null;
             }
             catch (Exception ex)
             {
-                // 加入詳細的錯誤信息
-                ASI.Lib.Log.ErrorLog.Log($"Error ProcessMessage PowerSetting: {ex.Message}\nStack Trace: {ex.StackTrace}", ex);
-                return null;
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"電源設定檢查錯誤: {ex.Message}\n{ex.StackTrace}");
             }
+        }
+
+        /// <summary>
+        /// 舊版 PowerSetting 方法 - 保留供 MSMQ 消息觸發使用（已棄用，建議使用定時器方式）
+        /// </summary>
+        [Obsolete("此方法已改為由定時器主動調用 CheckAndExecutePowerSetting()，不建議通過 MSMQ 被動觸發")]
+        public dmdPowerSetting PowerSetting(string stationID)
+        {
+            CheckAndExecutePowerSetting(stationID);
+            return null;
         }
         #endregion
         Display.Sequence CreateSequence(string messageContent, int sequenceNo)
@@ -642,7 +671,7 @@ namespace ASI.Wanda.DCU.TaskPUP
                 ASI.Lib.Log.ErrorLog.Log(_mProcName, $"設備 {effectiveDeviceId} 不由此 Task 管理");
                 return;
             }
-
+            
             var startCode = new byte[] { 0x55, 0xAA };
             var processor = new PacketProcessor();
             var function = new PowerControlHandler();

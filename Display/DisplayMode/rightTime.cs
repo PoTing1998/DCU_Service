@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Display.DisplayMode
 {
-    public class rightTime
+    public class rightTime : IMessage
     {
 
         public byte MessageType { get; set; }

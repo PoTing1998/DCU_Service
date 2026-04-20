@@ -1,0 +1,52 @@
+// =========================================
+// 添加到 Form1.Designer.cs 文件末尾的字段声明部分（第1188行之前）
+// =========================================
+
+// Message Sender Tab
+private System.Windows.Forms.TabPage tabMessageSender;
+private System.Windows.Forms.GroupBox grpMessageType;
+private System.Windows.Forms.RadioButton rbPreRecordMessage;
+private System.Windows.Forms.RadioButton rbInstantMessage;
+private System.Windows.Forms.GroupBox grpMessageContent;
+private System.Windows.Forms.Label lblMessageName;
+private System.Windows.Forms.TextBox txtMessageName;
+private System.Windows.Forms.Label lblMessageContentCHN;
+private System.Windows.Forms.TextBox txtMessageContentCHN;
+private System.Windows.Forms.Label lblMessageContentENG;
+private System.Windows.Forms.TextBox txtMessageContentENG;
+private System.Windows.Forms.GroupBox grpMessageSettings;
+private System.Windows.Forms.Label lblFontTypeCHN;
+private System.Windows.Forms.TextBox txtFontTypeCHN;
+private System.Windows.Forms.Label lblFontSizeCHN;
+private System.Windows.Forms.TextBox txtFontSizeCHN;
+private System.Windows.Forms.Label lblFontColorCHN;
+private System.Windows.Forms.TextBox txtFontColorCHN;
+private System.Windows.Forms.Label lblFontTypeENG;
+private System.Windows.Forms.TextBox txtFontTypeENG;
+private System.Windows.Forms.Label lblFontSizeENG;
+private System.Windows.Forms.TextBox txtFontSizeENG;
+private System.Windows.Forms.Label lblFontColorENG;
+private System.Windows.Forms.TextBox txtFontColorENG;
+private System.Windows.Forms.Label lblMoveMode;
+private System.Windows.Forms.TextBox txtMoveMode;
+private System.Windows.Forms.Label lblMoveSpeed;
+private System.Windows.Forms.NumericUpDown numMoveSpeed;
+private System.Windows.Forms.Label lblMessagePriority;
+private System.Windows.Forms.NumericUpDown numMessagePriority;
+private System.Windows.Forms.Label lblInterval;
+private System.Windows.Forms.TextBox txtInterval;
+private System.Windows.Forms.GroupBox grpTargetDevice;
+private System.Windows.Forms.Label lblTargetDevice;
+private System.Windows.Forms.ComboBox cboTargetDevice;
+private System.Windows.Forms.TextBox txtTargetDevice;
+private System.Windows.Forms.Button btnLoadDevicesForMessage;
+private System.Windows.Forms.GroupBox grpMessageActions;
+private System.Windows.Forms.Button btnSendTestMessage;
+private System.Windows.Forms.Button btnClearMessageResult;
+private System.Windows.Forms.GroupBox grpMessageResult;
+private System.Windows.Forms.TextBox txtMessageSendResult;
+
+// =========================================
+// 提示：建议使用 Visual Studio 设计器添加控件
+// 如果需要手动添加，请参考现有 TabPage 的初始化代码结构
+// =========================================

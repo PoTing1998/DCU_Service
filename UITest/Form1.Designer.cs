@@ -34,11 +34,7 @@ namespace UITest
             this.btnClearPacketOutput = new System.Windows.Forms.Button();
             this.txtPacketOutput = new System.Windows.Forms.TextBox();
             this.grpPacketBuilder = new System.Windows.Forms.GroupBox();
-            this.btnCreatePacket = new System.Windows.Forms.Button();
-            this.btnCreateSequence = new System.Windows.Forms.Button();
-            this.btnCreateFullWindow = new System.Windows.Forms.Button();
-            this.btnCreateStringMessage = new System.Windows.Forms.Button();
-            this.btnCreateStringBody = new System.Windows.Forms.Button();
+            this.btnGeneratePacket = new System.Windows.Forms.Button();
             this.grpMessageInput = new System.Windows.Forms.GroupBox();
             this.txtMessageInput = new System.Windows.Forms.TextBox();
             this.lblMessageInput = new System.Windows.Forms.Label();
@@ -46,38 +42,14 @@ namespace UITest
             this.grpValidationResult = new System.Windows.Forms.GroupBox();
             this.btnClearResult = new System.Windows.Forms.Button();
             this.txtValidationResult = new System.Windows.Forms.TextBox();
-            this.grpVersion8 = new System.Windows.Forms.GroupBox();
-            this.btnValidateVersion8 = new System.Windows.Forms.Button();
-            this.txtVersion8Input = new System.Windows.Forms.TextBox();
-            this.lblVersion8 = new System.Windows.Forms.Label();
-            this.grpVersion7 = new System.Windows.Forms.GroupBox();
-            this.btnValidateVersion7 = new System.Windows.Forms.Button();
-            this.txtVersion7Input = new System.Windows.Forms.TextBox();
-            this.lblVersion7 = new System.Windows.Forms.Label();
-            this.grpVersion6 = new System.Windows.Forms.GroupBox();
-            this.btnValidateVersion6 = new System.Windows.Forms.Button();
-            this.txtVersion6Input = new System.Windows.Forms.TextBox();
-            this.lblVersion6 = new System.Windows.Forms.Label();
-            this.grpVersion5 = new System.Windows.Forms.GroupBox();
-            this.btnValidateVersion5 = new System.Windows.Forms.Button();
-            this.txtVersion5Input = new System.Windows.Forms.TextBox();
-            this.lblVersion5 = new System.Windows.Forms.Label();
-            this.grpVersion4 = new System.Windows.Forms.GroupBox();
-            this.btnValidateVersion4 = new System.Windows.Forms.Button();
-            this.txtVersion4Input = new System.Windows.Forms.TextBox();
-            this.lblVersion4 = new System.Windows.Forms.Label();
-            this.grpVersion3 = new System.Windows.Forms.GroupBox();
-            this.btnValidateVersion3 = new System.Windows.Forms.Button();
-            this.txtVersion3Input = new System.Windows.Forms.TextBox();
-            this.lblVersion3 = new System.Windows.Forms.Label();
-            this.grpVersion2 = new System.Windows.Forms.GroupBox();
-            this.btnValidateVersion2 = new System.Windows.Forms.Button();
-            this.txtVersion2Input = new System.Windows.Forms.TextBox();
-            this.lblVersion2 = new System.Windows.Forms.Label();
-            this.grpVersion1 = new System.Windows.Forms.GroupBox();
-            this.btnValidateVersion1 = new System.Windows.Forms.Button();
-            this.txtVersion1Input = new System.Windows.Forms.TextBox();
-            this.lblVersion1 = new System.Windows.Forms.Label();
+            this.grpPacketInput = new System.Windows.Forms.GroupBox();
+            this.lblPacketType = new System.Windows.Forms.Label();
+            this.cmbPacketType = new System.Windows.Forms.ComboBox();
+            this.lblPacketInput = new System.Windows.Forms.Label();
+            this.txtPacketInput = new System.Windows.Forms.TextBox();
+            this.btnLoadSample = new System.Windows.Forms.Button();
+            this.btnValidatePacket = new System.Windows.Forms.Button();
+            this.lblSampleDescription = new System.Windows.Forms.Label();
             this.tabTools = new System.Windows.Forms.TabPage();
             this.grpColorConversion = new System.Windows.Forms.GroupBox();
             this.txtColorOutput = new System.Windows.Forms.TextBox();
@@ -116,6 +88,26 @@ namespace UITest
             this.txtDbStatus = new System.Windows.Forms.TextBox();
             this.txtDbConnectionString = new System.Windows.Forms.TextBox();
             this.lblDbConnectionString = new System.Windows.Forms.Label();
+            this.grpMessageSender = new System.Windows.Forms.GroupBox();
+            this.grpTableBrowser = new System.Windows.Forms.GroupBox();
+            this.lblTableName = new System.Windows.Forms.Label();
+            this.cmbTables = new System.Windows.Forms.ComboBox();
+            this.btnLoadTables = new System.Windows.Forms.Button();
+            this.lblTableFilter = new System.Windows.Forms.Label();
+            this.txtTableFilter = new System.Windows.Forms.TextBox();
+            this.btnQueryTable = new System.Windows.Forms.Button();
+            this.btnClearTableData = new System.Windows.Forms.Button();
+            this.lblRowCount = new System.Windows.Forms.Label();
+            this.dgvTableData = new System.Windows.Forms.DataGridView();
+            this.txtSimpleResult = new System.Windows.Forms.TextBox();
+            this.btnSimpleClearResult = new System.Windows.Forms.Button();
+            this.btnSimpleUseDefaults = new System.Windows.Forms.Button();
+            this.btnSimpleSendMessage = new System.Windows.Forms.Button();
+            this.chkSimpleInstantMessage = new System.Windows.Forms.CheckBox();
+            this.txtSimpleTargetDevice = new System.Windows.Forms.TextBox();
+            this.lblSimpleTargetDevice = new System.Windows.Forms.Label();
+            this.txtSimpleMessageText = new System.Windows.Forms.TextBox();
+            this.lblSimpleMessageText = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPacketBuilder.SuspendLayout();
             this.grpPacketOutput.SuspendLayout();
@@ -123,14 +115,7 @@ namespace UITest
             this.grpMessageInput.SuspendLayout();
             this.tabPacketValidator.SuspendLayout();
             this.grpValidationResult.SuspendLayout();
-            this.grpVersion8.SuspendLayout();
-            this.grpVersion7.SuspendLayout();
-            this.grpVersion6.SuspendLayout();
-            this.grpVersion5.SuspendLayout();
-            this.grpVersion4.SuspendLayout();
-            this.grpVersion3.SuspendLayout();
-            this.grpVersion2.SuspendLayout();
-            this.grpVersion1.SuspendLayout();
+            this.grpPacketInput.SuspendLayout();
             this.tabTools.SuspendLayout();
             this.grpColorConversion.SuspendLayout();
             this.grpDeviceCheck.SuspendLayout();
@@ -138,6 +123,9 @@ namespace UITest
             this.tabDatabaseSettings.SuspendLayout();
             this.grpDatabaseConnection.SuspendLayout();
             this.grpCurrentConnectionString.SuspendLayout();
+            this.grpMessageSender.SuspendLayout();
+            this.grpTableBrowser.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvTableData)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -197,68 +185,25 @@ namespace UITest
             this.txtPacketOutput.TabIndex = 0;
             // 
             // grpPacketBuilder
-            // 
-            this.grpPacketBuilder.Controls.Add(this.btnCreatePacket);
-            this.grpPacketBuilder.Controls.Add(this.btnCreateSequence);
-            this.grpPacketBuilder.Controls.Add(this.btnCreateFullWindow);
-            this.grpPacketBuilder.Controls.Add(this.btnCreateStringMessage);
-            this.grpPacketBuilder.Controls.Add(this.btnCreateStringBody);
+            //
+            this.grpPacketBuilder.Controls.Add(this.btnGeneratePacket);
             this.grpPacketBuilder.Location = new System.Drawing.Point(400, 20);
             this.grpPacketBuilder.Name = "grpPacketBuilder";
             this.grpPacketBuilder.Size = new System.Drawing.Size(200, 240);
             this.grpPacketBuilder.TabIndex = 1;
             this.grpPacketBuilder.TabStop = false;
-            this.grpPacketBuilder.Text = "封包建立步驟";
-            // 
-            // btnCreatePacket
-            // 
-            this.btnCreatePacket.Location = new System.Drawing.Point(20, 200);
-            this.btnCreatePacket.Name = "btnCreatePacket";
-            this.btnCreatePacket.Size = new System.Drawing.Size(160, 30);
-            this.btnCreatePacket.TabIndex = 4;
-            this.btnCreatePacket.Text = "5. 建立 Packet";
-            this.btnCreatePacket.UseVisualStyleBackColor = true;
-            this.btnCreatePacket.Click += new System.EventHandler(this.button5_Click);
-            // 
-            // btnCreateSequence
-            // 
-            this.btnCreateSequence.Location = new System.Drawing.Point(20, 158);
-            this.btnCreateSequence.Name = "btnCreateSequence";
-            this.btnCreateSequence.Size = new System.Drawing.Size(160, 30);
-            this.btnCreateSequence.TabIndex = 3;
-            this.btnCreateSequence.Text = "4. 建立 Sequence";
-            this.btnCreateSequence.UseVisualStyleBackColor = true;
-            this.btnCreateSequence.Click += new System.EventHandler(this.button4_Click);
-            // 
-            // btnCreateFullWindow
-            // 
-            this.btnCreateFullWindow.Location = new System.Drawing.Point(20, 116);
-            this.btnCreateFullWindow.Name = "btnCreateFullWindow";
-            this.btnCreateFullWindow.Size = new System.Drawing.Size(160, 30);
-            this.btnCreateFullWindow.TabIndex = 2;
-            this.btnCreateFullWindow.Text = "3. 建立 FullWindow";
-            this.btnCreateFullWindow.UseVisualStyleBackColor = true;
-            this.btnCreateFullWindow.Click += new System.EventHandler(this.button3_Click);
-            // 
-            // btnCreateStringMessage
-            // 
-            this.btnCreateStringMessage.Location = new System.Drawing.Point(20, 74);
-            this.btnCreateStringMessage.Name = "btnCreateStringMessage";
-            this.btnCreateStringMessage.Size = new System.Drawing.Size(160, 30);
-            this.btnCreateStringMessage.TabIndex = 1;
-            this.btnCreateStringMessage.Text = "2. 建立 StringMessage";
-            this.btnCreateStringMessage.UseVisualStyleBackColor = true;
-            this.btnCreateStringMessage.Click += new System.EventHandler(this.button2_Click_1);
-            // 
-            // btnCreateStringBody
-            // 
-            this.btnCreateStringBody.Location = new System.Drawing.Point(20, 32);
-            this.btnCreateStringBody.Name = "btnCreateStringBody";
-            this.btnCreateStringBody.Size = new System.Drawing.Size(160, 30);
-            this.btnCreateStringBody.TabIndex = 0;
-            this.btnCreateStringBody.Text = "1. 建立 StringBody";
-            this.btnCreateStringBody.UseVisualStyleBackColor = true;
-            this.btnCreateStringBody.Click += new System.EventHandler(this.button1_Click);
+            this.grpPacketBuilder.Text = "封包生成";
+            //
+            // btnGeneratePacket
+            //
+            this.btnGeneratePacket.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnGeneratePacket.Location = new System.Drawing.Point(20, 80);
+            this.btnGeneratePacket.Name = "btnGeneratePacket";
+            this.btnGeneratePacket.Size = new System.Drawing.Size(160, 80);
+            this.btnGeneratePacket.TabIndex = 0;
+            this.btnGeneratePacket.Text = "一鍵生成\r\n完整封包";
+            this.btnGeneratePacket.UseVisualStyleBackColor = true;
+            this.btnGeneratePacket.Click += new System.EventHandler(this.btnGeneratePacket_Click);
             // 
             // grpMessageInput
             // 
@@ -289,17 +234,9 @@ namespace UITest
             this.lblMessageInput.Text = "請輸入訊息 (格式: 字體顏色 : xxx\\r\\n字體內容 : xxx)";
             // 
             // tabPacketValidator
-            // 
-            this.tabPacketValidator.AutoScroll = true;
+            //
             this.tabPacketValidator.Controls.Add(this.grpValidationResult);
-            this.tabPacketValidator.Controls.Add(this.grpVersion8);
-            this.tabPacketValidator.Controls.Add(this.grpVersion7);
-            this.tabPacketValidator.Controls.Add(this.grpVersion6);
-            this.tabPacketValidator.Controls.Add(this.grpVersion5);
-            this.tabPacketValidator.Controls.Add(this.grpVersion4);
-            this.tabPacketValidator.Controls.Add(this.grpVersion3);
-            this.tabPacketValidator.Controls.Add(this.grpVersion2);
-            this.tabPacketValidator.Controls.Add(this.grpVersion1);
+            this.tabPacketValidator.Controls.Add(this.grpPacketInput);
             this.tabPacketValidator.Location = new System.Drawing.Point(4, 22);
             this.tabPacketValidator.Name = "tabPacketValidator";
             this.tabPacketValidator.Padding = new System.Windows.Forms.Padding(3);
@@ -309,363 +246,122 @@ namespace UITest
             this.tabPacketValidator.UseVisualStyleBackColor = true;
             // 
             // grpValidationResult
-            // 
+            //
             this.grpValidationResult.Controls.Add(this.btnClearResult);
             this.grpValidationResult.Controls.Add(this.txtValidationResult);
-            this.grpValidationResult.Location = new System.Drawing.Point(750, 20);
+            this.grpValidationResult.Location = new System.Drawing.Point(20, 260);
             this.grpValidationResult.Name = "grpValidationResult";
-            this.grpValidationResult.Size = new System.Drawing.Size(300, 850);
-            this.grpValidationResult.TabIndex = 8;
+            this.grpValidationResult.Size = new System.Drawing.Size(1030, 450);
+            this.grpValidationResult.TabIndex = 1;
             this.grpValidationResult.TabStop = false;
             this.grpValidationResult.Text = "驗證結果";
-            // 
+            //
             // btnClearResult
-            // 
-            this.btnClearResult.Location = new System.Drawing.Point(20, 30);
+            //
+            this.btnClearResult.Location = new System.Drawing.Point(20, 25);
             this.btnClearResult.Name = "btnClearResult";
-            this.btnClearResult.Size = new System.Drawing.Size(260, 30);
+            this.btnClearResult.Size = new System.Drawing.Size(120, 35);
             this.btnClearResult.TabIndex = 1;
             this.btnClearResult.Text = "清除結果";
             this.btnClearResult.UseVisualStyleBackColor = true;
             this.btnClearResult.Click += new System.EventHandler(this.ClearBT_Click);
-            // 
+            //
             // txtValidationResult
-            // 
+            //
+            this.txtValidationResult.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtValidationResult.Location = new System.Drawing.Point(20, 70);
             this.txtValidationResult.Multiline = true;
             this.txtValidationResult.Name = "txtValidationResult";
+            this.txtValidationResult.ReadOnly = true;
             this.txtValidationResult.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtValidationResult.Size = new System.Drawing.Size(260, 760);
+            this.txtValidationResult.Size = new System.Drawing.Size(990, 360);
             this.txtValidationResult.TabIndex = 0;
             // 
-            // grpVersion8
-            // 
-            this.grpVersion8.Controls.Add(this.btnValidateVersion8);
-            this.grpVersion8.Controls.Add(this.txtVersion8Input);
-            this.grpVersion8.Controls.Add(this.lblVersion8);
-            this.grpVersion8.Location = new System.Drawing.Point(380, 396);
-            this.grpVersion8.Name = "grpVersion8";
-            this.grpVersion8.Size = new System.Drawing.Size(350, 110);
-            this.grpVersion8.TabIndex = 7;
-            this.grpVersion8.TabStop = false;
-            this.grpVersion8.Text = "版本8";
-            // 
-            // btnValidateVersion8
-            // 
-            this.btnValidateVersion8.Location = new System.Drawing.Point(240, 20);
-            this.btnValidateVersion8.Name = "btnValidateVersion8";
-            this.btnValidateVersion8.Size = new System.Drawing.Size(90, 75);
-            this.btnValidateVersion8.TabIndex = 2;
-            this.btnValidateVersion8.Text = "驗證";
-            this.btnValidateVersion8.UseVisualStyleBackColor = true;
-            this.btnValidateVersion8.Click += new System.EventHandler(this.Version8BT_Click);
-            // 
-            // txtVersion8Input
-            // 
-            this.txtVersion8Input.Location = new System.Drawing.Point(20, 50);
-            this.txtVersion8Input.Multiline = true;
-            this.txtVersion8Input.Name = "txtVersion8Input";
-            this.txtVersion8Input.Size = new System.Drawing.Size(200, 45);
-            this.txtVersion8Input.TabIndex = 1;
-            this.txtVersion8Input.Text = "55 AA 01 01 34 26 00 02 23 00 7F 21 31 7E 31 00 FF 00 31 7B 00 00 FF 0C 00 74 10 " +
-    "00 04 64 07 0A 2A FF 00 00 B8 55 A4 6A BD 75 1F 1E 1D 28";
-            // 
-            // lblVersion8
-            // 
-            this.lblVersion8.AutoSize = true;
-            this.lblVersion8.Location = new System.Drawing.Point(20, 25);
-            this.lblVersion8.Name = "lblVersion8";
-            this.lblVersion8.Size = new System.Drawing.Size(179, 12);
-            this.lblVersion8.TabIndex = 0;
-            this.lblVersion8.Text = "顯示在下排左側 24(h)x48(w) 封包";
-            // 
-            // grpVersion7
-            // 
-            this.grpVersion7.Controls.Add(this.btnValidateVersion7);
-            this.grpVersion7.Controls.Add(this.txtVersion7Input);
-            this.grpVersion7.Controls.Add(this.lblVersion7);
-            this.grpVersion7.Location = new System.Drawing.Point(20, 396);
-            this.grpVersion7.Name = "grpVersion7";
-            this.grpVersion7.Size = new System.Drawing.Size(350, 110);
-            this.grpVersion7.TabIndex = 6;
-            this.grpVersion7.TabStop = false;
-            this.grpVersion7.Text = "版本7";
-            // 
-            // btnValidateVersion7
-            // 
-            this.btnValidateVersion7.Location = new System.Drawing.Point(240, 20);
-            this.btnValidateVersion7.Name = "btnValidateVersion7";
-            this.btnValidateVersion7.Size = new System.Drawing.Size(90, 75);
-            this.btnValidateVersion7.TabIndex = 2;
-            this.btnValidateVersion7.Text = "驗證";
-            this.btnValidateVersion7.UseVisualStyleBackColor = true;
-            this.btnValidateVersion7.Click += new System.EventHandler(this.Version7BT_Click);
-            // 
-            // txtVersion7Input
-            // 
-            this.txtVersion7Input.Location = new System.Drawing.Point(20, 50);
-            this.txtVersion7Input.Multiline = true;
-            this.txtVersion7Input.Name = "txtVersion7Input";
-            this.txtVersion7Input.Size = new System.Drawing.Size(200, 45);
-            this.txtVersion7Input.TabIndex = 1;
-            this.txtVersion7Input.Text = "55 AA 01 01 34 27 00 01 24 00 7F 21 31 7D 31 00 00 FF 01 31 7B FF 00 00 0C 00 74 " +
-    "10 00 04 64 07 0A 2A FF FF FF B8 55 A4 6A BD 75 1F 1E 1D 26";
-            // 
-            // lblVersion7
-            // 
-            this.lblVersion7.AutoSize = true;
-            this.lblVersion7.Location = new System.Drawing.Point(20, 25);
-            this.lblVersion7.Name = "lblVersion7";
-            this.lblVersion7.Size = new System.Drawing.Size(179, 12);
-            this.lblVersion7.TabIndex = 0;
-            this.lblVersion7.Text = "顯示在上排左側 24(h)x48(w) 封包";
-            // 
-            // grpVersion6
-            // 
-            this.grpVersion6.Controls.Add(this.btnValidateVersion6);
-            this.grpVersion6.Controls.Add(this.txtVersion6Input);
-            this.grpVersion6.Controls.Add(this.lblVersion6);
-            this.grpVersion6.Location = new System.Drawing.Point(380, 266);
-            this.grpVersion6.Name = "grpVersion6";
-            this.grpVersion6.Size = new System.Drawing.Size(350, 110);
-            this.grpVersion6.TabIndex = 5;
-            this.grpVersion6.TabStop = false;
-            this.grpVersion6.Text = "版本6";
-            // 
-            // btnValidateVersion6
-            // 
-            this.btnValidateVersion6.Location = new System.Drawing.Point(240, 20);
-            this.btnValidateVersion6.Name = "btnValidateVersion6";
-            this.btnValidateVersion6.Size = new System.Drawing.Size(90, 75);
-            this.btnValidateVersion6.TabIndex = 2;
-            this.btnValidateVersion6.Text = "驗證";
-            this.btnValidateVersion6.UseVisualStyleBackColor = true;
-            this.btnValidateVersion6.Click += new System.EventHandler(this.Version6BT_Click);
-            // 
-            // txtVersion6Input
-            // 
-            this.txtVersion6Input.Location = new System.Drawing.Point(20, 50);
-            this.txtVersion6Input.Multiline = true;
-            this.txtVersion6Input.Name = "txtVersion6Input";
-            this.txtVersion6Input.Size = new System.Drawing.Size(200, 45);
-            this.txtVersion6Input.TabIndex = 1;
-            this.txtVersion6Input.Text = "55 AA 01 01 38 20 00 01 01 1C 00 77 79 02 80 FF 7F 21 32 71 10 00 01 64 07 0A 2A " +
-    "FF 00 00 B8 55 A4 6A BD 75 1F 1E 1D 28";
-            // 
-            // lblVersion6
-            // 
-            this.lblVersion6.AutoSize = true;
-            this.lblVersion6.Location = new System.Drawing.Point(20, 25);
-            this.lblVersion6.Name = "lblVersion6";
-            this.lblVersion6.Size = new System.Drawing.Size(77, 12);
-            this.lblVersion6.TabIndex = 0;
-            this.lblVersion6.Text = "緊急訊息封包";
-            // 
-            // grpVersion5
-            // 
-            this.grpVersion5.Controls.Add(this.btnValidateVersion5);
-            this.grpVersion5.Controls.Add(this.txtVersion5Input);
-            this.grpVersion5.Controls.Add(this.lblVersion5);
-            this.grpVersion5.Location = new System.Drawing.Point(20, 266);
-            this.grpVersion5.Name = "grpVersion5";
-            this.grpVersion5.Size = new System.Drawing.Size(350, 110);
-            this.grpVersion5.TabIndex = 4;
-            this.grpVersion5.TabStop = false;
-            this.grpVersion5.Text = "版本5";
-            // 
-            // btnValidateVersion5
-            // 
-            this.btnValidateVersion5.Location = new System.Drawing.Point(240, 20);
-            this.btnValidateVersion5.Name = "btnValidateVersion5";
-            this.btnValidateVersion5.Size = new System.Drawing.Size(90, 75);
-            this.btnValidateVersion5.TabIndex = 2;
-            this.btnValidateVersion5.Text = "驗證";
-            this.btnValidateVersion5.UseVisualStyleBackColor = true;
-            this.btnValidateVersion5.Click += new System.EventHandler(this.Version5BT_Click);
-            // 
-            // txtVersion5Input
-            // 
-            this.txtVersion5Input.Location = new System.Drawing.Point(20, 50);
-            this.txtVersion5Input.Multiline = true;
-            this.txtVersion5Input.Name = "txtVersion5Input";
-            this.txtVersion5Input.Size = new System.Drawing.Size(200, 45);
-            this.txtVersion5Input.TabIndex = 1;
-            this.txtVersion5Input.Text = "55 AA 01 01 34 3B 00 02 38 00 77 7F 21 31 83 30 00 04 61 07 08 2A FF FF 00 B7 48 " +
-    "A6 77 1F 2D 01 00 01 FF FF 00 1F 2A FF FF 00 A5 5B D3 C2 1F 2D 02 00 01 FF FF 00" +
-    " 1F 2A FF FF 00 A5 BB AF B8 1F 1E 1D CA";
-            // 
-            // lblVersion5
-            // 
-            this.lblVersion5.AutoSize = true;
-            this.lblVersion5.Location = new System.Drawing.Point(20, 25);
-            this.lblVersion5.Name = "lblVersion5";
-            this.lblVersion5.Size = new System.Drawing.Size(77, 12);
-            this.lblVersion5.TabIndex = 0;
-            this.lblVersion5.Text = "列車訊息封包";
-            // 
-            // grpVersion4
-            // 
-            this.grpVersion4.Controls.Add(this.btnValidateVersion4);
-            this.grpVersion4.Controls.Add(this.txtVersion4Input);
-            this.grpVersion4.Controls.Add(this.lblVersion4);
-            this.grpVersion4.Location = new System.Drawing.Point(380, 136);
-            this.grpVersion4.Name = "grpVersion4";
-            this.grpVersion4.Size = new System.Drawing.Size(350, 110);
-            this.grpVersion4.TabIndex = 3;
-            this.grpVersion4.TabStop = false;
-            this.grpVersion4.Text = "版本4";
-            // 
-            // btnValidateVersion4
-            // 
-            this.btnValidateVersion4.Location = new System.Drawing.Point(240, 20);
-            this.btnValidateVersion4.Name = "btnValidateVersion4";
-            this.btnValidateVersion4.Size = new System.Drawing.Size(90, 75);
-            this.btnValidateVersion4.TabIndex = 2;
-            this.btnValidateVersion4.Text = "驗證";
-            this.btnValidateVersion4.UseVisualStyleBackColor = true;
-            this.btnValidateVersion4.Click += new System.EventHandler(this.Version4BT_Click);
-            // 
-            // txtVersion4Input
-            // 
-            this.txtVersion4Input.Location = new System.Drawing.Point(20, 50);
-            this.txtVersion4Input.Multiline = true;
-            this.txtVersion4Input.Name = "txtVersion4Input";
-            this.txtVersion4Input.Size = new System.Drawing.Size(200, 45);
-            this.txtVersion4Input.TabIndex = 1;
-            this.txtVersion4Input.Text = "55 AA 01 01 34 20 00 01 1D 00 7F 21 31 7B FF FF FF 0C 00 74 10 00 04 64 07 0A 2A " +
-    "FF FF FF B8 55 A4 6A BD 75 1F 1E 1D 3E";
-            // 
-            // lblVersion4
-            // 
-            this.lblVersion4.AutoSize = true;
-            this.lblVersion4.Location = new System.Drawing.Point(20, 25);
-            this.lblVersion4.Name = "lblVersion4";
-            this.lblVersion4.Size = new System.Drawing.Size(77, 12);
-            this.lblVersion4.TabIndex = 0;
-            this.lblVersion4.Text = "右側時間封包";
-            // 
-            // grpVersion3
-            // 
-            this.grpVersion3.Controls.Add(this.btnValidateVersion3);
-            this.grpVersion3.Controls.Add(this.txtVersion3Input);
-            this.grpVersion3.Controls.Add(this.lblVersion3);
-            this.grpVersion3.Location = new System.Drawing.Point(20, 136);
-            this.grpVersion3.Name = "grpVersion3";
-            this.grpVersion3.Size = new System.Drawing.Size(350, 110);
-            this.grpVersion3.TabIndex = 2;
-            this.grpVersion3.TabStop = false;
-            this.grpVersion3.Text = "版本3";
-            // 
-            // btnValidateVersion3
-            // 
-            this.btnValidateVersion3.Location = new System.Drawing.Point(240, 20);
-            this.btnValidateVersion3.Name = "btnValidateVersion3";
-            this.btnValidateVersion3.Size = new System.Drawing.Size(90, 75);
-            this.btnValidateVersion3.TabIndex = 2;
-            this.btnValidateVersion3.Text = "驗證";
-            this.btnValidateVersion3.UseVisualStyleBackColor = true;
-            this.btnValidateVersion3.Click += new System.EventHandler(this.Version3BT_Click);
-            // 
-            // txtVersion3Input
-            // 
-            this.txtVersion3Input.Location = new System.Drawing.Point(20, 50);
-            this.txtVersion3Input.Multiline = true;
-            this.txtVersion3Input.Name = "txtVersion3Input";
-            this.txtVersion3Input.Size = new System.Drawing.Size(200, 45);
-            this.txtVersion3Input.TabIndex = 1;
-            this.txtVersion3Input.Text = "55 AA 01 01 34 25 00 01 22 00 7F 21 31 7A 00 00 FF 01 7B FF 00 00 00 00 73 10 00 " +
-    "04 64 07 0A 2A FF FF FF B8 55 A4 6A BD 75 1F 1E 1D B2";
-            // 
-            // lblVersion3
-            // 
-            this.lblVersion3.AutoSize = true;
-            this.lblVersion3.Location = new System.Drawing.Point(20, 25);
-            this.lblVersion3.Name = "lblVersion3";
-            this.lblVersion3.Size = new System.Drawing.Size(113, 12);
-            this.lblVersion3.TabIndex = 0;
-            this.lblVersion3.Text = "左側加上右時間封包";
-            // 
-            // grpVersion2
-            // 
-            this.grpVersion2.Controls.Add(this.btnValidateVersion2);
-            this.grpVersion2.Controls.Add(this.txtVersion2Input);
-            this.grpVersion2.Controls.Add(this.lblVersion2);
-            this.grpVersion2.Location = new System.Drawing.Point(380, 20);
-            this.grpVersion2.Name = "grpVersion2";
-            this.grpVersion2.Size = new System.Drawing.Size(350, 110);
-            this.grpVersion2.TabIndex = 1;
-            this.grpVersion2.TabStop = false;
-            this.grpVersion2.Text = "版本2";
-            // 
-            // btnValidateVersion2
-            // 
-            this.btnValidateVersion2.Location = new System.Drawing.Point(240, 20);
-            this.btnValidateVersion2.Name = "btnValidateVersion2";
-            this.btnValidateVersion2.Size = new System.Drawing.Size(90, 75);
-            this.btnValidateVersion2.TabIndex = 2;
-            this.btnValidateVersion2.Text = "驗證";
-            this.btnValidateVersion2.UseVisualStyleBackColor = true;
-            this.btnValidateVersion2.Click += new System.EventHandler(this.Version2BT_Click);
-            // 
-            // txtVersion2Input
-            // 
-            this.txtVersion2Input.Location = new System.Drawing.Point(20, 50);
-            this.txtVersion2Input.Multiline = true;
-            this.txtVersion2Input.Name = "txtVersion2Input";
-            this.txtVersion2Input.Size = new System.Drawing.Size(200, 45);
-            this.txtVersion2Input.TabIndex = 1;
-            this.txtVersion2Input.Text = " 55 AA 01 01 34 1F 00 01 1C 00 7F 21 31 7A FF FF 00 01 72 10 00 04 64 07 0A 2A FF" +
-    " FF FF B8 55 A4 6A BD 75 1F 1E 1D 30";
-            // 
-            // lblVersion2
-            // 
-            this.lblVersion2.AutoSize = true;
-            this.lblVersion2.Location = new System.Drawing.Point(20, 25);
-            this.lblVersion2.Name = "lblVersion2";
-            this.lblVersion2.Size = new System.Drawing.Size(53, 12);
-            this.lblVersion2.TabIndex = 0;
-            this.lblVersion2.Text = "左側封包";
-            // 
-            // grpVersion1
-            // 
-            this.grpVersion1.Controls.Add(this.btnValidateVersion1);
-            this.grpVersion1.Controls.Add(this.txtVersion1Input);
-            this.grpVersion1.Controls.Add(this.lblVersion1);
-            this.grpVersion1.Location = new System.Drawing.Point(20, 20);
-            this.grpVersion1.Name = "grpVersion1";
-            this.grpVersion1.Size = new System.Drawing.Size(350, 110);
-            this.grpVersion1.TabIndex = 0;
-            this.grpVersion1.TabStop = false;
-            this.grpVersion1.Text = "版本1";
-            // 
-            // btnValidateVersion1
-            // 
-            this.btnValidateVersion1.Location = new System.Drawing.Point(240, 20);
-            this.btnValidateVersion1.Name = "btnValidateVersion1";
-            this.btnValidateVersion1.Size = new System.Drawing.Size(90, 75);
-            this.btnValidateVersion1.TabIndex = 2;
-            this.btnValidateVersion1.Text = "驗證";
-            this.btnValidateVersion1.UseVisualStyleBackColor = true;
-            this.btnValidateVersion1.Click += new System.EventHandler(this.Version1BT_Click);
-            // 
-            // txtVersion1Input
-            // 
-            this.txtVersion1Input.Location = new System.Drawing.Point(20, 50);
-            this.txtVersion1Input.Multiline = true;
-            this.txtVersion1Input.Name = "txtVersion1Input";
-            this.txtVersion1Input.Size = new System.Drawing.Size(200, 45);
-            this.txtVersion1Input.TabIndex = 1;
-            this.txtVersion1Input.Text = "55 AA 02 11 12 34 19 00 01 15 00 77 7F 22 31 71 0E 00 03 64 07 0A 2A C6 59 11 A6 " +
-    "55 A6 EC 1F 1E 1D 97";
-            // 
-            // lblVersion1
-            // 
-            this.lblVersion1.AutoSize = true;
-            this.lblVersion1.Location = new System.Drawing.Point(20, 25);
-            this.lblVersion1.Name = "lblVersion1";
-            this.lblVersion1.Size = new System.Drawing.Size(77, 12);
-            this.lblVersion1.TabIndex = 0;
-            this.lblVersion1.Text = "一般訊息封包";
+            //
+            // grpPacketInput
+            //
+            this.grpPacketInput.Controls.Add(this.lblPacketType);
+            this.grpPacketInput.Controls.Add(this.cmbPacketType);
+            this.grpPacketInput.Controls.Add(this.lblSampleDescription);
+            this.grpPacketInput.Controls.Add(this.lblPacketInput);
+            this.grpPacketInput.Controls.Add(this.txtPacketInput);
+            this.grpPacketInput.Controls.Add(this.btnLoadSample);
+            this.grpPacketInput.Controls.Add(this.btnValidatePacket);
+            this.grpPacketInput.Location = new System.Drawing.Point(20, 20);
+            this.grpPacketInput.Name = "grpPacketInput";
+            this.grpPacketInput.Size = new System.Drawing.Size(1030, 220);
+            this.grpPacketInput.TabIndex = 0;
+            this.grpPacketInput.TabStop = false;
+            this.grpPacketInput.Text = "封包輸入";
+            //
+            // lblPacketType
+            //
+            this.lblPacketType.AutoSize = true;
+            this.lblPacketType.Location = new System.Drawing.Point(20, 30);
+            this.lblPacketType.Name = "lblPacketType";
+            this.lblPacketType.Size = new System.Drawing.Size(80, 12);
+            this.lblPacketType.TabIndex = 0;
+            this.lblPacketType.Text = "封包類型:";
+            //
+            // cmbPacketType
+            //
+            this.cmbPacketType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPacketType.FormattingEnabled = true;
+            this.cmbPacketType.Location = new System.Drawing.Point(110, 27);
+            this.cmbPacketType.Name = "cmbPacketType";
+            this.cmbPacketType.Size = new System.Drawing.Size(350, 20);
+            this.cmbPacketType.TabIndex = 1;
+            this.cmbPacketType.SelectedIndexChanged += new System.EventHandler(this.cmbPacketType_SelectedIndexChanged);
+            //
+            // lblSampleDescription
+            //
+            this.lblSampleDescription.AutoSize = true;
+            this.lblSampleDescription.ForeColor = System.Drawing.Color.Blue;
+            this.lblSampleDescription.Location = new System.Drawing.Point(480, 30);
+            this.lblSampleDescription.Name = "lblSampleDescription";
+            this.lblSampleDescription.Size = new System.Drawing.Size(200, 12);
+            this.lblSampleDescription.TabIndex = 2;
+            this.lblSampleDescription.Text = "";
+            //
+            // lblPacketInput
+            //
+            this.lblPacketInput.AutoSize = true;
+            this.lblPacketInput.Location = new System.Drawing.Point(20, 65);
+            this.lblPacketInput.Name = "lblPacketInput";
+            this.lblPacketInput.Size = new System.Drawing.Size(380, 12);
+            this.lblPacketInput.TabIndex = 3;
+            this.lblPacketInput.Text = "封包內容 (十六進制，可用空格或無空格分隔，例如: 55 AA 01 或 55AA01):";
+            //
+            // txtPacketInput
+            //
+            this.txtPacketInput.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtPacketInput.Location = new System.Drawing.Point(20, 85);
+            this.txtPacketInput.Multiline = true;
+            this.txtPacketInput.Name = "txtPacketInput";
+            this.txtPacketInput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtPacketInput.Size = new System.Drawing.Size(840, 110);
+            this.txtPacketInput.TabIndex = 4;
+            //
+            // btnLoadSample
+            //
+            this.btnLoadSample.Location = new System.Drawing.Point(880, 85);
+            this.btnLoadSample.Name = "btnLoadSample";
+            this.btnLoadSample.Size = new System.Drawing.Size(130, 45);
+            this.btnLoadSample.TabIndex = 5;
+            this.btnLoadSample.Text = "載入範例封包";
+            this.btnLoadSample.UseVisualStyleBackColor = true;
+            this.btnLoadSample.Click += new System.EventHandler(this.btnLoadSample_Click);
+            //
+            // btnValidatePacket
+            //
+            this.btnValidatePacket.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnValidatePacket.Location = new System.Drawing.Point(880, 145);
+            this.btnValidatePacket.Name = "btnValidatePacket";
+            this.btnValidatePacket.Size = new System.Drawing.Size(130, 50);
+            this.btnValidatePacket.TabIndex = 6;
+            this.btnValidatePacket.Text = "驗證封包";
+            this.btnValidatePacket.UseVisualStyleBackColor = true;
+            this.btnValidatePacket.Click += new System.EventHandler(this.btnValidatePacket_Click);
             // 
             // tabTools
             // 
@@ -872,7 +568,10 @@ namespace UITest
             this.btnConvertFormat.Click += new System.EventHandler(this.button6_Click);
             // 
             // tabDatabaseSettings
-            // 
+            //
+            this.tabDatabaseSettings.AutoScroll = true;
+            this.tabDatabaseSettings.Controls.Add(this.grpTableBrowser);
+            this.tabDatabaseSettings.Controls.Add(this.grpMessageSender);
             this.tabDatabaseSettings.Controls.Add(this.grpDatabaseConnection);
             this.tabDatabaseSettings.Controls.Add(this.grpCurrentConnectionString);
             this.tabDatabaseSettings.Location = new System.Drawing.Point(4, 22);
@@ -1044,7 +743,219 @@ namespace UITest
             this.lblDbConnectionString.Size = new System.Drawing.Size(56, 12);
             this.lblDbConnectionString.TabIndex = 0;
             this.lblDbConnectionString.Text = "連線字串:";
-            // 
+            //
+            // grpMessageSender
+            //
+            this.grpMessageSender.Controls.Add(this.txtSimpleResult);
+            this.grpMessageSender.Controls.Add(this.btnSimpleClearResult);
+            this.grpMessageSender.Controls.Add(this.btnSimpleUseDefaults);
+            this.grpMessageSender.Controls.Add(this.btnSimpleSendMessage);
+            this.grpMessageSender.Controls.Add(this.chkSimpleInstantMessage);
+            this.grpMessageSender.Controls.Add(this.txtSimpleTargetDevice);
+            this.grpMessageSender.Controls.Add(this.lblSimpleTargetDevice);
+            this.grpMessageSender.Controls.Add(this.txtSimpleMessageText);
+            this.grpMessageSender.Controls.Add(this.lblSimpleMessageText);
+            this.grpMessageSender.Location = new System.Drawing.Point(540, 20);
+            this.grpMessageSender.Name = "grpMessageSender";
+            this.grpMessageSender.Size = new System.Drawing.Size(510, 690);
+            this.grpMessageSender.TabIndex = 2;
+            this.grpMessageSender.TabStop = false;
+            this.grpMessageSender.Text = "消息發送測試 (數據庫聯動)";
+            //
+            // lblSimpleMessageText
+            //
+            this.lblSimpleMessageText.AutoSize = true;
+            this.lblSimpleMessageText.Location = new System.Drawing.Point(20, 30);
+            this.lblSimpleMessageText.Name = "lblSimpleMessageText";
+            this.lblSimpleMessageText.Size = new System.Drawing.Size(56, 12);
+            this.lblSimpleMessageText.TabIndex = 0;
+            this.lblSimpleMessageText.Text = "消息內容:";
+            //
+            // txtSimpleMessageText
+            //
+            this.txtSimpleMessageText.Location = new System.Drawing.Point(20, 50);
+            this.txtSimpleMessageText.Multiline = true;
+            this.txtSimpleMessageText.Name = "txtSimpleMessageText";
+            this.txtSimpleMessageText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtSimpleMessageText.Size = new System.Drawing.Size(470, 60);
+            this.txtSimpleMessageText.TabIndex = 1;
+            this.txtSimpleMessageText.Text = "UITest 測試消息 - Test Message";
+            //
+            // lblSimpleTargetDevice
+            //
+            this.lblSimpleTargetDevice.AutoSize = true;
+            this.lblSimpleTargetDevice.Location = new System.Drawing.Point(20, 125);
+            this.lblSimpleTargetDevice.Name = "lblSimpleTargetDevice";
+            this.lblSimpleTargetDevice.Size = new System.Drawing.Size(245, 12);
+            this.lblSimpleTargetDevice.TabIndex = 2;
+            this.lblSimpleTargetDevice.Text = "目標設備 (格式: StationID_AreaID_DeviceID):";
+            //
+            // txtSimpleTargetDevice
+            //
+            this.txtSimpleTargetDevice.Location = new System.Drawing.Point(20, 145);
+            this.txtSimpleTargetDevice.Name = "txtSimpleTargetDevice";
+            this.txtSimpleTargetDevice.Size = new System.Drawing.Size(300, 22);
+            this.txtSimpleTargetDevice.TabIndex = 3;
+            this.txtSimpleTargetDevice.Text = "LG01_CCS_CDU-1";
+            //
+            // chkSimpleInstantMessage
+            //
+            this.chkSimpleInstantMessage.AutoSize = true;
+            this.chkSimpleInstantMessage.Location = new System.Drawing.Point(20, 185);
+            this.chkSimpleInstantMessage.Name = "chkSimpleInstantMessage";
+            this.chkSimpleInstantMessage.Size = new System.Drawing.Size(234, 16);
+            this.chkSimpleInstantMessage.TabIndex = 4;
+            this.chkSimpleInstantMessage.Text = "即時消息 (否則為預錄消息)";
+            this.chkSimpleInstantMessage.UseVisualStyleBackColor = true;
+            //
+            // btnSimpleSendMessage
+            //
+            this.btnSimpleSendMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSimpleSendMessage.Location = new System.Drawing.Point(20, 220);
+            this.btnSimpleSendMessage.Name = "btnSimpleSendMessage";
+            this.btnSimpleSendMessage.Size = new System.Drawing.Size(130, 40);
+            this.btnSimpleSendMessage.TabIndex = 5;
+            this.btnSimpleSendMessage.Text = "發送測試消息";
+            this.btnSimpleSendMessage.UseVisualStyleBackColor = true;
+            this.btnSimpleSendMessage.Click += new System.EventHandler(this.btnSimpleSendMessage_Click);
+            //
+            // btnSimpleUseDefaults
+            //
+            this.btnSimpleUseDefaults.Location = new System.Drawing.Point(170, 220);
+            this.btnSimpleUseDefaults.Name = "btnSimpleUseDefaults";
+            this.btnSimpleUseDefaults.Size = new System.Drawing.Size(110, 40);
+            this.btnSimpleUseDefaults.TabIndex = 6;
+            this.btnSimpleUseDefaults.Text = "填充默認值";
+            this.btnSimpleUseDefaults.UseVisualStyleBackColor = true;
+            this.btnSimpleUseDefaults.Click += new System.EventHandler(this.btnSimpleUseDefaults_Click);
+            //
+            // btnSimpleClearResult
+            //
+            this.btnSimpleClearResult.Location = new System.Drawing.Point(300, 220);
+            this.btnSimpleClearResult.Name = "btnSimpleClearResult";
+            this.btnSimpleClearResult.Size = new System.Drawing.Size(90, 40);
+            this.btnSimpleClearResult.TabIndex = 7;
+            this.btnSimpleClearResult.Text = "清除結果";
+            this.btnSimpleClearResult.UseVisualStyleBackColor = true;
+            this.btnSimpleClearResult.Click += new System.EventHandler(this.btnSimpleClearResult_Click);
+            //
+            // txtSimpleResult
+            //
+            this.txtSimpleResult.Location = new System.Drawing.Point(20, 280);
+            this.txtSimpleResult.Multiline = true;
+            this.txtSimpleResult.Name = "txtSimpleResult";
+            this.txtSimpleResult.ReadOnly = true;
+            this.txtSimpleResult.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtSimpleResult.Size = new System.Drawing.Size(470, 390);
+            this.txtSimpleResult.TabIndex = 8;
+            //
+            // grpTableBrowser
+            //
+            this.grpTableBrowser.Controls.Add(this.lblTableName);
+            this.grpTableBrowser.Controls.Add(this.cmbTables);
+            this.grpTableBrowser.Controls.Add(this.btnLoadTables);
+            this.grpTableBrowser.Controls.Add(this.lblTableFilter);
+            this.grpTableBrowser.Controls.Add(this.txtTableFilter);
+            this.grpTableBrowser.Controls.Add(this.btnQueryTable);
+            this.grpTableBrowser.Controls.Add(this.btnClearTableData);
+            this.grpTableBrowser.Controls.Add(this.lblRowCount);
+            this.grpTableBrowser.Controls.Add(this.dgvTableData);
+            this.grpTableBrowser.Location = new System.Drawing.Point(20, 730);
+            this.grpTableBrowser.Name = "grpTableBrowser";
+            this.grpTableBrowser.Size = new System.Drawing.Size(1030, 550);
+            this.grpTableBrowser.TabIndex = 3;
+            this.grpTableBrowser.TabStop = false;
+            this.grpTableBrowser.Text = "資料庫表查看器";
+            //
+            // lblTableName
+            //
+            this.lblTableName.AutoSize = true;
+            this.lblTableName.Location = new System.Drawing.Point(20, 30);
+            this.lblTableName.Name = "lblTableName";
+            this.lblTableName.Size = new System.Drawing.Size(80, 12);
+            this.lblTableName.TabIndex = 0;
+            this.lblTableName.Text = "選擇資料表:";
+            //
+            // cmbTables
+            //
+            this.cmbTables.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbTables.FormattingEnabled = true;
+            this.cmbTables.Location = new System.Drawing.Point(110, 27);
+            this.cmbTables.Name = "cmbTables";
+            this.cmbTables.Size = new System.Drawing.Size(300, 20);
+            this.cmbTables.TabIndex = 1;
+            //
+            // btnLoadTables
+            //
+            this.btnLoadTables.Location = new System.Drawing.Point(430, 22);
+            this.btnLoadTables.Name = "btnLoadTables";
+            this.btnLoadTables.Size = new System.Drawing.Size(120, 30);
+            this.btnLoadTables.TabIndex = 2;
+            this.btnLoadTables.Text = "載入表列表";
+            this.btnLoadTables.UseVisualStyleBackColor = true;
+            this.btnLoadTables.Click += new System.EventHandler(this.btnLoadTables_Click);
+            //
+            // lblTableFilter
+            //
+            this.lblTableFilter.AutoSize = true;
+            this.lblTableFilter.Location = new System.Drawing.Point(20, 65);
+            this.lblTableFilter.Name = "lblTableFilter";
+            this.lblTableFilter.Size = new System.Drawing.Size(320, 12);
+            this.lblTableFilter.TabIndex = 3;
+            this.lblTableFilter.Text = "篩選條件 (可選，WHERE 後的條件，例如: id > 10 AND name LIKE '%test%'):";
+            //
+            // txtTableFilter
+            //
+            this.txtTableFilter.Location = new System.Drawing.Point(20, 85);
+            this.txtTableFilter.Multiline = true;
+            this.txtTableFilter.Name = "txtTableFilter";
+            this.txtTableFilter.Size = new System.Drawing.Size(530, 40);
+            this.txtTableFilter.TabIndex = 4;
+            //
+            // btnQueryTable
+            //
+            this.btnQueryTable.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnQueryTable.Location = new System.Drawing.Point(570, 85);
+            this.btnQueryTable.Name = "btnQueryTable";
+            this.btnQueryTable.Size = new System.Drawing.Size(120, 40);
+            this.btnQueryTable.TabIndex = 5;
+            this.btnQueryTable.Text = "查詢表內容";
+            this.btnQueryTable.UseVisualStyleBackColor = true;
+            this.btnQueryTable.Click += new System.EventHandler(this.btnQueryTable_Click);
+            //
+            // btnClearTableData
+            //
+            this.btnClearTableData.Location = new System.Drawing.Point(710, 85);
+            this.btnClearTableData.Name = "btnClearTableData";
+            this.btnClearTableData.Size = new System.Drawing.Size(100, 40);
+            this.btnClearTableData.TabIndex = 6;
+            this.btnClearTableData.Text = "清除資料";
+            this.btnClearTableData.UseVisualStyleBackColor = true;
+            this.btnClearTableData.Click += new System.EventHandler(this.btnClearTableData_Click);
+            //
+            // lblRowCount
+            //
+            this.lblRowCount.AutoSize = true;
+            this.lblRowCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRowCount.Location = new System.Drawing.Point(20, 138);
+            this.lblRowCount.Name = "lblRowCount";
+            this.lblRowCount.Size = new System.Drawing.Size(100, 15);
+            this.lblRowCount.TabIndex = 7;
+            this.lblRowCount.Text = "資料筆數: 0";
+            //
+            // dgvTableData
+            //
+            this.dgvTableData.AllowUserToAddRows = false;
+            this.dgvTableData.AllowUserToDeleteRows = false;
+            this.dgvTableData.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.dgvTableData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvTableData.Location = new System.Drawing.Point(20, 160);
+            this.dgvTableData.Name = "dgvTableData";
+            this.dgvTableData.ReadOnly = true;
+            this.dgvTableData.RowTemplate.Height = 24;
+            this.dgvTableData.Size = new System.Drawing.Size(990, 370);
+            this.dgvTableData.TabIndex = 8;
+            //
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1063,22 +974,8 @@ namespace UITest
             this.tabPacketValidator.ResumeLayout(false);
             this.grpValidationResult.ResumeLayout(false);
             this.grpValidationResult.PerformLayout();
-            this.grpVersion8.ResumeLayout(false);
-            this.grpVersion8.PerformLayout();
-            this.grpVersion7.ResumeLayout(false);
-            this.grpVersion7.PerformLayout();
-            this.grpVersion6.ResumeLayout(false);
-            this.grpVersion6.PerformLayout();
-            this.grpVersion5.ResumeLayout(false);
-            this.grpVersion5.PerformLayout();
-            this.grpVersion4.ResumeLayout(false);
-            this.grpVersion4.PerformLayout();
-            this.grpVersion3.ResumeLayout(false);
-            this.grpVersion3.PerformLayout();
-            this.grpVersion2.ResumeLayout(false);
-            this.grpVersion2.PerformLayout();
-            this.grpVersion1.ResumeLayout(false);
-            this.grpVersion1.PerformLayout();
+            this.grpPacketInput.ResumeLayout(false);
+            this.grpPacketInput.PerformLayout();
             this.tabTools.ResumeLayout(false);
             this.grpColorConversion.ResumeLayout(false);
             this.grpColorConversion.PerformLayout();
@@ -1091,6 +988,11 @@ namespace UITest
             this.grpDatabaseConnection.PerformLayout();
             this.grpCurrentConnectionString.ResumeLayout(false);
             this.grpCurrentConnectionString.PerformLayout();
+            this.grpMessageSender.ResumeLayout(false);
+            this.grpMessageSender.PerformLayout();
+            this.grpTableBrowser.ResumeLayout(false);
+            this.grpTableBrowser.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvTableData)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1105,46 +1007,18 @@ namespace UITest
         private System.Windows.Forms.TextBox txtMessageInput;
         private System.Windows.Forms.Label lblMessageInput;
         private System.Windows.Forms.GroupBox grpPacketBuilder;
-        private System.Windows.Forms.Button btnCreatePacket;
-        private System.Windows.Forms.Button btnCreateSequence;
-        private System.Windows.Forms.Button btnCreateFullWindow;
-        private System.Windows.Forms.Button btnCreateStringMessage;
-        private System.Windows.Forms.Button btnCreateStringBody;
+        private System.Windows.Forms.Button btnGeneratePacket;
         private System.Windows.Forms.GroupBox grpPacketOutput;
         private System.Windows.Forms.TextBox txtPacketOutput;
         private System.Windows.Forms.Button btnClearPacketOutput;
-        private System.Windows.Forms.GroupBox grpVersion1;
-        private System.Windows.Forms.Button btnValidateVersion1;
-        private System.Windows.Forms.TextBox txtVersion1Input;
-        private System.Windows.Forms.Label lblVersion1;
-        private System.Windows.Forms.GroupBox grpVersion2;
-        private System.Windows.Forms.Button btnValidateVersion2;
-        private System.Windows.Forms.TextBox txtVersion2Input;
-        private System.Windows.Forms.Label lblVersion2;
-        private System.Windows.Forms.GroupBox grpVersion3;
-        private System.Windows.Forms.Button btnValidateVersion3;
-        private System.Windows.Forms.TextBox txtVersion3Input;
-        private System.Windows.Forms.Label lblVersion3;
-        private System.Windows.Forms.GroupBox grpVersion4;
-        private System.Windows.Forms.Button btnValidateVersion4;
-        private System.Windows.Forms.TextBox txtVersion4Input;
-        private System.Windows.Forms.Label lblVersion4;
-        private System.Windows.Forms.GroupBox grpVersion5;
-        private System.Windows.Forms.Button btnValidateVersion5;
-        private System.Windows.Forms.TextBox txtVersion5Input;
-        private System.Windows.Forms.Label lblVersion5;
-        private System.Windows.Forms.GroupBox grpVersion6;
-        private System.Windows.Forms.Button btnValidateVersion6;
-        private System.Windows.Forms.TextBox txtVersion6Input;
-        private System.Windows.Forms.Label lblVersion6;
-        private System.Windows.Forms.GroupBox grpVersion7;
-        private System.Windows.Forms.Button btnValidateVersion7;
-        private System.Windows.Forms.TextBox txtVersion7Input;
-        private System.Windows.Forms.Label lblVersion7;
-        private System.Windows.Forms.GroupBox grpVersion8;
-        private System.Windows.Forms.Button btnValidateVersion8;
-        private System.Windows.Forms.TextBox txtVersion8Input;
-        private System.Windows.Forms.Label lblVersion8;
+        private System.Windows.Forms.GroupBox grpPacketInput;
+        private System.Windows.Forms.Label lblPacketType;
+        private System.Windows.Forms.ComboBox cmbPacketType;
+        private System.Windows.Forms.Label lblSampleDescription;
+        private System.Windows.Forms.Label lblPacketInput;
+        private System.Windows.Forms.TextBox txtPacketInput;
+        private System.Windows.Forms.Button btnLoadSample;
+        private System.Windows.Forms.Button btnValidatePacket;
         private System.Windows.Forms.GroupBox grpValidationResult;
         private System.Windows.Forms.Button btnClearResult;
         private System.Windows.Forms.TextBox txtValidationResult;
@@ -1185,6 +1059,26 @@ namespace UITest
         private System.Windows.Forms.TextBox txtDbStatus;
         private System.Windows.Forms.TextBox txtDbConnectionString;
         private System.Windows.Forms.Label lblDbConnectionString;
+        private System.Windows.Forms.GroupBox grpMessageSender;
+        private System.Windows.Forms.Label lblSimpleMessageText;
+        private System.Windows.Forms.TextBox txtSimpleMessageText;
+        private System.Windows.Forms.Label lblSimpleTargetDevice;
+        private System.Windows.Forms.TextBox txtSimpleTargetDevice;
+        private System.Windows.Forms.CheckBox chkSimpleInstantMessage;
+        private System.Windows.Forms.Button btnSimpleSendMessage;
+        private System.Windows.Forms.Button btnSimpleUseDefaults;
+        private System.Windows.Forms.Button btnSimpleClearResult;
+        private System.Windows.Forms.TextBox txtSimpleResult;
+        private System.Windows.Forms.GroupBox grpTableBrowser;
+        private System.Windows.Forms.Label lblTableName;
+        private System.Windows.Forms.ComboBox cmbTables;
+        private System.Windows.Forms.Button btnLoadTables;
+        private System.Windows.Forms.Label lblTableFilter;
+        private System.Windows.Forms.TextBox txtTableFilter;
+        private System.Windows.Forms.Button btnQueryTable;
+        private System.Windows.Forms.Button btnClearTableData;
+        private System.Windows.Forms.Label lblRowCount;
+        private System.Windows.Forms.DataGridView dgvTableData;
     }
 }
 
