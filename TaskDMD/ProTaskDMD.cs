@@ -33,6 +33,7 @@ namespace ASI.Wanda.DCU.TaskDMD
         private int _initialDelay = 2000;    // 重試延遲時間（毫秒）
         private bool _isConnecting = false;  // 標記當前是否在連接過程中
         private bool _isConnected = false;   // 標記是否已連接成功
+        private ScheduledTask _powerScheduler = null; // 持有排程，StopTask 時可停止
         #endregion
 
 
@@ -96,11 +97,11 @@ namespace ASI.Wanda.DCU.TaskDMD
             // Default to an error state
             try
             {
-                // 1. 啟動 ScheduledTask，加入偵錯日誌
+                // 1. 啟動 ScheduledTask（連線成功後才能傳入有效的 mDMD_API）
                 ASI.Lib.Log.DebugLog.Log(_mProcName, "嘗試啟動 ScheduledTask...");
-                var task = new ScheduledTask();
-
-                task.StartPowerSettingScheduler("LG01");  
+                ConnToDMDServer(); // 先確保連線，mDMD_API 才有效
+                var scheduledTaskFactory = new ScheduledTask(mDMD_API);
+                _powerScheduler = scheduledTaskFactory.StartPowerSettingScheduler("LG01");
                 ASI.Lib.Log.DebugLog.Log(_mProcName, "ScheduledTask 已啟動成功.");
 
                 // 2. 初始化資料庫連線
@@ -187,6 +188,11 @@ namespace ASI.Wanda.DCU.TaskDMD
         /// </summary>
         public override void StopTask()
         {
+            // 停止節能排程
+            _powerScheduler?.Stop();
+            _powerScheduler?.Dispose();
+            _powerScheduler = null;
+
             if (mDMD_API != null)
             {
                 mDMD_API.Dispose();

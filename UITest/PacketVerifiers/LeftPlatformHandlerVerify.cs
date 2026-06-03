@@ -1,35 +1,23 @@
-using Display;
+﻿using Display;
 
 using System;
 
 using static Display.DisplaySettingsEnums;
 
-namespace UITest.Verify
+namespace UITest.PacketVerifiers
 {
-    /// <summary>
-    /// 左側月台版型：CommandType(1) + skip 4 → WindowDisplayMode + Factory
-    /// </summary>
     public class LeftPlatformHandlerVerify : PacketVerifyBase
     {
         protected override bool CheckMessageType(byte[] data, ref int i, out string errorMessage)
         {
             errorMessage = "";
-
-            // 左側版行 CommandType
             var cmdType = (DisplaySettingsEnums.CommandType)data[i];
             if (!Enum.IsDefined(typeof(DisplaySettingsEnums.CommandType), cmdType))
-            {
-                errorMessage = $"Invalid CommandType at byte {i}, received {data[i]:X2}";
-                return false;
-            }
-            i += 5; // CommandType(1) + 4 bytes 版型參數
-
+            { errorMessage = $"Invalid CommandType at byte {i}, received {data[i]:X2}"; return false; }
+            i += 5;
             WindowDisplayMode msgType = (WindowDisplayMode)data[i];
             if (!Enum.IsDefined(typeof(WindowDisplayMode), msgType))
-            {
-                errorMessage = $"Invalid messageType at byte {i}, received {data[i]:X2}";
-                return false;
-            }
+            { errorMessage = $"Invalid messageType at byte {i}, received {data[i]:X2}"; return false; }
             return MessageTypeHandlerFactory.GetHandler(msgType).Handle(data, ref i, out errorMessage);
         }
     }

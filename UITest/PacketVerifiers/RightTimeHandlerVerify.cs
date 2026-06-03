@@ -1,34 +1,23 @@
-using Display;
+﻿using Display;
 
 using System;
 
 using static Display.DisplaySettingsEnums;
 
-namespace UITest.Verify
+namespace UITest.PacketVerifiers
 {
-    /// <summary>
-    /// 右側時間版型：CommandType(1) + skip 5 → WindowDisplayMode + Factory
-    /// </summary>
     public class RightTimeHandlerVerify : PacketVerifyBase
     {
         protected override bool CheckMessageType(byte[] data, ref int i, out string errorMessage)
         {
             errorMessage = "";
-
             var cmdType = (DisplaySettingsEnums.CommandType)data[i];
             if (!Enum.IsDefined(typeof(DisplaySettingsEnums.CommandType), cmdType))
-            {
-                errorMessage = $"Invalid CommandType at byte {i}, received {data[i]:X2}";
-                return false;
-            }
+            { errorMessage = $"Invalid CommandType at byte {i}, received {data[i]:X2}"; return false; }
             i += 6;
-
             WindowDisplayMode msgType = (WindowDisplayMode)data[i];
             if (!Enum.IsDefined(typeof(WindowDisplayMode), msgType))
-            {
-                errorMessage = $"Invalid messageType at byte {i}, received {data[i]:X2}";
-                return false;
-            }
+            { errorMessage = $"Invalid messageType at byte {i}, received {data[i]:X2}"; return false; }
             return MessageTypeHandlerFactory.GetHandler(msgType).Handle(data, ref i, out errorMessage);
         }
     }

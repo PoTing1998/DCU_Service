@@ -1,45 +1,22 @@
-using Display;
+﻿using Display;
 
 using System;
 
 using static Display.DisplaySettingsEnums;
 
-namespace UITest.Verify
+namespace UITest.PacketVerifiers
 {
-    /// <summary>
-    /// 列車動態版型：
-    /// - CheckSequenceLength 只允許 0x02
-    /// - CheckMessageType 直接為 WindowDisplayMode
-    /// - ValidatePacket 有額外的 PhotoIndex / StringMode / StringText 步驟（共 23 步）
-    /// </summary>
     public class TrainDynamicVerify : PacketVerifyBase
     {
-        // 列車只允許 0x02
         protected override bool CheckSequenceLength(byte[] data, ref int i, out string errorMessage)
         {
             errorMessage = "";
-            if (data[i] != 0x02)
-            {
-                errorMessage = $"Expected 0x02 at byte {i}";
-                return false;
-            }
+            if (data[i] != 0x02) { errorMessage = $"Expected 0x02 at byte {i}"; return false; }
             i++;
-
-            if (i + 2 > data.Length)
-            {
-                errorMessage = $"Insufficient data for SequenceLength at byte {i}";
-                return false;
-            }
-
-            int seqLen = data[i] | (data[i + 1] << 8);
-            i += 2;
-
+            if (i + 2 > data.Length) { errorMessage = $"Insufficient data for SequenceLength at byte {i}"; return false; }
+            int seqLen = data[i] | (data[i + 1] << 8); i += 2;
             int seqEnd = i + seqLen - 2;
-            if (seqEnd + 1 >= data.Length)
-            {
-                errorMessage = $"Sequence length extends beyond data length at byte {seqEnd}";
-                return false;
-            }
+            if (seqEnd + 1 >= data.Length) { errorMessage = $"Sequence length beyond data at byte {seqEnd}"; return false; }
             return true;
         }
 
@@ -48,18 +25,13 @@ namespace UITest.Verify
             errorMessage = "";
             WindowDisplayMode msgType = (WindowDisplayMode)data[i];
             if (!Enum.IsDefined(typeof(WindowDisplayMode), msgType))
-            {
-                errorMessage = $"Invalid messageType at byte {i}, received {data[i]:X2}";
-                return false;
-            }
+            { errorMessage = $"Invalid messageType at byte {i}, received {data[i]:X2}"; return false; }
             return MessageTypeHandlerFactory.GetHandler(msgType).Handle(data, ref i, out errorMessage);
         }
 
-        // 列車版型有額外的圖片區塊步驟，覆寫整個驗證流程
         public override bool ValidatePacket(byte[] data, out string errorMessage)
         {
-            int i = 0;
-            errorMessage = "";
+            int i = 0; errorMessage = "";
             try
             {
                 if (!CheckStartCode(data, ref i, out errorMessage))      { errorMessage = $"[Step 1]  {errorMessage}"; return false; }
@@ -74,50 +46,33 @@ namespace UITest.Verify
                 if (!CheckMessageLength(data, ref i, out errorMessage))  { errorMessage = $"[Step 10] {errorMessage}"; return false; }
                 if (!CheckMessageLevel(data, ref i, out errorMessage))   { errorMessage = $"[Step 11] {errorMessage}"; return false; }
                 if (!CheckMessageScroll(data, ref i, out errorMessage))  { errorMessage = $"[Step 12] {errorMessage}"; return false; }
-                // 第一段文字
                 if (!CheckStringMode(data, ref i, out errorMessage))     { errorMessage = $"[Step 13] {errorMessage}"; return false; }
                 if (!CheckStringText(data, ref i, out errorMessage))     { errorMessage = $"[Step 14] {errorMessage}"; return false; }
-                // 第一段圖片
                 if (!CheckStringMode(data, ref i, out errorMessage))     { errorMessage = $"[Step 15] {errorMessage}"; return false; }
                 if (!CheckPhotoIndex(data, ref i, out errorMessage))     { errorMessage = $"[Step 16] {errorMessage}"; return false; }
-                // 第二段文字
                 if (!CheckStringMode(data, ref i, out errorMessage))     { errorMessage = $"[Step 17] {errorMessage}"; return false; }
                 if (!CheckStringText(data, ref i, out errorMessage))     { errorMessage = $"[Step 18] {errorMessage}"; return false; }
-                // 第二段圖片
                 if (!CheckStringMode(data, ref i, out errorMessage))     { errorMessage = $"[Step 19] {errorMessage}"; return false; }
                 if (!CheckPhotoIndex(data, ref i, out errorMessage))     { errorMessage = $"[Step 20] {errorMessage}"; return false; }
-                // 第三段文字
                 if (!CheckStringMode(data, ref i, out errorMessage))     { errorMessage = $"[Step 21] {errorMessage}"; return false; }
                 if (!CheckStringText(data, ref i, out errorMessage))     { errorMessage = $"[Step 22] {errorMessage}"; return false; }
                 if (!CheckEndBytes(data, ref i, out errorMessage))       { errorMessage = $"[Step 23] {errorMessage}"; return false; }
             }
-            catch (Exception ex)
-            {
-                errorMessage = $"Exception occurred: {ex.Message}";
-                return false;
-            }
+            catch (Exception ex) { errorMessage = $"Exception: {ex.Message}"; return false; }
             return true;
         }
 
-        // 列車專用：驗證圖片索引區塊 (GraphicStartIndex 2B + GraphicNumber 1B + RGB 3B + 0x1F)
         private bool CheckPhotoIndex(byte[] data, ref int i, out string errorMessage)
         {
             errorMessage = "";
-
             if (i + 2 > data.Length) { errorMessage = $"Insufficient data for GraphicStartIndex at byte {i}"; return false; }
-            i += 2; // GraphicStartIndex (2 bytes)
-
+            i += 2;
             if (i + 1 > data.Length) { errorMessage = $"Insufficient data for GraphicNumber at byte {i}"; return false; }
-            i += 1; // GraphicNumber (1 byte)
-
+            i += 1;
             if (i + 3 > data.Length) { errorMessage = $"Insufficient data for GraphicColor at byte {i}"; return false; }
-            i += 3; // RGB (3 bytes)
-
+            i += 3;
             if (i >= data.Length || data[i] != 0x1F)
-            {
-                errorMessage = $"Expected 0x1F at byte {i}, but found {(i < data.Length ? data[i].ToString("X2") : "EOF")}";
-                return false;
-            }
+            { errorMessage = $"Expected 0x1F at byte {i}"; return false; }
             i++;
             return true;
         }
