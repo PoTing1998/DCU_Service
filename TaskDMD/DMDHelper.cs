@@ -118,7 +118,7 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             try
             {
-                ///抓取CMFT的資料表 
+                // 從 DMD DB 抓取資料表
                 var tempList = DMD.DB.Tables.DMD.dmdPlayList.SelectAll();
                 ///轉換過程 
                 var convertedList = tempList 

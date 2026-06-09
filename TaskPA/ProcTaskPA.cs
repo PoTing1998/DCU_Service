@@ -164,10 +164,14 @@ namespace ASI.Wanda.DCU.TaskPA
                 var msg = new ASI.Wanda.DMD.Message.Message(ASI.Wanda.DMD.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sHexString));
 
                 // 發送兩次以確保廣播被接收
-                serial.Send(arrPacketByte);
-                ASI.Lib.Log.DebugLog.Log("發送到 PA 的封包內容第一次", sHexString.ToString());
-                serial.Send(arrPacketByte);
-                ASI.Lib.Log.DebugLog.Log("發送到 PA 的封包內容第二次", sHexString.ToString());
+                // arrPacketByte 僅在有預建封包時才送出
+                if (arrPacketByte != null && arrPacketByte.Length > 0)
+                {
+                    serial.Send(arrPacketByte);
+                    ASI.Lib.Log.DebugLog.Log("發送到 PA 的封包內容第一次", sHexString.ToString());
+                    serial.Send(arrPacketByte);
+                    ASI.Lib.Log.DebugLog.Log("發送到 PA 的封包內容第二次", sHexString.ToString());
+                }
 
                 // 發送到各個看板 
                 PAHelper.SendToTaskCDU(2, 1, msg.JsonContent);
@@ -216,17 +220,9 @@ namespace ASI.Wanda.DCU.TaskPA
             ASI.Lib.Log.DebugLog.Log("未收到回覆，重新傳送一次", sHexString.ToString()); // 紀錄log
         }
         private void StartResponseTimer() => responseTimer?.Start();
-        static private byte CalculateLRC(byte[] text)
-        {
-            byte xor = 0;
-            // if no data then done  
-            if (text.Length <= 0)
-                return 0;
-            // incorporate remaining bytes into the value
-            for (int i = 0; i < text.Length; i++)
-                xor ^= text[i];
-            return xor;
-        }
+        // 已移至 ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC()
+        static private byte CalculateLRC(byte[] data)
+            => ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC(data);
         /// <summary>
         /// 處理TaskPDU的訊息  
         /// </summary> 
@@ -321,7 +317,7 @@ namespace ASI.Wanda.DCU.TaskPA
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName"); 
                         sLog = $"sJsonObjectName = {sJsonObjectName}";
                         ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);  
-                        //將訊息傳給CMFT 
+                        //將訊息回傳給 DMD Server
                         var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDCU.Res_SendPreRecordMessage)ASI.Wanda.DMD.Message.Helper.GetJsonObject(mSGFromTaskDCU.JsonData);
 
                         //組封包 

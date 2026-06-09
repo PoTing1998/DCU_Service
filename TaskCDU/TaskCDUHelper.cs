@@ -402,9 +402,13 @@ namespace ASI.Wanda.DCU.TaskCDU
         {
             var startCode = new byte[] { 0x55, 0xAA };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, false);
-            var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, true);
+            var back  = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, true);
             var processor = new PacketProcessor();
-            return processor.CreatePacket(startCode, new List<byte> { 0x17, 0x18 }, new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
+            return processor.CreatePacket(
+                startCode,
+                new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, // 使用 DB 查詢結果
+                new PassengerInfoHandler().FunctionCode,
+                new List<Display.Sequence> { sequence });
         }
         /// <summary>
         /// 序列化封包並透過串口傳送封包資料。
@@ -417,7 +421,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             var serializedData = processor.SerializePacket(packet);
             string result = BitConverter.ToString(serializedData).Replace("-", " ");
             ASI.Lib.Log.DebugLog.Log(_mProcName + " SendMessageToDisplay", "Serialized display packet: " + result);
-            // _mSerial.Send(serializedData); 
+            _mSerial.Send(serializedData);
             return serializedData;
         }
         /// <summary>
@@ -485,18 +489,24 @@ namespace ASI.Wanda.DCU.TaskCDU
                 );
                 serializedDataEnglish = processor.SerializePacket(packet2);
 
-                // 如果情境為 84，執行延遲並關閉
+                // 如果情境為 84，在背景執行緒延遲後關閉，避免阻塞主執行緒
                 if (situation == 84)
                 {
-                    System.Threading.Thread.Sleep(10000); // 同步延遲十秒
-                    var OffMode = new byte[] { 0x02 };
-                    var packetOff = processor.CreatePacketOff(
-                        startCode,
-                        new List<byte> { 0x11, 0x12 },
-                        function.FunctionCode,
-                        OffMode
-                    );
-                    serializedDataOff = processor.SerializePacket(packetOff);
+                    var capturedProcessor = processor;
+                    var capturedStartCode = startCode;
+                    var capturedFunction  = function;
+                    var capturedSerial    = _mSerial;
+                    System.Threading.Tasks.Task.Run(() =>
+                    {
+                        System.Threading.Thread.Sleep(10000);
+                        var OffMode   = new byte[] { 0x02 };
+                        var packetOff = capturedProcessor.CreatePacketOff(
+                            capturedStartCode,
+                            new List<byte> { 0x11, 0x12 },
+                            capturedFunction.FunctionCode,
+                            OffMode);
+                        capturedSerial.Send(capturedProcessor.SerializePacket(packetOff));
+                    });
                 }
             }
             catch (Exception ex)
@@ -574,7 +584,7 @@ namespace ASI.Wanda.DCU.TaskCDU
             };
         }
         /// <summary>
-        /// 將CMFT傳送過來的資料字串切割
+        /// 將 DMD Server 傳送過來的設備 ID 字串切割
         /// </summary>
         /// <param name="deviceString"></param>
         /// <returns></returns>

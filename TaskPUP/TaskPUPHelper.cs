@@ -537,7 +537,7 @@ namespace ASI.Wanda.DCU.TaskPUP
                 //從資料庫讀取資料
                 var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
                 string[] notEcoDays = stationData.not_eco_day.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                if (stationData.eco_mode == "on")
+                if (string.Equals(stationData.eco_mode, "ON", System.StringComparison.OrdinalIgnoreCase))
                 {
                     // 獲取當前日期的月和日以及現在的時間（時和分）
                     int currentMonth = DateTime.Now.Month;

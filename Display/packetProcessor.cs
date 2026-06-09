@@ -22,19 +22,15 @@ namespace Display
 
         public Packet CreatePacket(byte[] startCode, List<byte> ids, byte functionCode, List<Sequence> sequences)
         {
-            var packet = new Packet
+            // CheckSum 由 Packet.ToBytes() 在序列化時自動計算（僅加總 Data bytes）
+            // 此處不需要另外計算
+            return new Packet
             {
-                StartCode = startCode,
-                IDs = ids,
+                StartCode    = startCode,
+                IDs          = ids,
                 FunctionCode = functionCode,
-                Sequences = sequences
+                Sequences    = sequences
             };
-            // Generate CheckSum after all other fields are set
-            
-            // 計算 CheckSum，不包含 CheckSum 本身
-            var tempBytes = packet.ToBytes().Take(packet.ToBytes().Length - 1).ToArray();
-            packet.CheckSum = (byte)(tempBytes.Sum(b => b) & 0xFF);
-            return packet;
         }
 
 
@@ -49,9 +45,7 @@ namespace Display
                 Sequences = sequences
             };
 
-            // Generate CheckSum after all other fields are set
-            customPacket.CheckSum = (byte)(customPacket.ToBytes().Sum(b => b) & 0xFF);
-
+            // CheckSum 由 CustomPacket.ToBytes() 在序列化時自動計算
             return customPacket;
         }
 

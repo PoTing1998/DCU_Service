@@ -395,7 +395,7 @@ namespace ASI.Wanda.DCU.TaskDMD
 
         private void HandleUnexpectedResponse(ASI.Wanda.DMD.Message.Message DMDServerMessage) 
         {
-            ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從CMFT來的訊息不應有Response，MessageType:{DMDServerMessage.MessageType}");
+            ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從DMD Server來的訊息不應有Response，MessageType:{DMDServerMessage.MessageType}");
         }
 
         private void SendToPlatform<T>(TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, T messageObject)

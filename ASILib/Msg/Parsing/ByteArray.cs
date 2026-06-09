@@ -305,6 +305,50 @@ namespace ASI.Lib.Msg.Parsing
         }
 
         /// <summary>
+        /// 計算 LRC（所有 byte 做 XOR）
+        /// </summary>
+        /// <param name="data">來源 byte[]</param>
+        /// <returns>LRC 校驗值；若陣列為空則回傳 0</returns>
+        public static byte CalculateLRC(byte[] data)
+        {
+            if (data == null || data.Length == 0)
+                return 0;
+            byte xor = 0;
+            for (int i = 0; i < data.Length; i++)
+                xor ^= data[i];
+            return xor;
+        }
+
+        /// <summary>
+        /// 將以空白分隔的 16 進位字串轉換為 byte[]
+        /// 例如："55 AA 01" → new byte[]{ 0x55, 0xAA, 0x01 }
+        /// 亦支援不含空白的連續字串，例如："55AA01"
+        /// </summary>
+        /// <param name="hex">16 進位字串</param>
+        /// <returns>轉換後的 byte[]；格式錯誤時回傳 null</returns>
+        public static byte[] HexStringToBytes(string hex)
+        {
+            if (string.IsNullOrWhiteSpace(hex))
+                return null;
+            try
+            {
+                // 移除空白與引號，統一大寫
+                hex = hex.Replace(" ", "").Replace("\"", "").ToUpper();
+                if (hex.Length % 2 != 0)
+                    throw new ArgumentException("16 進位字串長度必須為偶數");
+                byte[] result = new byte[hex.Length / 2];
+                for (int i = 0; i < hex.Length; i += 2)
+                    result[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                ASI.Lib.Log.ErrorLog.Log("ByteArray.HexStringToBytes", ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// 從陣列中尋找是否存在另一個指定陣列內容
         /// </summary>
         /// <param name="source">來源陣列</param>

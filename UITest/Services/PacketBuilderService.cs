@@ -1,22 +1,20 @@
+using ASI.Lib.Msg.Parsing;
 using Display;
 using Display.DisplayMode;
 using Display.Function;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using static Display.DisplaySettingsEnums;
 
 namespace UITest.Services
 {
-    /// <summary>
-    /// 封包組成步驟的結果
-    /// </summary>
+    /// <summary>封包組成步驟的結果</summary>
     public class BuildResult<T>
     {
-        public bool IsValid { get; set; }
-        public T Value { get; set; }
+        public bool   IsValid      { get; set; }
+        public T      Value        { get; set; }
         public string ErrorMessage { get; set; }
-        public string HexDump { get; set; }
+        public string HexDump      { get; set; }
 
         public static BuildResult<T> Success(T value, string hexDump = null)
             => new BuildResult<T> { IsValid = true, Value = value, HexDump = hexDump };
@@ -25,30 +23,32 @@ namespace UITest.Services
             => new BuildResult<T> { IsValid = false, ErrorMessage = error };
     }
 
-    /// <summary>
-    /// 負責封包各層的組建，不依賴任何 UI 元件
-    /// </summary>
+    /// <summary>負責封包各層的組建，不依賴任何 UI 元件</summary>
     public class PacketBuilderService
     {
         private readonly PacketValidationService _validator = new PacketValidationService();
 
-        // ── Step 1：從輸入文字解析 TextStringBody ────────────────────────
+        // ── Step 1：建立 TextStringBody ──────────────────────────────────
 
-        public BuildResult<TextStringBody> BuildTextStringBody(
-            string fontColor, string messageContent,
-            Func<string, string> pickColor,
-            Func<string, byte[]> fromHex)
+        /// <param name="hexColor">RGB Hex 字串，例如 "FF0000" 或 "#FF0000"</param>
+        /// <param name="messageContent">顯示文字（BIG-5 相容）</param>
+        public BuildResult<TextStringBody> BuildTextStringBody(string hexColor, string messageContent)
         {
             try
             {
-                var hexColor = pickColor(fontColor);
-                var colorBytes = fromHex(hexColor);
+                if (string.IsNullOrWhiteSpace(hexColor))
+                    return BuildResult<TextStringBody>.Fail("顏色不能為空。");
+
+                byte[] colorBytes = DataConversion.FromHex(hexColor);
+                if (colorBytes == null || colorBytes.Length != 3)
+                    return BuildResult<TextStringBody>.Fail("顏色格式錯誤，請輸入 6 碼 Hex（例如 FF0000）。");
+
                 var body = new TextStringBody
                 {
                     RedColor   = colorBytes[0],
                     GreenColor = colorBytes[1],
                     BlueColor  = colorBytes[2],
-                    StringText = messageContent
+                    StringText = messageContent ?? string.Empty
                 };
 
                 var vr = _validator.ValidateStringBody(body);
@@ -63,7 +63,7 @@ namespace UITest.Services
             }
         }
 
-        // ── Step 2：組成 StringMessage ───────────────────────────────────
+        // ── Step 2：建立 StringMessage ───────────────────────────────────
 
         public BuildResult<StringMessage> BuildStringMessage(TextStringBody body)
         {
@@ -80,22 +80,19 @@ namespace UITest.Services
             return BuildResult<StringMessage>.Success(msg, ToHex(msg.ToBytes()));
         }
 
-        // ── Step 3：組成 FullWindow ──────────────────────────────────────
+        // ── Step 3：建立 FullWindow ──────────────────────────────────────
 
-        public BuildResult<FullWindow> BuildFullWindow(StringMessage stringMessage)
+        /// <param name="level">訊息等級 1–4</param>
+        /// <param name="scroll">捲動設定</param>
+        public BuildResult<FullWindow> BuildFullWindow(StringMessage stringMessage, byte level, ScrollInfo scroll)
         {
             try
             {
                 var fw = new FullWindow
                 {
-                    MessageType  = 0x71,
-                    MessageLevel = 3,
-                    MessageScroll = new ScrollInfo
-                    {
-                        ScrollMode  = 0x64,
-                        ScrollSpeed = 7,
-                        PauseTime   = 10
-                    },
+                    MessageType   = 0x71,
+                    MessageLevel  = level,
+                    MessageScroll = scroll,
                     MessageContent = new List<StringMessage> { stringMessage }
                 };
 
@@ -116,14 +113,15 @@ namespace UITest.Services
             }
         }
 
-        // ── Step 4：組成 Sequence ────────────────────────────────────────
+        // ── Step 4：建立 Sequence ────────────────────────────────────────
 
-        public BuildResult<Sequence> BuildSequence(FullWindow fullWindow)
+        /// <param name="font">字型設定</param>
+        public BuildResult<Sequence> BuildSequence(FullWindow fullWindow, FontSetting font)
         {
             var seq = new Sequence
             {
                 SequenceNo = 1,
-                Font       = new FontSetting { Size = FontSize.Font24x24, Style = Display.FontStyle.Ming },
+                Font       = font,
                 Messages   = new List<IMessage> { fullWindow }
             };
 
@@ -134,18 +132,17 @@ namespace UITest.Services
             return BuildResult<Sequence>.Success(seq, ToHex(seq.ToBytes()));
         }
 
-        // ── Step 5：組成完整封包 ─────────────────────────────────────────
+        // ── Step 5：建立完整封包 ─────────────────────────────────────────
 
-        public BuildResult<Packet> BuildPacket(Sequence sequence)
+        /// <param name="ids">目標顯示板 ID 清單</param>
+        /// <param name="functionCode">功能碼（例如 0x34）</param>
+        public BuildResult<Packet> BuildPacket(Sequence sequence, List<byte> ids, byte functionCode)
         {
             try
             {
-                var processor  = new PacketProcessor();
-                var startCode  = new byte[] { 0x55, 0xAA };
-                var handler    = new PassengerInfoHandler();
-                var ids        = new List<byte> { 0x11, 0x12 };
-
-                var packet = processor.CreatePacket(startCode, ids, handler.FunctionCode, new List<Sequence> { sequence });
+                var processor = new PacketProcessor();
+                var startCode = new byte[] { 0x55, 0xAA };
+                var packet    = processor.CreatePacket(startCode, ids, functionCode, new List<Sequence> { sequence });
                 return BuildResult<Packet>.Success(packet, ToHex(packet.ToBytes()));
             }
             catch (Exception ex)
@@ -167,15 +164,6 @@ namespace UITest.Services
             int end = source.IndexOf("\r\n", start);
             if (end == -1) end = source.Length;
             return source.Substring(start, end - start).Trim();
-        }
-
-        public static byte[] ConvertHexStringToByteArray(string hex)
-        {
-            hex = hex.Replace(" ", "");
-            byte[] arr = new byte[hex.Length / 2];
-            for (int i = 0; i < arr.Length; i++)
-                arr[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
-            return arr;
         }
     }
 }

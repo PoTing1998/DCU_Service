@@ -266,10 +266,11 @@ namespace ASI.Wanda.DCU.TaskPDN
         {
             ASI.Lib.Log.DebugLog.Log($"{_mProcName} processing 0x01 case", sJsonData);
             dataBytes[2] = 0x06;
-            Array.Resize(ref dataBytes, dataBytes.Length - 1); // Remove the last byte
-            byte newLRC = CalculateLRC(dataBytes);
-            Array.Resize(ref dataBytes, dataBytes.Length + 1); // Add a byte back
+            Array.Resize(ref dataBytes, dataBytes.Length - 1);
+            byte newLRC = ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC(dataBytes);
+            Array.Resize(ref dataBytes, dataBytes.Length + 1);
             dataBytes[dataBytes.Length - 1] = newLRC;
+            _mSerial.Send(dataBytes); // 回傳 ACK 給 PA 設備
             ASI.Lib.Log.DebugLog.Log($"{_mProcName} replied to TaskPA message at {sRcvTime}", sJsonData);
         }
         
@@ -301,60 +302,16 @@ namespace ASI.Wanda.DCU.TaskPDN
         /// </summary>
         /// <param name="hex">The hexadecimal string to convert.</param>
         /// <returns>A byte array representing the hexadecimal string.</returns>
+        // 已移至 ASI.Lib.Msg.Parsing.ByteArray.HexStringToBytes()
         public static byte[] HexStringToBytes(string hex)
-        {
-            var mProcName = "HexStringToBytes";
-            try
-            {
-                // 移除所有空格和無效字符
-                hex = hex.Replace(" ", "").Replace("\"", "").ToUpper();
+            => ASI.Lib.Msg.Parsing.ByteArray.HexStringToBytes(hex);
 
-                // 打印原始的十六進位字串
-                ASI.Lib.Log.DebugLog.Log(mProcName, "HexStringToBytes 轉換前的字串: " + hex);
-
-                if (hex.Length % 2 != 0)
-                {
-                    throw new ArgumentException("十六進位字串的長度必須是偶數");
-                }
-                // 確保所有字符都是有效的十六進位字符
-                foreach (char c in hex)
-                {
-                    if (!Uri.IsHexDigit(c))
-                    {
-                        throw new ArgumentException($"十六進位字串包含無效字符: {c}");
-                    }
-                }
-                
-                // 創建一個字節陣列，長度為字串長度的一半 
-                byte[] bytes = new byte[hex.Length / 2];
-
-                // 循環遍歷十六進位字串，將每對十六進位字符轉換為一個字節
-                for (int i = 0; i < hex.Length; i += 2)
-                {
-                    bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-                }
-
-                return bytes;
-            }
-            catch (Exception ex)
-            {
-                ASI.Lib.Log.ErrorLog.Log(mProcName, "HexStringToBytes 轉換錯誤: " + ex.ToString());
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// 計算LRC
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
+        // 已移至 ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC()
         public byte CalculateLRC(byte[] text)
         {
-            byte xor = 0;
-            // if no data then done  
+            byte xor = 0; // placeholder — 避免移除後影響其他 call site
             if (text.Length <= 0)
                 return 0;
-            // incorporate remaining bytes into the value  
             for (int i = 0; i < text.Length; i++)
                 xor ^= text[i];
             return xor;

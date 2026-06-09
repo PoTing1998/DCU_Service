@@ -53,8 +53,10 @@ namespace UITest.Services
 
         public ValidationResult ValidateStringBody(TextStringBody stringBody)
         {
-            bool colorOk = stringBody.RedColor >= 0x00 && stringBody.RedColor <= 0xFF
-                        && stringBody.GreenColor >= 0x00 && stringBody.BlueColor <= 0xFF;
+            // 修正：原本漏掉 GreenColor 上界與 BlueColor 下界的檢查
+            bool colorOk = stringBody.RedColor   >= 0x00 && stringBody.RedColor   <= 0xFF
+                        && stringBody.GreenColor >= 0x00 && stringBody.GreenColor <= 0xFF
+                        && stringBody.BlueColor  >= 0x00 && stringBody.BlueColor  <= 0xFF;
             if (!colorOk)
                 return ValidationResult.Fail("StringBody 顏色值不合法。");
 
@@ -66,7 +68,11 @@ namespace UITest.Services
             if (stringMessage.StringMode != 0x2A && stringMessage.StringMode != 0x2B)
                 return ValidationResult.Fail("StringMode 不在合法範圍內。");
 
-            return ValidateStringText(stringMessage.StringBody.ToString());
+            // 修正：原本錯誤呼叫 .ToString()（回傳型別名稱），改為正確取得文字內容
+            if (stringMessage.StringBody is TextStringBody textBody)
+                return ValidateStringText(textBody.StringText);
+
+            return ValidationResult.Success("StringBody 驗證通過。");
         }
 
         // ── Scroll / Level / Font 驗證 ───────────────────────────────────

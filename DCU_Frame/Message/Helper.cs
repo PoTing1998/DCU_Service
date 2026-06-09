@@ -33,11 +33,11 @@ namespace ASI.Wanda.DCU.Message
         }
 
         /// <summary>
-        /// 將ASI.Wanda.CMFT.Message.Message物件轉成byte[]封包
+        /// 將 DCU Message 物件序列化成 byte[] 封包
         /// </summary>
         /// <param name="PAmessage"></param>
         /// <returns></returns>
-        public static byte[] Pack(Message CMFTmessage)
+        public static byte[] Pack(Message dcuMessage)
         {
             byte[] arrReturn = new byte[] { };
             List<byte> oByteList = new List<byte>(100);
@@ -46,52 +46,52 @@ namespace ASI.Wanda.DCU.Message
             try
             {
                 //訊息識別碼
-                //byte[] byteID = CutApart(CMFTmessage.ID);
-                oByteList.AddRange(CMFTmessage.ID);
+                //byte[] byteID = CutApart(dcuMessage.ID);
+                oByteList.AddRange(dcuMessage.ID);
 
                 //TSAI　2023/01/10 Delete Start 
                 //設定訊息長度前須先將0xAX 轉成 0xA0,0x0X
-                //CMFTmessage.Content = ASI.Wanda.CMFT.Message.Helper.CutApart(CMFTmessage.Content);
+                //dcuMessage.Content = ASI.Wanda.CMFT.Message.Helper.CutApart(dcuMessage.Content);
                 //TSAI　2023/01/10 Delete End
 
                 //訊息長度
-                if (CMFTmessage.MessageType != Message.eMessageType.Ack)
+                if (dcuMessage.MessageType != Message.eMessageType.Ack)
                 {
-                    if (CMFTmessage.LEN != null)
+                    if (dcuMessage.LEN != null)
                     {
-                        //byte[] byteLEN = CutApart(CMFTmessage.LEN);
-                        oByteList.AddRange(CMFTmessage.LEN);
+                        //byte[] byteLEN = CutApart(dcuMessage.LEN);
+                        oByteList.AddRange(dcuMessage.LEN);
                     }
 
                     //訊息內容
-                    if (CMFTmessage.Content != null)
+                    if (dcuMessage.Content != null)
                     {
                         //TSAI　2023/01/10 Add Start 
                         //設定訊息長度前須先將0xAX 轉成 0xA0,0x0X
-                        //CMFTmessage.Content = CutApart(CMFTmessage.Content);
+                        //dcuMessage.Content = CutApart(dcuMessage.Content);
                         //TSAI　2023/01/10 Add End
-                        oByteList.AddRange(CMFTmessage.Content);
+                        oByteList.AddRange(dcuMessage.Content);
                     }
 
                     //建立CRC16檢查碼
-                    CMFTmessage.CRC16 = CMFTmessage.GenCRC16();
-                    oByteList.AddRange(CMFTmessage.CRC16);
+                    dcuMessage.CRC16 = dcuMessage.GenCRC16();
+                    oByteList.AddRange(dcuMessage.CRC16);
                 }
 
                 //訊息識別碼、訊息長度、訊息內容、CRC16檢查碼等欄位皆須CutApart特別處理，避免內容包含封包頭尾
                 byte[] oByteContent = CutApart(oByteList.ToArray());
 
                 //起始識別碼
-                oSendByteList.Add(CMFTmessage.HEAD);
+                oSendByteList.Add(dcuMessage.HEAD);
 
                 //訊息類別碼
-                oSendByteList.Add((byte)CMFTmessage.MessageType);
+                oSendByteList.Add((byte)dcuMessage.MessageType);
 
                 //加入CutApart特別處理過後的訊息識別碼、訊息長度、訊息內容、CRC16檢查碼等欄位
                 oSendByteList.AddRange(oByteContent);
 
                 //封包結尾
-                oSendByteList.Add(CMFTmessage.TAIL);
+                oSendByteList.Add(dcuMessage.TAIL);
 
                 arrReturn = oSendByteList.ToArray();
 
@@ -109,7 +109,7 @@ namespace ASI.Wanda.DCU.Message
         }
 
         /// <summary>
-        /// 將byte[]封包轉換成ASI.Wanda.CMFT.Message.Message物件
+        /// 將 byte[] 封包反序列化成 DCU Message 物件
         /// </summary>
         /// <param name="msgBytes">包含起始識別碼(0xAC)及封包結尾(0xA9)的完整byte[]封包</param>
         /// <returns></returns>

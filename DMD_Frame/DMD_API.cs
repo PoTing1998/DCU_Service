@@ -163,7 +163,7 @@ namespace ASI.Wanda.DMD
         /// <summary>
         /// 指定對象送出訊息(Server端專用) 
         /// </summary>
-        /// <param name="CMFTmessage">ASI.Wanda.CMFT.Message.Message物件</param>
+        /// <param name="CMFTmessage">DMD Message 物件</param>
         /// <param name="target">指定傳送的Client對象IP:port</param>
         /// <returns></returns>
         public int Send(ASI.Wanda.DMD.Message.Message DMDmessage, string target)
