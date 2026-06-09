@@ -42,6 +42,7 @@
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -51,6 +52,12 @@
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CommLogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CommLogForm.Designer.cs">
+      <DependentUpon>CommLogForm.cs</DependentUpon>
     </Compile>
     <Compile Include="IMessageType.cs" />
     <Compile Include="Verify\PacketVerifyBase.cs" />
@@ -66,6 +73,56 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\PacketValidationService.cs" />
     <Compile Include="Services\PacketBuilderService.cs" />
+    <Compile Include="Services\DisplayMessageService.cs" />
+    <Compile Include="Services\ConnectionMonitor.cs" />
+    <Compile Include="Controls\ConnectionMonitorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ConnectionMonitorControl.Designer.cs">
+      <DependentUpon>ConnectionMonitorControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DisplayModeControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\DisplayModeControl.Designer.cs">
+      <DependentUpon>DisplayModeControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DisplayPowerControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\DisplayPowerControl.Designer.cs">
+      <DependentUpon>DisplayPowerControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AlarmLightControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\AlarmLightControl.Designer.cs">
+      <DependentUpon>AlarmLightControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\CommTimeoutControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\CommTimeoutControl.Designer.cs">
+      <DependentUpon>CommTimeoutControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\CalendarClockControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\CalendarClockControl.Designer.cs">
+      <DependentUpon>CalendarClockControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\BrightnessControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\BrightnessControl.Designer.cs">
+      <DependentUpon>BrightnessControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\CountdownUnitControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\CountdownUnitControl.Designer.cs">
+      <DependentUpon>CountdownUnitControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\DisplayMessageControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

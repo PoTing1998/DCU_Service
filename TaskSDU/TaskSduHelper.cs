@@ -480,70 +480,74 @@ namespace ASI.Wanda.DCU.TaskSDU
         public dmdPowerSetting PowerSetting(string stationID)
         {
             var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
-            string[] notEcoDays = stationData.not_eco_day.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (stationData.eco_mode == "ON")
+            if (stationData == null)
             {
-                // 獲取當前日期的月和日以及現在的時間（時和分）
-                int currentMonth = DateTime.Now.Month;
-                int currentDay = DateTime.Now.Day;
-                int currentHour = DateTime.Now.Hour;
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, "無法取得車站節能設定：" + stationID);
+                return null;
+            }
 
-                // 使用 List 儲存不啟動節能模式的日期 
-                var nonEcoDates = new List<(int Month, int Day)>();
+            if (stationData.eco_mode != "ON")
+                return null;
 
-                foreach (string day in notEcoDays)
+            var    now         = DateTime.Now;
+            string todayKey    = now.Month.ToString("D2") + now.Day.ToString("D2");
+            int    currentHour = now.Hour;
+
+            string[] notEcoDays = stationData.not_eco_day.Split(
+                new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+            // Step 1：先判斷今天是否為非節能日（找到即跳出）
+            bool isNonEcoDay = false;
+            foreach (string day in notEcoDays)
+            {
+                if (day.Length == 4 &&
+                    int.TryParse(day.Substring(0, 2), out int m) &&
+                    int.TryParse(day.Substring(2, 2), out int d))
                 {
-                    if (day.Length == 4)
+                    if (m.ToString("D2") + d.ToString("D2") == todayKey)
                     {
-                        int month = int.Parse(day.Substring(0, 2));
-
-                        int dayOfMonth = int.Parse(day.Substring(2, 2));
-                        nonEcoDates.Add((month, dayOfMonth));
-
-                        // 檢查當前日期是否在不啟動節能模式的日期列表中 
-                        if (month == currentMonth && dayOfMonth == currentDay)
-                        {
-                            // 當前日期不啟動節能模式
-                            continue;
-                        }
+                        isNonEcoDay = true;
+                        break;
                     }
-                    else
-                    {
-                        // 處理長度不是 4 的情況，代表日期格式錯誤 
-                        ASI.Lib.Log.ErrorLog.Log(_mProcName, "無效的日期格式：" + day);
-                        continue;
-                    }
+                }
+                else
+                {
+                    ASI.Lib.Log.ErrorLog.Log(_mProcName, "無效的日期格式：" + day);
+                }
+            }
 
-                    // 檢查開關顯示器的時間   
-                    string[] autoPlayTimes = stationData.auto_play_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                    string[] autoEcoTimes = stationData.auto_eco_time.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (isNonEcoDay)
+            {
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "今天是非節能日，不執行節能排程");
+                return null;
+            }
 
-                    if (autoPlayTimes.Length == 2 && autoEcoTimes.Length == 2)
-                    {
-                        int autoPlayStartHour = int.Parse(autoPlayTimes[0]);
-                        int autoPlayEndHour = int.Parse(autoPlayTimes[1]);
-                        int autoEcoStartHour = int.Parse(autoEcoTimes[0]);
-                        int autoEcoEndHour = int.Parse(autoEcoTimes[1]);
+            // Step 2：時間判斷在迴圈外，只執行一次
+            string[] autoPlayTimes = stationData.auto_play_time.Split(
+                new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] autoEcoTimes = stationData.auto_eco_time.Split(
+                new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
-                        if (currentHour >= autoPlayStartHour && currentHour <= autoPlayEndHour)
-                        {
-                            // 關閉顯示器
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, "關閉顯示器");
-                            PowerSettingOff();
-                        }
-                        else if (currentHour >= autoEcoStartHour && currentHour <= autoEcoEndHour)
-                        {
-                            // 開啟顯示器
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, "開啟顯示器");
-                            PowerSettingOpen();
-                        }
-                    }
+            if (autoPlayTimes.Length == 2 && autoEcoTimes.Length == 2 &&
+                int.TryParse(autoPlayTimes[0], out int playStart) &&
+                int.TryParse(autoPlayTimes[1], out int playEnd)   &&
+                int.TryParse(autoEcoTimes[0],  out int ecoStart)  &&
+                int.TryParse(autoEcoTimes[1],  out int ecoEnd))
+            {
+                if (currentHour >= playStart && currentHour <= playEnd)
+                {
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, "關閉顯示器");
+                    PowerSettingOff();
+                }
+                else if (currentHour >= ecoStart && currentHour <= ecoEnd)
+                {
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, "開啟顯示器");
+                    PowerSettingOpen();
                 }
             }
             else
             {
-                // 不需要做任何處理  
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, "自動播放時間或自動節能時間格式錯誤");
             }
 
             return null;

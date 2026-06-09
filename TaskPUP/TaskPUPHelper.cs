@@ -322,9 +322,16 @@ namespace ASI.Wanda.DCU.TaskPUP
             var messageContentEnProperty = typeof(T).GetProperty("message_content_en");
 
             if (fontColorProperty == null || messageContentProperty == null || messageContentEnProperty == null)
-                ASI.Lib.Log.ErrorLog.Log("資料庫取的相關資料", $"類型 {typeof(T).Name} 缺少必要屬性。");
+            {
+                var missing = (fontColorProperty == null ? "font_color " : "")
+                            + (messageContentProperty == null ? "message_content " : "")
+                            + (messageContentEnProperty == null ? "message_content_en" : "");
+                var msg = $"類型 {typeof(T).Name} 缺少必要屬性：{missing.Trim()}";
+                ASI.Lib.Log.ErrorLog.Log("CreateTextStringBody", msg);
+                throw new ArgumentException(msg);
+            }
 
-            // 提取屬性值 
+            // 提取屬性值
             var fontColor = (string)fontColorProperty.GetValue(messageLayout);
             var messageContent = (string)messageContentProperty.GetValue(messageLayout) ?? string.Empty;
             var messageContentEn = (string)messageContentEnProperty.GetValue(messageLayout) ?? string.Empty;

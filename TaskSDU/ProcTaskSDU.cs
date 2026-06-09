@@ -80,8 +80,8 @@ namespace ASI.Wanda.DCU.TaskSDU
             string dbIP = ConfigApp.Instance.GetConfigSetting("DCU_DB_IP");
             string dbPort = ConfigApp.Instance.GetConfigSetting("DCU_DB_Port");
             string dbName = ConfigApp.Instance.GetConfigSetting("DCU_DB_Name");
-            string dbUserID = "postgres";
-            string dbPassword = "postgres";
+            string dbUserID   = ConfigApp.Instance.GetConfigSetting("DCU_DB_User");
+            string dbPassword = ConfigApp.Instance.GetConfigSetting("DCU_DB_Password");
             string currentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
 
          
@@ -221,10 +221,6 @@ namespace ASI.Wanda.DCU.TaskSDU
             return -1;
         }
         #region private Method
-        // 已移至 ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC()
-        private byte calculateLRC(byte[] data)
-            => ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC(data);
-
         // 已移至 ASI.Lib.Msg.Parsing.ByteArray.HexStringToBytes()
         public static byte[] HexStringToBytes(string hex)
             => ASI.Lib.Msg.Parsing.ByteArray.HexStringToBytes(hex);
@@ -311,23 +307,8 @@ namespace ASI.Wanda.DCU.TaskSDU
 
 
         /// <summary>
-        /// 計算LRC 
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>  
-        private byte CalculateLRC(byte[] text)
-        {
-            byte xor = 0;
-            // if no data then done   
-            if (text.Length <= 0)
-                return 0;
-            // incorporate remaining bytes into the value  
-            for (int i = 0; i < text.Length; i++)
-                xor ^= text[i];
-            return xor;
-        }
         #endregion
-        #region serialPort 
+        #region serialPort
         void SerialPort_DisconnectedEvent(string source) //斷線處理  
         {
             try
@@ -344,28 +325,30 @@ namespace ASI.Wanda.DCU.TaskSDU
             }
         }
 
-        void SerialPort_ReceivedEvent(byte[] dataBytes, string source) //顯示器的狀態顯示 
+        void SerialPort_ReceivedEvent(byte[] dataBytes, string source) //顯示器的狀態顯示
         {
-            string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
-            string str = "";
-            foreach (byte b in dataBytes)
-            {
-                str += Convert.ToString(b, 16).ToUpper().PadLeft(2, '0') + " ";
-            }
-            var text = string.Format("{0} \r\n收到收包內容 {1} \r\n", sRcvTime, str);
             var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
-            if (dataBytes.Length >= 3 && dataBytes[4] == 0x00)
+
+            if (dataBytes.Length < 5)
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName, "顯示器的狀態收到的訊息" + sHexString.ToString());  //處理顯示器回報的狀態
+                ASI.Lib.Log.ErrorLog.Log(_mProcName,
+                    $"收到封包長度不足：{dataBytes.Length} bytes，HEX: {sHexString}");
+                return;
             }
-            else if (dataBytes[4] != 0x00)
+
+            if (dataBytes[4] == 0x00)
             {
-                if (dataBytes[4] == 0x01) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "曾經有通訊不良"); }
-                else if (dataBytes[4] == 0x02) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "處於關機狀態 "); }
-                else if (dataBytes[4] == 0x04) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "通訊逾時"); }
-                else if (dataBytes[4] == 0x07) { ASI.Lib.Log.ErrorLog.Log(_mProcName, " 1/2/4 多重組合 "); }
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "顯示器的狀態收到的訊息" + sHexString);
             }
-            ASI.Lib.Log.DebugLog.Log(_mProcName, "從顯示器收到的訊息" + sHexString.ToString());//log紀錄 
+            else
+            {
+                if      (dataBytes[4] == 0x01) ASI.Lib.Log.ErrorLog.Log(_mProcName, "曾經有通訊不良");
+                else if (dataBytes[4] == 0x02) ASI.Lib.Log.ErrorLog.Log(_mProcName, "處於關機狀態");
+                else if (dataBytes[4] == 0x04) ASI.Lib.Log.ErrorLog.Log(_mProcName, "通訊逾時");
+                else if (dataBytes[4] == 0x07) ASI.Lib.Log.ErrorLog.Log(_mProcName, "1/2/4 多重組合");
+            }
+
+            ASI.Lib.Log.DebugLog.Log(_mProcName, "從顯示器收到的訊息" + sHexString);
         }
 
 

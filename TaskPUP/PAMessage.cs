@@ -74,16 +74,7 @@ namespace TaskPUP.PAMessage
         /// <param name="text"></param>
         /// <returns></returns>   
         private byte CalculateLRC(byte[] text)
-        {
-            byte xor = 0;
-            // if no data then done   
-            if (text.Length <= 0)
-                return 0;
-            // incorporate remaining bytes into the value   
-            for (int i = 0; i < text.Length; i++)
-                xor ^= text[i];
-            return xor;
-        }
+            => ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC(text);
         /// <summary>
         /// 處理廣播不同播放內容
         /// </summary>

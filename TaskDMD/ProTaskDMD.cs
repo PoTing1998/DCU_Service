@@ -91,8 +91,8 @@ namespace ASI.Wanda.DCU.TaskDMD
             string sDMD_DBPort = ConfigApp.Instance.GetConfigSetting("DMD_DB_Port");
             string sDMD_DBName = ConfigApp.Instance.GetConfigSetting("DMD_DB_Name");
 
-            string sUserID = "postgres";
-            string sPassword = "postgres";
+            string sUserID    = ConfigApp.Instance.GetConfigSetting("DCU_DB_User");
+            string sPassword  = ConfigApp.Instance.GetConfigSetting("DCU_DB_Password");
             string sCurrentUserID = ConfigApp.Instance.GetConfigSetting("Current_User_ID");
             // Default to an error state
             try

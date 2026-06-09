@@ -78,6 +78,7 @@ namespace UITest.Controls
                 _isOpen = true;
                 btnOpen.Text = "關閉";
                 SetSerialControls(false);
+                Services.ConnectionMonitor.Instance.UpdateComPortStatus(true, _port.PortName);
             }
             catch (Exception ex)
             {
@@ -98,6 +99,7 @@ namespace UITest.Controls
                 _isOpen = false;
                 btnOpen.Text = "開啟";
                 SetSerialControls(true);
+                Services.ConnectionMonitor.Instance.UpdateComPortStatus(false);
             }
             catch (Exception ex)
             {
@@ -191,6 +193,43 @@ namespace UITest.Controls
                            && chkPlatform_ID17.Checked && chkPlatform_ID18.Checked;
             chkAllPlatform.Checked = allChecked;
             _updatingPlatform = false;
+        }
+        // ── 取得已勾選的 ID 清單（供 DisplayMessageControl 使用）────────
+
+        /// <summary>上行月台 ID11–ID14</summary>
+        public System.Collections.Generic.List<byte> GetSelectedUpPlatformIDs()
+        {
+            var ids = new System.Collections.Generic.List<byte>();
+            if (chkPlatform_ID11.Checked) ids.Add(0x11);
+            if (chkPlatform_ID12.Checked) ids.Add(0x12);
+            if (chkPlatform_ID13.Checked) ids.Add(0x13);
+            if (chkPlatform_ID14.Checked) ids.Add(0x14);
+            return ids;
+        }
+
+        /// <summary>下行月台 ID15–ID18</summary>
+        public System.Collections.Generic.List<byte> GetSelectedDnPlatformIDs()
+        {
+            var ids = new System.Collections.Generic.List<byte>();
+            if (chkPlatform_ID15.Checked) ids.Add(0x15);
+            if (chkPlatform_ID16.Checked) ids.Add(0x16);
+            if (chkPlatform_ID17.Checked) ids.Add(0x17);
+            if (chkPlatform_ID18.Checked) ids.Add(0x18);
+            return ids;
+        }
+
+        /// <summary>大廳 ID1–ID7</summary>
+        public System.Collections.Generic.List<byte> GetSelectedLobbyIDs()
+        {
+            var ids = new System.Collections.Generic.List<byte>();
+            if (chkLobby_ID1.Checked) ids.Add(0x01);
+            if (chkLobby_ID2.Checked) ids.Add(0x02);
+            if (chkLobby_ID3.Checked) ids.Add(0x03);
+            if (chkLobby_ID4.Checked) ids.Add(0x04);
+            if (chkLobby_ID5.Checked) ids.Add(0x05);
+            if (chkLobby_ID6.Checked) ids.Add(0x06);
+            if (chkLobby_ID7.Checked) ids.Add(0x07);
+            return ids;
         }
     }
 }

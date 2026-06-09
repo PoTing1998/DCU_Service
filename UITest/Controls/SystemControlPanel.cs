@@ -18,5 +18,53 @@ namespace UITest.Controls
             get => preRecordCtrl.SendAction;
             set => preRecordCtrl.SendAction = value;
         }
+
+        public Func<byte[], bool> CommTimeoutSendAction
+        {
+            get => commTimeoutCtrl.SendAction;
+            set => commTimeoutCtrl.SendAction = value;
+        }
+
+        public Func<byte[], bool> CalendarSendAction
+        {
+            get => calendarClockCtrl.SendAction;
+            set => calendarClockCtrl.SendAction = value;
+        }
+
+        public Func<byte[], byte[]> CalendarReadAction
+        {
+            get => calendarClockCtrl.ReadAction;
+            set => calendarClockCtrl.ReadAction = value;
+        }
+
+        public Func<byte[], bool> BrightnessSendAction
+        {
+            get => brightnessCtrl.SendAction;
+            set => brightnessCtrl.SendAction = value;
+        }
+
+        public Func<byte[], bool> DisplayModeSendAction
+        {
+            get => displayModeCtrl.SendAction;
+            set => displayModeCtrl.SendAction = value;
+        }
+
+        public Func<byte[], bool> DisplayPowerSendAction
+        {
+            get => displayPowerCtrl.SendAction;
+            set => displayPowerCtrl.SendAction = value;
+        }
+
+        public Func<byte[], bool> AlarmLightSendAction
+        {
+            get => alarmLightCtrl.SendAction;
+            set => alarmLightCtrl.SendAction = value;
+        }
+
+        public Func<byte[], bool> CountdownUnitSendAction
+        {
+            get => countdownUnitCtrl.SendAction;
+            set => countdownUnitCtrl.SendAction = value;
+        }
     }
 }

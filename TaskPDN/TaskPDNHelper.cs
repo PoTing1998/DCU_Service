@@ -37,8 +37,8 @@ namespace ASI.Wanda.DCU.TaskPDN
     }
     public class TaskPDNHelper
     {
-        public const string _mDU_ID = "LG01_CDU_01";
-        private const string Pattern = @"LG01_CCS_CDU-1"; // 定義要篩選的模式
+        public const string _mDU_ID = "LG01_PDU_21";
+        private const string Pattern = @"LG01_PDU_21"; // 定義要篩選的模式（PDN 裝置 ID）
         public bool is_back = true;
         static string StationID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         private string _mProcName;

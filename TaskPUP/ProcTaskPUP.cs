@@ -190,26 +190,28 @@ namespace ASI.Wanda.DCU.TaskPUP
         }
         void SerialPort_ReceivedEvent(byte[] dataBytes, string source)
         {
-            string sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
-            string str = "";
-            foreach (byte b in dataBytes)
-            {
-                str += Convert.ToString(b, 16).ToUpper().PadLeft(2, '0') + " ";
-            }
-            var text = string.Format("{0} \r\n收到收包內容 {1} \r\n", sRcvTime, str);
             var sHexString = ASI.Lib.Text.Parsing.String.BytesToHexString(dataBytes, " ");
-            if (dataBytes.Length >= 3 && dataBytes[4] == 0x00)
+
+            if (dataBytes.Length < 5)
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName, _mProcName + "顯示器的狀態收到的訊息" + sHexString.ToString());  //處理顯示器回報的狀態
+                ASI.Lib.Log.ErrorLog.Log(_mProcName,
+                    $"收到封包長度不足：{dataBytes.Length} bytes，HEX: {sHexString}");
+                return;
             }
-            else if (dataBytes[4] != 0x00)
+
+            if (dataBytes[4] == 0x00)
             {
-                if (dataBytes[4] == 0x01) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "曾經有通訊不良"); }
-                else if (dataBytes[4] == 0x02) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "處於關機狀態 "); }
-                else if (dataBytes[4] == 0x04) { ASI.Lib.Log.ErrorLog.Log(_mProcName, "通訊逾時"); }
-                else if (dataBytes[4] == 0x07) { ASI.Lib.Log.ErrorLog.Log(_mProcName, " 1/2/4 多重組合 "); }
+                ASI.Lib.Log.DebugLog.Log(_mProcName, _mProcName + "顯示器的狀態收到的訊息" + sHexString);
             }
-            ASI.Lib.Log.ErrorLog.Log(_mProcName, "從顯示器收到的訊息" + sHexString.ToString());//log紀錄 
+            else
+            {
+                if      (dataBytes[4] == 0x01) ASI.Lib.Log.ErrorLog.Log(_mProcName, "曾經有通訊不良");
+                else if (dataBytes[4] == 0x02) ASI.Lib.Log.ErrorLog.Log(_mProcName, "處於關機狀態");
+                else if (dataBytes[4] == 0x04) ASI.Lib.Log.ErrorLog.Log(_mProcName, "通訊逾時");
+                else if (dataBytes[4] == 0x07) ASI.Lib.Log.ErrorLog.Log(_mProcName, "1/2/4 多重組合");
+            }
+
+            ASI.Lib.Log.DebugLog.Log(_mProcName, "從顯示器收到的訊息" + sHexString);
         }
         #endregion
 

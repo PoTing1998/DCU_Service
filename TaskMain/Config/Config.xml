@@ -5,6 +5,8 @@
 	<add key="DCU_DB_IP" value="127.0.0.1" />
 	<add key="DCU_DB_Port" value="5432" />
 	<add key="DCU_DB_Name" value="DCUDB" />
+	<add key="DCU_DB_User" value="postgres" />
+	<add key="DCU_DB_Password" value="postgres" />
 	<add key="DMD_DB_IP" value="127.0.0.1" />
 	<add key="DMD_DB_Port" value="5432" />
 	<add key="DMD_DB_Name" value="DMDDB" />

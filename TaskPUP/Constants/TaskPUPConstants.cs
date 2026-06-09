@@ -53,8 +53,8 @@ namespace TaskPUP.Constants
         public static readonly string DbPort = Get("DCU_DB_Port");
         public static readonly string DbName = Get("DCU_DB_Name");
         public static readonly string CurrentUserID = Get("Current_User_ID");
-        public static readonly string DBUserID = "postgres";
-        public static readonly string DBPassword = "postgres";
+        public static readonly string DBUserID   = Get("DCU_DB_User");
+        public static readonly string DBPassword = Get("DCU_DB_Password");
 
         private static string Get(string key) => ConfigApp.Instance.GetConfigSetting(key);
     }
