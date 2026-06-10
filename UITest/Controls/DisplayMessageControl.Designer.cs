@@ -178,274 +178,282 @@ namespace UITest.Controls
             this.chkDnMulti.Text     = "下行多訊息";
 
             // ════════════════════════════════════════════════
-            // 上行 (左欄 x=10, y 從 90 開始)
+            // 上行 (左欄 x=10, y 從 224 開始)
             // ════════════════════════════════════════════════
             this.lblUpMsgType.AutoSize = true;
-            this.lblUpMsgType.Location = new System.Drawing.Point(10, 90);
+            this.lblUpMsgType.Location = new System.Drawing.Point(10, 224);
             this.lblUpMsgType.Text     = "上行訊息頻型";
 
             this.rdoUpGeneral.AutoSize = true;
-            this.rdoUpGeneral.Location = new System.Drawing.Point(10, 108);
+            this.rdoUpGeneral.Location = new System.Drawing.Point(10, 242);
             this.rdoUpGeneral.Text     = "一般訊息(2AH)";
             this.rdoUpGeneral.Checked  = true;
 
             this.rdoUpPreRec.AutoSize = true;
-            this.rdoUpPreRec.Location = new System.Drawing.Point(135, 108);
+            this.rdoUpPreRec.Location = new System.Drawing.Point(135, 242);
             this.rdoUpPreRec.Text     = "預錄訊息(2CH)";
 
             this.lblUpMsg.AutoSize = true;
-            this.lblUpMsg.Location = new System.Drawing.Point(10, 135);
+            this.lblUpMsg.Location = new System.Drawing.Point(10, 269);
             this.lblUpMsg.Text     = "上行一般訊息";
 
-            this.txtUpMsg.Location = new System.Drawing.Point(10, 153);
+            this.txtUpMsg.Location = new System.Drawing.Point(10, 287);
             this.txtUpMsg.Size     = new System.Drawing.Size(375, 21);
             this.txtUpMsg.Text     = "萬大線中英文abcdeABCDE123456";
 
-            this.btnUpMsgBrowse.Location = new System.Drawing.Point(389, 152);
+            this.btnUpMsgBrowse.Location = new System.Drawing.Point(389, 286);
             this.btnUpMsgBrowse.Size     = new System.Drawing.Size(28, 23);
             this.btnUpMsgBrowse.Text     = "...";
 
-            this.btnUpMsgShow.Location = new System.Drawing.Point(420, 152);
+            this.btnUpMsgShow.Location = new System.Drawing.Point(420, 286);
             this.btnUpMsgShow.Size     = new System.Drawing.Size(50, 23);
             this.btnUpMsgShow.Text     = "顯示";
             this.btnUpMsgShow.Click   += new System.EventHandler(this.btnUpMsgShow_Click);
 
-            this.btnUpMsgAdd.Location = new System.Drawing.Point(473, 152);
+            this.btnUpMsgAdd.Location = new System.Drawing.Point(473, 286);
             this.btnUpMsgAdd.Size     = new System.Drawing.Size(50, 23);
             this.btnUpMsgAdd.Text     = "新增";
             this.btnUpMsgAdd.Click   += new System.EventHandler(this.btnUpMsgAdd_Click);
 
             this.lblUpFont.AutoSize = true;
-            this.lblUpFont.Location = new System.Drawing.Point(10, 180);
+            this.lblUpFont.Location = new System.Drawing.Point(10, 314);
             this.lblUpFont.Text     = "上行訊息(字型參數)";
 
-            this.cmbUpFontSize.Location      = new System.Drawing.Point(10, 198);
+            this.cmbUpFontSize.Location      = new System.Drawing.Point(10, 332);
             this.cmbUpFontSize.Size          = new System.Drawing.Size(65, 21);
             this.cmbUpFontSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUpFontSize.Items.AddRange(new object[] { "24x24", "16x16", "32x32" });
+            this.cmbUpFontSize.Items.AddRange(new object[] { "24x24", "16x16", "英文 5x7" });
             this.cmbUpFontSize.SelectedIndex = 0;
 
-            this.cmbUpFontStyle.Location      = new System.Drawing.Point(80, 198);
+            this.cmbUpFontStyle.Location      = new System.Drawing.Point(80, 332);
             this.cmbUpFontStyle.Size          = new System.Drawing.Size(65, 21);
             this.cmbUpFontStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUpFontStyle.Items.AddRange(new object[] { "明體", "黑體" });
+            this.cmbUpFontStyle.Items.AddRange(new object[] { "明體", "黑體", "楷體" });
             this.cmbUpFontStyle.SelectedIndex = 0;
 
-            this.pnlUpColor.Location    = new System.Drawing.Point(150, 200);
+            this.pnlUpColor.Location    = new System.Drawing.Point(150, 334);
             this.pnlUpColor.Size        = new System.Drawing.Size(18, 18);
             this.pnlUpColor.BackColor   = System.Drawing.Color.Yellow;
             this.pnlUpColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 
-            this.cmbUpColor.Location      = new System.Drawing.Point(172, 198);
-            this.cmbUpColor.Size          = new System.Drawing.Size(100, 21);
+            this.cmbUpColor.Location      = new System.Drawing.Point(172, 332);
+            this.cmbUpColor.Size          = new System.Drawing.Size(130, 21);
             this.cmbUpColor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUpColor.Items.AddRange(new object[] { "clYellow", "clRed", "clGreen", "clWhite" });
-            this.cmbUpColor.SelectedIndex = 0;
+            this.cmbUpColor.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbUpColor.ItemHeight    = 20;
+            this.cmbUpColor.Items.AddRange(ColorComboItems);
+            this.cmbUpColor.SelectedIndex = 3; // clYellow
+            this.cmbUpColor.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
+            this.cmbUpColor.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
 
-            this.cmbUpLevel.Location      = new System.Drawing.Point(276, 198);
+            this.cmbUpLevel.Location      = new System.Drawing.Point(310, 332);
             this.cmbUpLevel.Size          = new System.Drawing.Size(105, 21);
             this.cmbUpLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUpLevel.Items.AddRange(new object[] { "最低Level 4", "最低Level 3", "最低Level 2", "最低Level 1" });
+            this.cmbUpLevel.Items.AddRange(new object[] { "最高Level 1", "高Level 2", "低Level 3", "最低Level 4" });
             this.cmbUpLevel.SelectedIndex = 0;
 
             this.lblUpAction.AutoSize = true;
-            this.lblUpAction.Location = new System.Drawing.Point(10, 225);
+            this.lblUpAction.Location = new System.Drawing.Point(10, 359);
             this.lblUpAction.Text     = "上行訊息動作方式";
 
             this.rdoUpAct61.AutoSize = true;
-            this.rdoUpAct61.Location = new System.Drawing.Point(10, 243);
+            this.rdoUpAct61.Location = new System.Drawing.Point(10, 377);
             this.rdoUpAct61.Text     = "立即顯示(61H)";
             this.rdoUpAct61.Checked  = true;
 
             this.rdoUpAct62.AutoSize = true;
-            this.rdoUpAct62.Location = new System.Drawing.Point(10, 265);
+            this.rdoUpAct62.Location = new System.Drawing.Point(10, 403);
             this.rdoUpAct62.Text     = "向左捲動(靠右對齊)(62H)";
 
             this.rdoUpAct63.AutoSize = true;
-            this.rdoUpAct63.Location = new System.Drawing.Point(10, 287);
+            this.rdoUpAct63.Location = new System.Drawing.Point(10, 429);
             this.rdoUpAct63.Text     = "向左捲動(靠左對齊)(63H)";
 
             this.rdoUpAct64.AutoSize = true;
-            this.rdoUpAct64.Location = new System.Drawing.Point(10, 309);
+            this.rdoUpAct64.Location = new System.Drawing.Point(10, 455);
             this.rdoUpAct64.Text     = "向左捲動(左移消失)(64H)";
 
             this.rdoUpAct65.AutoSize = true;
-            this.rdoUpAct65.Location = new System.Drawing.Point(220, 243);
+            this.rdoUpAct65.Location = new System.Drawing.Point(220, 377);
             this.rdoUpAct65.Text     = "向下捲動(65H)";
 
             this.rdoUpAct66.AutoSize = true;
-            this.rdoUpAct66.Location = new System.Drawing.Point(220, 265);
+            this.rdoUpAct66.Location = new System.Drawing.Point(220, 403);
             this.rdoUpAct66.Text     = "向上捲動(66H)";
 
             this.rdoUpAct67.AutoSize = true;
-            this.rdoUpAct67.Location = new System.Drawing.Point(220, 287);
+            this.rdoUpAct67.Location = new System.Drawing.Point(220, 429);
             this.rdoUpAct67.Text     = "閃爍(67H)";
 
             this.lblUpParam.AutoSize = true;
-            this.lblUpParam.Location = new System.Drawing.Point(10, 339);
+            this.lblUpParam.Location = new System.Drawing.Point(10, 487);
             this.lblUpParam.Text     = "上行訊息動作參數";
 
             this.lblUpSpeed.AutoSize = true;
-            this.lblUpSpeed.Location = new System.Drawing.Point(10, 359);
+            this.lblUpSpeed.Location = new System.Drawing.Point(10, 507);
             this.lblUpSpeed.Text     = "速度";
 
-            this.nudUpSpeed.Location = new System.Drawing.Point(45, 357);
+            this.nudUpSpeed.Location = new System.Drawing.Point(45, 505);
             this.nudUpSpeed.Size     = new System.Drawing.Size(50, 20);
             this.nudUpSpeed.Minimum  = 1;
             this.nudUpSpeed.Maximum  = 99;
             this.nudUpSpeed.Value    = 5;
 
             this.lblUpPause.AutoSize = true;
-            this.lblUpPause.Location = new System.Drawing.Point(105, 359);
+            this.lblUpPause.Location = new System.Drawing.Point(105, 507);
             this.lblUpPause.Text     = "停留時間";
 
-            this.nudUpPause.Location = new System.Drawing.Point(165, 357);
+            this.nudUpPause.Location = new System.Drawing.Point(165, 505);
             this.nudUpPause.Size     = new System.Drawing.Size(50, 20);
             this.nudUpPause.Minimum  = 1;
             this.nudUpPause.Maximum  = 99;
             this.nudUpPause.Value    = 10;
 
             this.lblUpPauseUnit.AutoSize = true;
-            this.lblUpPauseUnit.Location = new System.Drawing.Point(220, 359);
+            this.lblUpPauseUnit.Location = new System.Drawing.Point(220, 507);
             this.lblUpPauseUnit.Text     = "(100ms)";
 
             // ════════════════════════════════════════════════
-            // 下行 (右欄 x=595)
+            // 下行 (右欄 x=595, y 從 224 開始)
             // ════════════════════════════════════════════════
             this.lblDnMsgType.AutoSize = true;
-            this.lblDnMsgType.Location = new System.Drawing.Point(595, 90);
+            this.lblDnMsgType.Location = new System.Drawing.Point(595, 224);
             this.lblDnMsgType.Text     = "下行訊息頻型";
 
             this.rdoDnGeneral.AutoSize = true;
-            this.rdoDnGeneral.Location = new System.Drawing.Point(595, 108);
+            this.rdoDnGeneral.Location = new System.Drawing.Point(595, 242);
             this.rdoDnGeneral.Text     = "一般訊息(2AH)";
             this.rdoDnGeneral.Checked  = true;
 
             this.rdoDnPreRec.AutoSize = true;
-            this.rdoDnPreRec.Location = new System.Drawing.Point(720, 108);
+            this.rdoDnPreRec.Location = new System.Drawing.Point(720, 242);
             this.rdoDnPreRec.Text     = "預錄訊息(2CH)";
 
             this.lblDnMsg.AutoSize = true;
-            this.lblDnMsg.Location = new System.Drawing.Point(595, 135);
+            this.lblDnMsg.Location = new System.Drawing.Point(595, 269);
             this.lblDnMsg.Text     = "下行一般訊息";
 
-            this.txtDnMsg.Location = new System.Drawing.Point(595, 153);
+            this.txtDnMsg.Location = new System.Drawing.Point(595, 287);
             this.txtDnMsg.Size     = new System.Drawing.Size(375, 21);
             this.txtDnMsg.Text     = "萬大線中英文abcdeABCDE123456";
 
-            this.btnDnMsgBrowse.Location = new System.Drawing.Point(974, 152);
+            this.btnDnMsgBrowse.Location = new System.Drawing.Point(974, 286);
             this.btnDnMsgBrowse.Size     = new System.Drawing.Size(28, 23);
             this.btnDnMsgBrowse.Text     = "...";
 
-            this.btnDnMsgShow.Location = new System.Drawing.Point(1005, 152);
+            this.btnDnMsgShow.Location = new System.Drawing.Point(1005, 286);
             this.btnDnMsgShow.Size     = new System.Drawing.Size(50, 23);
             this.btnDnMsgShow.Text     = "顯示";
             this.btnDnMsgShow.Click   += new System.EventHandler(this.btnDnMsgShow_Click);
 
-            this.btnDnMsgAdd.Location = new System.Drawing.Point(1058, 152);
+            this.btnDnMsgAdd.Location = new System.Drawing.Point(1058, 286);
             this.btnDnMsgAdd.Size     = new System.Drawing.Size(50, 23);
             this.btnDnMsgAdd.Text     = "新增";
             this.btnDnMsgAdd.Click   += new System.EventHandler(this.btnDnMsgAdd_Click);
 
             this.lblDnFont.AutoSize = true;
-            this.lblDnFont.Location = new System.Drawing.Point(595, 180);
+            this.lblDnFont.Location = new System.Drawing.Point(595, 314);
             this.lblDnFont.Text     = "下行訊息(字型參數)";
 
-            this.cmbDnFontSize.Location      = new System.Drawing.Point(595, 198);
+            this.cmbDnFontSize.Location      = new System.Drawing.Point(595, 332);
             this.cmbDnFontSize.Size          = new System.Drawing.Size(65, 21);
             this.cmbDnFontSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbDnFontSize.Items.AddRange(new object[] { "24x24", "16x16", "32x32" });
+            this.cmbDnFontSize.Items.AddRange(new object[] { "24x24", "16x16", "英文 5x7" });
             this.cmbDnFontSize.SelectedIndex = 0;
 
-            this.cmbDnFontStyle.Location      = new System.Drawing.Point(665, 198);
+            this.cmbDnFontStyle.Location      = new System.Drawing.Point(665, 332);
             this.cmbDnFontStyle.Size          = new System.Drawing.Size(65, 21);
             this.cmbDnFontStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbDnFontStyle.Items.AddRange(new object[] { "明體", "黑體" });
+            this.cmbDnFontStyle.Items.AddRange(new object[] { "明體", "黑體", "楷體" });
             this.cmbDnFontStyle.SelectedIndex = 0;
 
-            this.pnlDnColor.Location    = new System.Drawing.Point(735, 200);
+            this.pnlDnColor.Location    = new System.Drawing.Point(735, 334);
             this.pnlDnColor.Size        = new System.Drawing.Size(18, 18);
             this.pnlDnColor.BackColor   = System.Drawing.Color.Yellow;
             this.pnlDnColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 
-            this.cmbDnColor.Location      = new System.Drawing.Point(757, 198);
-            this.cmbDnColor.Size          = new System.Drawing.Size(100, 21);
+            this.cmbDnColor.Location      = new System.Drawing.Point(757, 332);
+            this.cmbDnColor.Size          = new System.Drawing.Size(130, 21);
             this.cmbDnColor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbDnColor.Items.AddRange(new object[] { "clYellow", "clRed", "clGreen", "clWhite" });
-            this.cmbDnColor.SelectedIndex = 0;
+            this.cmbDnColor.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbDnColor.ItemHeight    = 20;
+            this.cmbDnColor.Items.AddRange(ColorComboItems);
+            this.cmbDnColor.SelectedIndex = 3; // clYellow
+            this.cmbDnColor.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
+            this.cmbDnColor.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
 
-            this.cmbDnLevel.Location      = new System.Drawing.Point(861, 198);
+            this.cmbDnLevel.Location      = new System.Drawing.Point(895, 332);
             this.cmbDnLevel.Size          = new System.Drawing.Size(105, 21);
             this.cmbDnLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbDnLevel.Items.AddRange(new object[] { "最低Level 4", "最低Level 3", "最低Level 2", "最低Level 1" });
+            this.cmbDnLevel.Items.AddRange(new object[] { "最高Level 1", "高Level 2", "低Level 3", "最低Level 4" });
             this.cmbDnLevel.SelectedIndex = 0;
 
             this.lblDnAction.AutoSize = true;
-            this.lblDnAction.Location = new System.Drawing.Point(595, 225);
+            this.lblDnAction.Location = new System.Drawing.Point(595, 359);
             this.lblDnAction.Text     = "下行訊息動作方式";
 
             this.rdoDnAct61.AutoSize = true;
-            this.rdoDnAct61.Location = new System.Drawing.Point(595, 243);
+            this.rdoDnAct61.Location = new System.Drawing.Point(595, 377);
             this.rdoDnAct61.Text     = "立即顯示(61H)";
             this.rdoDnAct61.Checked  = true;
 
             this.rdoDnAct62.AutoSize = true;
-            this.rdoDnAct62.Location = new System.Drawing.Point(595, 265);
+            this.rdoDnAct62.Location = new System.Drawing.Point(595, 403);
             this.rdoDnAct62.Text     = "向左捲動(靠右對齊)(62H)";
 
             this.rdoDnAct63.AutoSize = true;
-            this.rdoDnAct63.Location = new System.Drawing.Point(595, 287);
+            this.rdoDnAct63.Location = new System.Drawing.Point(595, 429);
             this.rdoDnAct63.Text     = "向左捲動(靠左對齊)(63H)";
 
             this.rdoDnAct64.AutoSize = true;
-            this.rdoDnAct64.Location = new System.Drawing.Point(595, 309);
+            this.rdoDnAct64.Location = new System.Drawing.Point(595, 455);
             this.rdoDnAct64.Text     = "向左捲動(左移消失)(64H)";
 
             this.rdoDnAct65.AutoSize = true;
-            this.rdoDnAct65.Location = new System.Drawing.Point(805, 243);
+            this.rdoDnAct65.Location = new System.Drawing.Point(805, 377);
             this.rdoDnAct65.Text     = "向下捲動(65H)";
 
             this.rdoDnAct66.AutoSize = true;
-            this.rdoDnAct66.Location = new System.Drawing.Point(805, 265);
+            this.rdoDnAct66.Location = new System.Drawing.Point(805, 403);
             this.rdoDnAct66.Text     = "向上捲動(66H)";
 
             this.rdoDnAct67.AutoSize = true;
-            this.rdoDnAct67.Location = new System.Drawing.Point(805, 287);
+            this.rdoDnAct67.Location = new System.Drawing.Point(805, 429);
             this.rdoDnAct67.Text     = "閃爍(67H)";
 
             this.lblDnParam.AutoSize = true;
-            this.lblDnParam.Location = new System.Drawing.Point(595, 339);
+            this.lblDnParam.Location = new System.Drawing.Point(595, 487);
             this.lblDnParam.Text     = "下行訊息動作參數";
 
             this.lblDnSpeed.AutoSize = true;
-            this.lblDnSpeed.Location = new System.Drawing.Point(595, 359);
+            this.lblDnSpeed.Location = new System.Drawing.Point(595, 507);
             this.lblDnSpeed.Text     = "速度";
 
-            this.nudDnSpeed.Location = new System.Drawing.Point(630, 357);
+            this.nudDnSpeed.Location = new System.Drawing.Point(630, 505);
             this.nudDnSpeed.Size     = new System.Drawing.Size(50, 20);
             this.nudDnSpeed.Minimum  = 1;
             this.nudDnSpeed.Maximum  = 99;
             this.nudDnSpeed.Value    = 5;
 
             this.lblDnPause.AutoSize = true;
-            this.lblDnPause.Location = new System.Drawing.Point(690, 359);
+            this.lblDnPause.Location = new System.Drawing.Point(690, 507);
             this.lblDnPause.Text     = "停留時間";
 
-            this.nudDnPause.Location = new System.Drawing.Point(750, 357);
+            this.nudDnPause.Location = new System.Drawing.Point(750, 505);
             this.nudDnPause.Size     = new System.Drawing.Size(50, 20);
             this.nudDnPause.Minimum  = 1;
             this.nudDnPause.Maximum  = 99;
             this.nudDnPause.Value    = 8;
 
             this.lblDnPauseUnit.AutoSize = true;
-            this.lblDnPauseUnit.Location = new System.Drawing.Point(805, 359);
+            this.lblDnPauseUnit.Location = new System.Drawing.Point(805, 507);
             this.lblDnPauseUnit.Text     = "(100ms)";
 
             // ════════════════════════════════════════════════
-            // 上行顯示器板型  (x=10, y=394, w=575, h=185)
+            // 上行顯示器板型  (x=10, y=543, w=575, h=228)
             // ════════════════════════════════════════════════
-            this.grpUpBoard.Location = new System.Drawing.Point(10, 394);
-            this.grpUpBoard.Size     = new System.Drawing.Size(575, 185);
+            this.grpUpBoard.Location = new System.Drawing.Point(10, 543);
+            this.grpUpBoard.Size     = new System.Drawing.Size(575, 228);
             this.grpUpBoard.Text     = "上行顯示器板型";
             this.grpUpBoard.Controls.AddRange(new System.Windows.Forms.Control[]
             {
@@ -454,51 +462,51 @@ namespace UITest.Controls
             });
 
             this.rdoUpBoard1.AutoSize = true;
-            this.rdoUpBoard1.Location = new System.Drawing.Point(8, 18);
+            this.rdoUpBoard1.Location = new System.Drawing.Point(8, 20);
             this.rdoUpBoard1.Text     = "1. 訊息顯示(71H)（全畫面）";
             this.rdoUpBoard1.Checked  = true;
             this.rdoUpBoard1.CheckedChanged += new System.EventHandler(this.rdoUpBoard_CheckedChanged);
 
             this.rdoUpBoard2.AutoSize = true;
-            this.rdoUpBoard2.Location = new System.Drawing.Point(8, 38);
+            this.rdoUpBoard2.Location = new System.Drawing.Point(8, 46);
             this.rdoUpBoard2.Text     = "2. 訊息顯示(74H) + 右側（標準或列車到站倒數）時間顯示";
             this.rdoUpBoard2.CheckedChanged += new System.EventHandler(this.rdoUpBoard_CheckedChanged);
 
             this.rdoUpBoard3.AutoSize = true;
-            this.rdoUpBoard3.Location = new System.Drawing.Point(8, 58);
+            this.rdoUpBoard3.Location = new System.Drawing.Point(8, 72);
             this.rdoUpBoard3.Text     = "3. 左側月台碼 + 訊息顯示(73H) + 右側時間顯示";
             this.rdoUpBoard3.CheckedChanged += new System.EventHandler(this.rdoUpBoard_CheckedChanged);
 
             this.rdoUpBoard4.AutoSize = true;
-            this.rdoUpBoard4.Location = new System.Drawing.Point(8, 78);
+            this.rdoUpBoard4.Location = new System.Drawing.Point(8, 98);
             this.rdoUpBoard4.Text     = "4. 訊息顯示(74H) + 右側48x48頁比時鐘顯示(82H)";
             this.rdoUpBoard4.CheckedChanged += new System.EventHandler(this.rdoUpBoard_CheckedChanged);
 
             this.rdoUpBoard5.AutoSize = true;
-            this.rdoUpBoard5.Location = new System.Drawing.Point(8, 98);
+            this.rdoUpBoard5.Location = new System.Drawing.Point(8, 124);
             this.rdoUpBoard5.Text     = "5. 左側月台碼 + 訊息顯示(72H)";
             this.rdoUpBoard5.CheckedChanged += new System.EventHandler(this.rdoUpBoard_CheckedChanged);
 
             this.rdoUpBoard6.AutoSize = true;
-            this.rdoUpBoard6.Location = new System.Drawing.Point(8, 118);
+            this.rdoUpBoard6.Location = new System.Drawing.Point(8, 150);
             this.rdoUpBoard6.Text     = "6. 緊急訊息(71H) + 警示燈  設定";
             this.rdoUpBoard6.CheckedChanged += new System.EventHandler(this.rdoUpBoard_CheckedChanged);
 
             this.rdoUpBoard7.AutoSize = true;
-            this.rdoUpBoard7.Location = new System.Drawing.Point(8, 138);
+            this.rdoUpBoard7.Location = new System.Drawing.Point(8, 176);
             this.rdoUpBoard7.Text     = "7. 路線代碼(7DH) + 到站訊息(74H) + 右側（時間倒數）";
             this.rdoUpBoard7.CheckedChanged += new System.EventHandler(this.rdoUpBoard_CheckedChanged);
 
             this.rdoUpBoard8.AutoSize = true;
-            this.rdoUpBoard8.Location = new System.Drawing.Point(8, 158);
+            this.rdoUpBoard8.Location = new System.Drawing.Point(8, 202);
             this.rdoUpBoard8.Text     = "8. 站與站之間，連續圖片動態顯示模式（83H）";
             this.rdoUpBoard8.CheckedChanged += new System.EventHandler(this.rdoUpBoard_CheckedChanged);
 
             // ════════════════════════════════════════════════
-            // 下行顯示器板型  (x=595, y=394, w=575, h=185)
+            // 下行顯示器板型  (x=595, y=543, w=575, h=228)
             // ════════════════════════════════════════════════
-            this.grpDnBoard.Location = new System.Drawing.Point(595, 394);
-            this.grpDnBoard.Size     = new System.Drawing.Size(575, 185);
+            this.grpDnBoard.Location = new System.Drawing.Point(595, 543);
+            this.grpDnBoard.Size     = new System.Drawing.Size(575, 228);
             this.grpDnBoard.Text     = "下行顯示器板型";
             this.grpDnBoard.Controls.AddRange(new System.Windows.Forms.Control[]
             {
@@ -507,175 +515,191 @@ namespace UITest.Controls
             });
 
             this.rdoDnBoard1.AutoSize = true;
-            this.rdoDnBoard1.Location = new System.Drawing.Point(8, 18);
+            this.rdoDnBoard1.Location = new System.Drawing.Point(8, 20);
             this.rdoDnBoard1.Text     = "1. 訊息顯示(71H)（全畫面）";
             this.rdoDnBoard1.Checked  = true;
             this.rdoDnBoard1.CheckedChanged += new System.EventHandler(this.rdoDnBoard_CheckedChanged);
 
             this.rdoDnBoard2.AutoSize = true;
-            this.rdoDnBoard2.Location = new System.Drawing.Point(8, 38);
+            this.rdoDnBoard2.Location = new System.Drawing.Point(8, 46);
             this.rdoDnBoard2.Text     = "2. 訊息顯示(74H) + 右側（標準或列車到站倒數）時間顯示";
             this.rdoDnBoard2.CheckedChanged += new System.EventHandler(this.rdoDnBoard_CheckedChanged);
 
             this.rdoDnBoard3.AutoSize = true;
-            this.rdoDnBoard3.Location = new System.Drawing.Point(8, 58);
+            this.rdoDnBoard3.Location = new System.Drawing.Point(8, 72);
             this.rdoDnBoard3.Text     = "3. 左側月台碼 + 訊息顯示(73H) + 右側時間顯示";
             this.rdoDnBoard3.CheckedChanged += new System.EventHandler(this.rdoDnBoard_CheckedChanged);
 
             this.rdoDnBoard4.AutoSize = true;
-            this.rdoDnBoard4.Location = new System.Drawing.Point(8, 78);
+            this.rdoDnBoard4.Location = new System.Drawing.Point(8, 98);
             this.rdoDnBoard4.Text     = "4. 訊息顯示(74H) + 右側48x48頁比時鐘顯示(82H)";
             this.rdoDnBoard4.CheckedChanged += new System.EventHandler(this.rdoDnBoard_CheckedChanged);
 
             this.rdoDnBoard5.AutoSize = true;
-            this.rdoDnBoard5.Location = new System.Drawing.Point(8, 98);
+            this.rdoDnBoard5.Location = new System.Drawing.Point(8, 124);
             this.rdoDnBoard5.Text     = "5. 左側月台碼 + 訊息顯示(72H)";
             this.rdoDnBoard5.CheckedChanged += new System.EventHandler(this.rdoDnBoard_CheckedChanged);
 
             this.rdoDnBoard6.AutoSize = true;
-            this.rdoDnBoard6.Location = new System.Drawing.Point(8, 118);
+            this.rdoDnBoard6.Location = new System.Drawing.Point(8, 150);
             this.rdoDnBoard6.Text     = "6. 緊急訊息(71H) + 警示燈  設定";
             this.rdoDnBoard6.CheckedChanged += new System.EventHandler(this.rdoDnBoard_CheckedChanged);
 
             this.rdoDnBoard7.AutoSize = true;
-            this.rdoDnBoard7.Location = new System.Drawing.Point(8, 138);
+            this.rdoDnBoard7.Location = new System.Drawing.Point(8, 176);
             this.rdoDnBoard7.Text     = "7. 左側標準進時碼(7EH) + 到站訊息(74H) + 右側(時間倒數)";
             this.rdoDnBoard7.CheckedChanged += new System.EventHandler(this.rdoDnBoard_CheckedChanged);
 
             this.rdoDnBoard8.AutoSize = true;
-            this.rdoDnBoard8.Location = new System.Drawing.Point(8, 158);
+            this.rdoDnBoard8.Location = new System.Drawing.Point(8, 202);
             this.rdoDnBoard8.Text     = "8. 站與站之間，連續圖片動態顯示模式（83H）";
             this.rdoDnBoard8.CheckedChanged += new System.EventHandler(this.rdoDnBoard_CheckedChanged);
 
             // ════════════════════════════════════════════════
             // 上行 Extra
-            // Board bottom = 394+185 = 579  → Extra 從 y=598 開始
-            // 時間列: header=598  controls=616
-            // 月台列: header=650  controls=668
+            // 版型 GroupBox 已移至底部，Extra 從 y=106 開始
+            // 時間列: header=106  controls=124
+            // 月台列: header=158  controls=174
             // ════════════════════════════════════════════════
             this.lblUpTimeHdr.AutoSize = true;
-            this.lblUpTimeHdr.Location = new System.Drawing.Point(10, 598);
+            this.lblUpTimeHdr.Location = new System.Drawing.Point(10, 106);
             this.lblUpTimeHdr.Text     = "上行時間(右側顯示)";
             this.lblUpTimeHdr.Visible  = false;
 
-            this.cmbUpTimeType.Location      = new System.Drawing.Point(10, 616);
+            this.cmbUpTimeType.Location      = new System.Drawing.Point(10, 124);
             this.cmbUpTimeType.Size          = new System.Drawing.Size(130, 21);
             this.cmbUpTimeType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbUpTimeType.Items.AddRange(new object[] { "標準時間", "列車到站倒數" });
             this.cmbUpTimeType.SelectedIndex = 0;
             this.cmbUpTimeType.Visible       = false;
 
-            this.pnlUpTimeClr.Location    = new System.Drawing.Point(148, 618);
+            this.pnlUpTimeClr.Location    = new System.Drawing.Point(148, 126);
             this.pnlUpTimeClr.Size        = new System.Drawing.Size(18, 18);
             this.pnlUpTimeClr.BackColor   = System.Drawing.Color.Yellow;
             this.pnlUpTimeClr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlUpTimeClr.Visible     = false;
 
-            this.cmbUpTimeClr.Location      = new System.Drawing.Point(170, 616);
-            this.cmbUpTimeClr.Size          = new System.Drawing.Size(90, 21);
+            this.cmbUpTimeClr.Location      = new System.Drawing.Point(170, 124);
+            this.cmbUpTimeClr.Size          = new System.Drawing.Size(130, 21);
             this.cmbUpTimeClr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUpTimeClr.Items.AddRange(new object[] { "clYellow", "clRed", "clGreen", "clWhite" });
+            this.cmbUpTimeClr.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbUpTimeClr.ItemHeight    = 20;
+            this.cmbUpTimeClr.Items.AddRange(ColorComboItems);
             this.cmbUpTimeClr.SelectedIndex = 0;
+            this.cmbUpTimeClr.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
+            this.cmbUpTimeClr.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
             this.cmbUpTimeClr.Visible       = false;
 
             this.lblUpPlatHdr.AutoSize = true;
-            this.lblUpPlatHdr.Location = new System.Drawing.Point(10, 650);
+            this.lblUpPlatHdr.Location = new System.Drawing.Point(10, 158);
             this.lblUpPlatHdr.Text     = "上行月台碼設定";
             this.lblUpPlatHdr.Visible  = false;
 
             this.lblUpPlatIdx.AutoSize = true;
-            this.lblUpPlatIdx.Location = new System.Drawing.Point(10, 671);
+            this.lblUpPlatIdx.Location = new System.Drawing.Point(10, 179);
             this.lblUpPlatIdx.Text     = "圖檔索引值";
             this.lblUpPlatIdx.Visible  = false;
 
-            this.nudUpPlatIdx.Location = new System.Drawing.Point(80, 668);
+            this.nudUpPlatIdx.Location = new System.Drawing.Point(80, 176);
             this.nudUpPlatIdx.Size     = new System.Drawing.Size(50, 20);
             this.nudUpPlatIdx.Minimum  = 0;
             this.nudUpPlatIdx.Maximum  = 99;
             this.nudUpPlatIdx.Value    = 1;
             this.nudUpPlatIdx.Visible  = false;
 
-            this.pnlUpPlatThumb.Location    = new System.Drawing.Point(140, 663);
+            this.pnlUpPlatThumb.Location    = new System.Drawing.Point(140, 171);
             this.pnlUpPlatThumb.Size        = new System.Drawing.Size(30, 30);
             this.pnlUpPlatThumb.BackColor   = System.Drawing.Color.DimGray;
             this.pnlUpPlatThumb.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlUpPlatThumb.Visible     = false;
 
-            this.pnlUpPlatClr.Location    = new System.Drawing.Point(180, 668);
+            this.pnlUpPlatClr.Location    = new System.Drawing.Point(180, 176);
             this.pnlUpPlatClr.Size        = new System.Drawing.Size(18, 18);
             this.pnlUpPlatClr.BackColor   = System.Drawing.Color.Yellow;
             this.pnlUpPlatClr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlUpPlatClr.Visible     = false;
 
-            this.cmbUpPlatClr.Location      = new System.Drawing.Point(202, 668);
-            this.cmbUpPlatClr.Size          = new System.Drawing.Size(90, 21);
+            this.cmbUpPlatClr.Location      = new System.Drawing.Point(202, 176);
+            this.cmbUpPlatClr.Size          = new System.Drawing.Size(130, 21);
             this.cmbUpPlatClr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUpPlatClr.Items.AddRange(new object[] { "clYellow", "clRed", "clGreen", "clWhite" });
+            this.cmbUpPlatClr.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbUpPlatClr.ItemHeight    = 20;
+            this.cmbUpPlatClr.Items.AddRange(ColorComboItems);
             this.cmbUpPlatClr.SelectedIndex = 0;
+            this.cmbUpPlatClr.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
+            this.cmbUpPlatClr.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
             this.cmbUpPlatClr.Visible       = false;
 
             // ════════════════════════════════════════════════
             // 下行 Extra（與上行同 y，x 偏移 595）
             // ════════════════════════════════════════════════
             this.lblDnTimeHdr.AutoSize = true;
-            this.lblDnTimeHdr.Location = new System.Drawing.Point(595, 598);
+            this.lblDnTimeHdr.Location = new System.Drawing.Point(595, 106);
             this.lblDnTimeHdr.Text     = "下行時間(右側顯示)";
             this.lblDnTimeHdr.Visible  = false;
 
-            this.cmbDnTimeType.Location      = new System.Drawing.Point(595, 616);
+            this.cmbDnTimeType.Location      = new System.Drawing.Point(595, 124);
             this.cmbDnTimeType.Size          = new System.Drawing.Size(130, 21);
             this.cmbDnTimeType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbDnTimeType.Items.AddRange(new object[] { "標準時間", "列車到站倒數" });
             this.cmbDnTimeType.SelectedIndex = 0;
             this.cmbDnTimeType.Visible       = false;
 
-            this.pnlDnTimeClr.Location    = new System.Drawing.Point(733, 618);
+            this.pnlDnTimeClr.Location    = new System.Drawing.Point(733, 126);
             this.pnlDnTimeClr.Size        = new System.Drawing.Size(18, 18);
             this.pnlDnTimeClr.BackColor   = System.Drawing.Color.Yellow;
             this.pnlDnTimeClr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlDnTimeClr.Visible     = false;
 
-            this.cmbDnTimeClr.Location      = new System.Drawing.Point(755, 616);
-            this.cmbDnTimeClr.Size          = new System.Drawing.Size(90, 21);
+            this.cmbDnTimeClr.Location      = new System.Drawing.Point(755, 124);
+            this.cmbDnTimeClr.Size          = new System.Drawing.Size(130, 21);
             this.cmbDnTimeClr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbDnTimeClr.Items.AddRange(new object[] { "clYellow", "clRed", "clGreen", "clWhite" });
+            this.cmbDnTimeClr.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbDnTimeClr.ItemHeight    = 20;
+            this.cmbDnTimeClr.Items.AddRange(ColorComboItems);
             this.cmbDnTimeClr.SelectedIndex = 0;
+            this.cmbDnTimeClr.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
+            this.cmbDnTimeClr.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
             this.cmbDnTimeClr.Visible       = false;
 
             this.lblDnPlatHdr.AutoSize = true;
-            this.lblDnPlatHdr.Location = new System.Drawing.Point(595, 650);
+            this.lblDnPlatHdr.Location = new System.Drawing.Point(595, 158);
             this.lblDnPlatHdr.Text     = "下行月台碼設定";
             this.lblDnPlatHdr.Visible  = false;
 
             this.lblDnPlatIdx.AutoSize = true;
-            this.lblDnPlatIdx.Location = new System.Drawing.Point(595, 671);
+            this.lblDnPlatIdx.Location = new System.Drawing.Point(595, 179);
             this.lblDnPlatIdx.Text     = "圖檔索引值";
             this.lblDnPlatIdx.Visible  = false;
 
-            this.nudDnPlatIdx.Location = new System.Drawing.Point(665, 668);
+            this.nudDnPlatIdx.Location = new System.Drawing.Point(665, 176);
             this.nudDnPlatIdx.Size     = new System.Drawing.Size(50, 20);
             this.nudDnPlatIdx.Minimum  = 0;
             this.nudDnPlatIdx.Maximum  = 99;
             this.nudDnPlatIdx.Value    = 1;
             this.nudDnPlatIdx.Visible  = false;
 
-            this.pnlDnPlatThumb.Location    = new System.Drawing.Point(725, 663);
+            this.pnlDnPlatThumb.Location    = new System.Drawing.Point(725, 171);
             this.pnlDnPlatThumb.Size        = new System.Drawing.Size(30, 30);
             this.pnlDnPlatThumb.BackColor   = System.Drawing.Color.DimGray;
             this.pnlDnPlatThumb.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlDnPlatThumb.Visible     = false;
 
-            this.pnlDnPlatClr.Location    = new System.Drawing.Point(765, 668);
+            this.pnlDnPlatClr.Location    = new System.Drawing.Point(765, 176);
             this.pnlDnPlatClr.Size        = new System.Drawing.Size(18, 18);
             this.pnlDnPlatClr.BackColor   = System.Drawing.Color.Yellow;
             this.pnlDnPlatClr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlDnPlatClr.Visible     = false;
 
-            this.cmbDnPlatClr.Location      = new System.Drawing.Point(787, 668);
-            this.cmbDnPlatClr.Size          = new System.Drawing.Size(90, 21);
+            this.cmbDnPlatClr.Location      = new System.Drawing.Point(787, 176);
+            this.cmbDnPlatClr.Size          = new System.Drawing.Size(130, 21);
             this.cmbDnPlatClr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbDnPlatClr.Items.AddRange(new object[] { "clYellow", "clRed", "clGreen", "clWhite" });
+            this.cmbDnPlatClr.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbDnPlatClr.ItemHeight    = 20;
+            this.cmbDnPlatClr.Items.AddRange(ColorComboItems);
             this.cmbDnPlatClr.SelectedIndex = 0;
+            this.cmbDnPlatClr.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
+            this.cmbDnPlatClr.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
             this.cmbDnPlatClr.Visible       = false;
 
             // ════════════════════════════════════════════════
@@ -683,7 +707,8 @@ namespace UITest.Controls
             // ════════════════════════════════════════════════
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Font;
-            this.Size                = new System.Drawing.Size(1185, 720);
+            this.AutoScroll          = true;
+            this.Size                = new System.Drawing.Size(1185, 790);
             this.Controls.AddRange(new System.Windows.Forms.Control[]
             {
                 this.pnlDisplay, this.lblDisplayHint,

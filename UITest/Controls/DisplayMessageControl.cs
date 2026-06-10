@@ -368,48 +368,133 @@ namespace UITest.Controls
             return 4;
         }
 
-        private static string NameToHex(string name)
+        // ════════════════════════════════════════════════════════════════
+        // 顏色 ComboBox：資料 + 繪製
+        // ════════════════════════════════════════════════════════════════
+
+        /// <summary>顏色名稱 → System.Drawing.Color 對照表（共 30 色）</summary>
+        private static readonly (string Name, Color Value)[] ColorEntries =
         {
-            switch (name)
-            {
-                case "clYellow": return "FFFF00";
-                case "clRed":    return "FF0000";
-                case "clGreen":  return "00FF00";
-                default:         return "FFFFFF";
-            }
+            ("clBlack",       Color.Black),
+            ("clWhite",       Color.White),
+            ("clRed",         Color.FromArgb(0xFF, 0x00, 0x00)),
+            ("clYellow",      Color.FromArgb(0xFF, 0xFF, 0x00)),
+            ("clGreen",       Color.FromArgb(0x00, 0xFF, 0x00)),
+            ("clBlue",        Color.FromArgb(0x00, 0x00, 0xFF)),
+            ("clCyan",        Color.FromArgb(0x00, 0xFF, 0xFF)),
+            ("clMagenta",     Color.FromArgb(0xFF, 0x00, 0xFF)),
+            ("clOrange",      Color.FromArgb(0xFF, 0xA5, 0x00)),
+            ("clGold",        Color.FromArgb(0xFF, 0xD7, 0x00)),
+            ("clPink",        Color.FromArgb(0xFF, 0xC0, 0xCB)),
+            ("clDeepPink",    Color.FromArgb(0xFF, 0x14, 0x93)),
+            ("clCoral",       Color.FromArgb(0xFF, 0x7F, 0x50)),
+            ("clSalmon",      Color.FromArgb(0xFA, 0x80, 0x72)),
+            ("clTomato",      Color.FromArgb(0xFF, 0x63, 0x47)),
+            ("clOrangeRed",   Color.FromArgb(0xFF, 0x45, 0x00)),
+            ("clLime",        Color.FromArgb(0x32, 0xCD, 0x32)),
+            ("clSpringGreen", Color.FromArgb(0x00, 0xFF, 0x7F)),
+            ("clTurquoise",   Color.FromArgb(0x40, 0xE0, 0xD0)),
+            ("clSkyBlue",     Color.FromArgb(0x87, 0xCE, 0xEB)),
+            ("clDodgerBlue",  Color.FromArgb(0x1E, 0x90, 0xFF)),
+            ("clNavy",        Color.FromArgb(0x00, 0x00, 0x80)),
+            ("clTeal",        Color.FromArgb(0x00, 0x80, 0x80)),
+            ("clPurple",      Color.FromArgb(0x80, 0x00, 0x80)),
+            ("clViolet",      Color.FromArgb(0xEE, 0x82, 0xEE)),
+            ("clIndigo",      Color.FromArgb(0x4B, 0x00, 0x82)),
+            ("clMaroon",      Color.FromArgb(0x80, 0x00, 0x00)),
+            ("clOlive",       Color.FromArgb(0x80, 0x80, 0x00)),
+            ("clGray",        Color.FromArgb(0x80, 0x80, 0x80)),
+            ("clSilver",      Color.FromArgb(0xC0, 0xC0, 0xC0)),
+        };
+
+        /// <summary>Designer 用的 object[] 色名陣列（shared across all color combos）</summary>
+        internal static object[] ColorComboItems
+            => Array.ConvertAll(ColorEntries, e => (object)e.Name);
+
+        private static Color GetColorByName(string name)
+        {
+            if (name == null) return Color.White;
+            foreach (var e in ColorEntries)
+                if (e.Name == name) return e.Value;
+            return Color.White;
         }
+
+        private static string GetHexByName(string name)
+        {
+            Color c = GetColorByName(name);
+            return $"{c.R:X2}{c.G:X2}{c.B:X2}";
+        }
+
+        /// <summary>Owner-draw：在每個顏色項目左側畫色塊，右側顯示名稱與 hex 碼。</summary>
+        private void cmbColor_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            var cmb = sender as ComboBox;
+            if (cmb == null || e.Index < 0) return;
+
+            e.DrawBackground();
+
+            string name  = cmb.Items[e.Index].ToString();
+            Color  color = GetColorByName(name);
+            string hex   = $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+
+            // 色塊
+            var swatchRect = new Rectangle(e.Bounds.X + 2, e.Bounds.Y + 2, 18, e.Bounds.Height - 4);
+            using (var fill = new SolidBrush(color))
+                e.Graphics.FillRectangle(fill, swatchRect);
+            e.Graphics.DrawRectangle(Pens.DarkGray, swatchRect);
+
+            // 文字：名稱 + hex
+            string label = $"{name}  {hex}";
+            using (var brush = new SolidBrush(e.ForeColor))
+                e.Graphics.DrawString(label, e.Font, brush,
+                    new PointF(e.Bounds.X + 24, e.Bounds.Y + (e.Bounds.Height - e.Font.Height) / 2f));
+
+            e.DrawFocusRectangle();
+        }
+
+        /// <summary>顏色選項變更時，同步更新對應色塊 Panel。</summary>
+        private void cmbColor_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var cmb = sender as ComboBox;
+            if (cmb == null) return;
+            Color c = GetColorByName(cmb.SelectedItem?.ToString());
+
+            if      (cmb == cmbUpColor)    pnlUpColor.BackColor    = c;
+            else if (cmb == cmbDnColor)    pnlDnColor.BackColor    = c;
+            else if (cmb == cmbUpTimeClr)  pnlUpTimeClr.BackColor  = c;
+            else if (cmb == cmbDnTimeClr)  pnlDnTimeClr.BackColor  = c;
+            else if (cmb == cmbUpPlatClr)  pnlUpPlatClr.BackColor  = c;
+            else if (cmb == cmbDnPlatClr)  pnlDnPlatClr.BackColor  = c;
+        }
+
+        private static string NameToHex(string name) => GetHexByName(name);
 
         private static FontSize NameToFontSize(string s)
         {
             switch (s)
             {
-                case "16x16": return FontSize.Font16x16;
-                case "32x32": return FontSize.Font5x7;   // 規格中最大字型
-                default:      return FontSize.Font24x24;
+                case "16x16":   return FontSize.Font16x16;
+                case "英文 5x7": return FontSize.Font5x7;
+                default:        return FontSize.Font24x24;
             }
         }
 
         private static Display.FontStyle NameToFontStyle(string s)
-            => (s == "黑體") ? Display.FontStyle.Hei : Display.FontStyle.Ming;
-
-        private static Color ParseColor(string name)
         {
-            switch (name)
-            {
-                case "clYellow": return Color.Yellow;
-                case "clRed":    return Color.Red;
-                case "clGreen":  return Color.Lime;
-                default:         return Color.White;
-            }
+            if (s == "黑體") return Display.FontStyle.Hei;
+            if (s == "楷體") return Display.FontStyle.Kai;
+            return Display.FontStyle.Ming;
         }
+
+        private static Color ParseColor(string name) => GetColorByName(name);
 
         private static float SizeToPt(string size)
         {
             switch (size)
             {
-                case "16x16": return 9f;
-                case "32x32": return 18f;
-                default:      return 13f;
+                case "16x16":   return 9f;
+                case "英文 5x7": return 7f;
+                default:        return 13f;
             }
         }
 
