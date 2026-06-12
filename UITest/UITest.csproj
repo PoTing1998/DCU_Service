@@ -123,6 +123,8 @@
     <Compile Include="Controls\CountdownUnitControl.Designer.cs">
       <DependentUpon>CountdownUnitControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ColorPalette.cs" />
+    <Compile Include="Controls\DisplayMessageSettings.cs" />
     <Compile Include="Controls\DisplayMessageControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

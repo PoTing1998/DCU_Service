@@ -3,8 +3,10 @@ using Display.DisplayMode;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 using UITest.Services;
 using static Display.DisplaySettingsEnums;
 
@@ -31,9 +33,26 @@ namespace UITest.Controls
 
         private readonly DisplayMessageService _service = new DisplayMessageService();
 
+        // 字型名稱常數，確保 Designer / 邏輯端完全一致
+        private const string FontName24x24 = "24x24";
+        private const string FontName16x16 = "16x16";
+        private const string FontName5x7   = "英文 5x7";
+
+        private static readonly string SettingsPath =
+            Path.Combine(Application.StartupPath, "display_settings.xml");
+
+        // 板型 RadioButton 陣列快取（初始化後不再變動）
+        private RadioButton[] _upBoardRadios;
+        private RadioButton[] _dnBoardRadios;
+
         public DisplayMessageControl()
         {
             InitializeComponent();
+            _upBoardRadios = new[] { rdoUpBoard1, rdoUpBoard2, rdoUpBoard3, rdoUpBoard4,
+                                     rdoUpBoard5, rdoUpBoard6, rdoUpBoard7, rdoUpBoard8 };
+            _dnBoardRadios = new[] { rdoDnBoard1, rdoDnBoard2, rdoDnBoard3, rdoDnBoard4,
+                                     rdoDnBoard5, rdoDnBoard6, rdoDnBoard7, rdoDnBoard8 };
+            LoadSettings();
         }
 
         // ════════════════════════════════════════════════════════════════
@@ -51,8 +70,17 @@ namespace UITest.Controls
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            // TODO: 儲存至設定檔
-            MessageBox.Show("存檔完成", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                SaveSettings();
+                MessageBox.Show($"存檔完成\n路徑：{SettingsPath}", "提示",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"存檔失敗：{ex.Message}", "錯誤",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // ════════════════════════════════════════════════════════════════
@@ -93,18 +121,19 @@ namespace UITest.Controls
         {
             var rdo = sender as RadioButton;
             if (rdo == null || !rdo.Checked) return;
-            int idx = GetBoardIndex(rdo);
-            SetUpTimeVisible(idx == 2 || idx == 3 || idx == 7);
-            SetUpPlatVisible(idx == 3 || idx == 5);
+            // 0-based: boards 2,3,7 → index 1,2,6 ; boards 3,5 → index 2,4
+            int idx = Array.IndexOf(_upBoardRadios, rdo);
+            SetUpTimeVisible(idx == 1 || idx == 2 || idx == 6);
+            SetUpPlatVisible(idx == 2 || idx == 4);
         }
 
         private void rdoDnBoard_CheckedChanged(object sender, EventArgs e)
         {
             var rdo = sender as RadioButton;
             if (rdo == null || !rdo.Checked) return;
-            int idx = GetBoardIndex(rdo);
-            SetDnTimeVisible(idx == 2 || idx == 3 || idx == 7);
-            SetDnPlatVisible(idx == 3 || idx == 5);
+            int idx = Array.IndexOf(_dnBoardRadios, rdo);
+            SetDnTimeVisible(idx == 1 || idx == 2 || idx == 6);
+            SetDnPlatVisible(idx == 2 || idx == 4);
         }
 
         // ════════════════════════════════════════════════════════════════
@@ -212,7 +241,7 @@ namespace UITest.Controls
             ScrollMode   = GetScrollMode(true),
             ScrollSpeed  = (byte)nudUpSpeed.Value,
             PauseTime    = (byte)nudUpPause.Value,
-            MessageLevel = ParseLevel(cmbUpLevel.SelectedItem?.ToString()),
+            MessageLevel = ParseLevel(cmbUpLevel),
             MessageType  = GetMessageType(true),
             SequenceNo   = 0x01,           // 上行
             TargetIDs    = ids,
@@ -229,7 +258,7 @@ namespace UITest.Controls
             ScrollMode   = GetScrollMode(false),
             ScrollSpeed  = (byte)nudDnSpeed.Value,
             PauseTime    = (byte)nudDnPause.Value,
-            MessageLevel = ParseLevel(cmbDnLevel.SelectedItem?.ToString()),
+            MessageLevel = ParseLevel(cmbDnLevel),
             MessageType  = GetMessageType(false),
             SequenceNo   = 0x02,           // 下行
             TargetIDs    = ids,
@@ -359,71 +388,174 @@ namespace UITest.Controls
             return 0x71;
         }
 
-        private static byte ParseLevel(string s)
+        /// <summary>
+        /// Level ComboBox 的 index 直接對應 Level 數值。
+        /// 選項順序：index 0 = 最高Level 1, 1 = 高Level 2, 2 = 低Level 3, 3 = 最低Level 4
+        /// </summary>
+        private static byte ParseLevel(ComboBox cmb)
+            => (byte)(cmb.SelectedIndex >= 0 ? cmb.SelectedIndex + 1 : 4);
+
+        // ════════════════════════════════════════════════════════════════
+        // 設定存讀
+        // ════════════════════════════════════════════════════════════════
+
+        private void SaveSettings()
         {
-            if (s == null) return 4;
-            if (s.Contains("Level 1")) return 1;
-            if (s.Contains("Level 2")) return 2;
-            if (s.Contains("Level 3")) return 3;
-            return 4;
+            var s = new DisplayMessageSettings
+            {
+                // 板型
+                UpBoardIndex   = GetCheckedBoardIndex(true),
+                DnBoardIndex   = GetCheckedBoardIndex(false),
+                // 訊息頻型
+                UpMsgTypeIndex = rdoUpPreRec.Checked ? 1 : 0,
+                DnMsgTypeIndex = rdoDnPreRec.Checked ? 1 : 0,
+                // 訊息文字
+                UpMsg = txtUpMsg.Text,
+                DnMsg = txtDnMsg.Text,
+                // 字型參數
+                UpFontSizeIndex  = cmbUpFontSize.SelectedIndex,
+                UpFontStyleIndex = cmbUpFontStyle.SelectedIndex,
+                UpColorIndex     = cmbUpColor.SelectedIndex,
+                UpLevelIndex     = cmbUpLevel.SelectedIndex,
+                DnFontSizeIndex  = cmbDnFontSize.SelectedIndex,
+                DnFontStyleIndex = cmbDnFontStyle.SelectedIndex,
+                DnColorIndex     = cmbDnColor.SelectedIndex,
+                DnLevelIndex     = cmbDnLevel.SelectedIndex,
+                // 動作方式
+                UpScrollAction = GetScrollMode(true),
+                DnScrollAction = GetScrollMode(false),
+                // 動作參數
+                UpSpeed = (int)nudUpSpeed.Value,
+                UpPause = (int)nudUpPause.Value,
+                DnSpeed = (int)nudDnSpeed.Value,
+                DnPause = (int)nudDnPause.Value,
+                // Extra
+                UpTimeTypeIndex = cmbUpTimeType.SelectedIndex,
+                UpTimeClrIndex  = cmbUpTimeClr.SelectedIndex,
+                DnTimeTypeIndex = cmbDnTimeType.SelectedIndex,
+                DnTimeClrIndex  = cmbDnTimeClr.SelectedIndex,
+                UpPlatIdx       = (int)nudUpPlatIdx.Value,
+                UpPlatClrIndex  = cmbUpPlatClr.SelectedIndex,
+                DnPlatIdx       = (int)nudDnPlatIdx.Value,
+                DnPlatClrIndex  = cmbDnPlatClr.SelectedIndex,
+            };
+
+            var serializer = new XmlSerializer(typeof(DisplayMessageSettings));
+            using (var writer = new StreamWriter(SettingsPath, append: false, encoding: Encoding.UTF8))
+                serializer.Serialize(writer, s);
+        }
+
+        private void LoadSettings()
+        {
+            if (!File.Exists(SettingsPath)) return;
+
+            try
+            {
+                DisplayMessageSettings s;
+                var serializer = new XmlSerializer(typeof(DisplayMessageSettings));
+                using (var reader = new StreamReader(SettingsPath, Encoding.UTF8))
+                    s = (DisplayMessageSettings)serializer.Deserialize(reader);
+
+                // 板型
+                SetCheckedBoard(true,  s.UpBoardIndex);
+                SetCheckedBoard(false, s.DnBoardIndex);
+                // 訊息頻型
+                rdoUpGeneral.Checked = s.UpMsgTypeIndex == 0;
+                rdoUpPreRec.Checked  = s.UpMsgTypeIndex == 1;
+                rdoDnGeneral.Checked = s.DnMsgTypeIndex == 0;
+                rdoDnPreRec.Checked  = s.DnMsgTypeIndex == 1;
+                // 訊息文字
+                txtUpMsg.Text = s.UpMsg ?? "";
+                txtDnMsg.Text = s.DnMsg ?? "";
+                // 字型參數
+                SetComboIndex(cmbUpFontSize,  s.UpFontSizeIndex);
+                SetComboIndex(cmbUpFontStyle, s.UpFontStyleIndex);
+                SetComboIndex(cmbUpColor,     s.UpColorIndex);
+                SetComboIndex(cmbUpLevel,     s.UpLevelIndex);
+                SetComboIndex(cmbDnFontSize,  s.DnFontSizeIndex);
+                SetComboIndex(cmbDnFontStyle, s.DnFontStyleIndex);
+                SetComboIndex(cmbDnColor,     s.DnColorIndex);
+                SetComboIndex(cmbDnLevel,     s.DnLevelIndex);
+                // 動作方式
+                SetScrollAction(true,  s.UpScrollAction);
+                SetScrollAction(false, s.DnScrollAction);
+                // 動作參數
+                nudUpSpeed.Value = Clamp(s.UpSpeed, nudUpSpeed);
+                nudUpPause.Value = Clamp(s.UpPause, nudUpPause);
+                nudDnSpeed.Value = Clamp(s.DnSpeed, nudDnSpeed);
+                nudDnPause.Value = Clamp(s.DnPause, nudDnPause);
+                // Extra
+                SetComboIndex(cmbUpTimeType, s.UpTimeTypeIndex);
+                SetComboIndex(cmbUpTimeClr,  s.UpTimeClrIndex);
+                SetComboIndex(cmbDnTimeType, s.DnTimeTypeIndex);
+                SetComboIndex(cmbDnTimeClr,  s.DnTimeClrIndex);
+                nudUpPlatIdx.Value = Clamp(s.UpPlatIdx, nudUpPlatIdx);
+                SetComboIndex(cmbUpPlatClr,  s.UpPlatClrIndex);
+                nudDnPlatIdx.Value = Clamp(s.DnPlatIdx, nudDnPlatIdx);
+                SetComboIndex(cmbDnPlatClr,  s.DnPlatClrIndex);
+            }
+            catch
+            {
+                // 設定檔損毀時靜默忽略，使用預設值
+            }
+        }
+
+        // ── LoadSettings 輔助 ─────────────────────────────────────────
+
+        private static void SetComboIndex(ComboBox cmb, int index)
+        {
+            if (index >= 0 && index < cmb.Items.Count)
+                cmb.SelectedIndex = index;
+        }
+
+        private static decimal Clamp(int value, NumericUpDown nud)
+            => Math.Max(nud.Minimum, Math.Min(nud.Maximum, value));
+
+        private int GetCheckedBoardIndex(bool isUp)
+        {
+            var radios = isUp ? _upBoardRadios : _dnBoardRadios;
+            for (int i = 0; i < radios.Length; i++)
+                if (radios[i].Checked) return i;
+            return 0;
+        }
+
+        private void SetCheckedBoard(bool isUp, int index)
+        {
+            var radios = isUp ? _upBoardRadios : _dnBoardRadios;
+            if (index >= 0 && index < radios.Length)
+                radios[index].Checked = true;
+        }
+
+        private void SetScrollAction(bool isUp, byte action)
+        {
+            if (isUp)
+            {
+                rdoUpAct61.Checked = action == 0x61;
+                rdoUpAct62.Checked = action == 0x62;
+                rdoUpAct63.Checked = action == 0x63;
+                rdoUpAct64.Checked = action == 0x64;
+                rdoUpAct65.Checked = action == 0x65;
+                rdoUpAct66.Checked = action == 0x66;
+                rdoUpAct67.Checked = action == 0x67;
+            }
+            else
+            {
+                rdoDnAct61.Checked = action == 0x61;
+                rdoDnAct62.Checked = action == 0x62;
+                rdoDnAct63.Checked = action == 0x63;
+                rdoDnAct64.Checked = action == 0x64;
+                rdoDnAct65.Checked = action == 0x65;
+                rdoDnAct66.Checked = action == 0x66;
+                rdoDnAct67.Checked = action == 0x67;
+            }
         }
 
         // ════════════════════════════════════════════════════════════════
         // 顏色 ComboBox：資料 + 繪製
         // ════════════════════════════════════════════════════════════════
 
-        /// <summary>顏色名稱 → System.Drawing.Color 對照表（共 30 色）</summary>
-        private static readonly (string Name, Color Value)[] ColorEntries =
-        {
-            ("clBlack",       Color.Black),
-            ("clWhite",       Color.White),
-            ("clRed",         Color.FromArgb(0xFF, 0x00, 0x00)),
-            ("clYellow",      Color.FromArgb(0xFF, 0xFF, 0x00)),
-            ("clGreen",       Color.FromArgb(0x00, 0xFF, 0x00)),
-            ("clBlue",        Color.FromArgb(0x00, 0x00, 0xFF)),
-            ("clCyan",        Color.FromArgb(0x00, 0xFF, 0xFF)),
-            ("clMagenta",     Color.FromArgb(0xFF, 0x00, 0xFF)),
-            ("clOrange",      Color.FromArgb(0xFF, 0xA5, 0x00)),
-            ("clGold",        Color.FromArgb(0xFF, 0xD7, 0x00)),
-            ("clPink",        Color.FromArgb(0xFF, 0xC0, 0xCB)),
-            ("clDeepPink",    Color.FromArgb(0xFF, 0x14, 0x93)),
-            ("clCoral",       Color.FromArgb(0xFF, 0x7F, 0x50)),
-            ("clSalmon",      Color.FromArgb(0xFA, 0x80, 0x72)),
-            ("clTomato",      Color.FromArgb(0xFF, 0x63, 0x47)),
-            ("clOrangeRed",   Color.FromArgb(0xFF, 0x45, 0x00)),
-            ("clLime",        Color.FromArgb(0x32, 0xCD, 0x32)),
-            ("clSpringGreen", Color.FromArgb(0x00, 0xFF, 0x7F)),
-            ("clTurquoise",   Color.FromArgb(0x40, 0xE0, 0xD0)),
-            ("clSkyBlue",     Color.FromArgb(0x87, 0xCE, 0xEB)),
-            ("clDodgerBlue",  Color.FromArgb(0x1E, 0x90, 0xFF)),
-            ("clNavy",        Color.FromArgb(0x00, 0x00, 0x80)),
-            ("clTeal",        Color.FromArgb(0x00, 0x80, 0x80)),
-            ("clPurple",      Color.FromArgb(0x80, 0x00, 0x80)),
-            ("clViolet",      Color.FromArgb(0xEE, 0x82, 0xEE)),
-            ("clIndigo",      Color.FromArgb(0x4B, 0x00, 0x82)),
-            ("clMaroon",      Color.FromArgb(0x80, 0x00, 0x00)),
-            ("clOlive",       Color.FromArgb(0x80, 0x80, 0x00)),
-            ("clGray",        Color.FromArgb(0x80, 0x80, 0x80)),
-            ("clSilver",      Color.FromArgb(0xC0, 0xC0, 0xC0)),
-        };
-
-        /// <summary>Designer 用的 object[] 色名陣列（shared across all color combos）</summary>
-        internal static object[] ColorComboItems
-            => Array.ConvertAll(ColorEntries, e => (object)e.Name);
-
-        private static Color GetColorByName(string name)
-        {
-            if (name == null) return Color.White;
-            foreach (var e in ColorEntries)
-                if (e.Name == name) return e.Value;
-            return Color.White;
-        }
-
-        private static string GetHexByName(string name)
-        {
-            Color c = GetColorByName(name);
-            return $"{c.R:X2}{c.G:X2}{c.B:X2}";
-        }
+        /// <summary>Designer 用的 object[]，直接取自 ColorPalette（只建立一次）。</summary>
+        internal static object[] ColorComboItems => ColorPalette.ComboItems;
 
         /// <summary>Owner-draw：在每個顏色項目左側畫色塊，右側顯示名稱與 hex 碼。</summary>
         private void cmbColor_DrawItem(object sender, DrawItemEventArgs e)
@@ -434,7 +566,7 @@ namespace UITest.Controls
             e.DrawBackground();
 
             string name  = cmb.Items[e.Index].ToString();
-            Color  color = GetColorByName(name);
+            Color  color = ColorPalette.GetColor(name);
             string hex   = $"#{color.R:X2}{color.G:X2}{color.B:X2}";
 
             // 色塊
@@ -457,7 +589,7 @@ namespace UITest.Controls
         {
             var cmb = sender as ComboBox;
             if (cmb == null) return;
-            Color c = GetColorByName(cmb.SelectedItem?.ToString());
+            Color c = ColorPalette.GetColor(cmb.SelectedItem?.ToString());
 
             if      (cmb == cmbUpColor)    pnlUpColor.BackColor    = c;
             else if (cmb == cmbDnColor)    pnlDnColor.BackColor    = c;
@@ -467,16 +599,13 @@ namespace UITest.Controls
             else if (cmb == cmbDnPlatClr)  pnlDnPlatClr.BackColor  = c;
         }
 
-        private static string NameToHex(string name) => GetHexByName(name);
+        private static string NameToHex(string name) => ColorPalette.GetHex(name);
 
         private static FontSize NameToFontSize(string s)
         {
-            switch (s)
-            {
-                case "16x16":   return FontSize.Font16x16;
-                case "英文 5x7": return FontSize.Font5x7;
-                default:        return FontSize.Font24x24;
-            }
+            if (s == FontName16x16) return FontSize.Font16x16;
+            if (s == FontName5x7)   return FontSize.Font5x7;
+            return FontSize.Font24x24;
         }
 
         private static Display.FontStyle NameToFontStyle(string s)
@@ -486,19 +615,15 @@ namespace UITest.Controls
             return Display.FontStyle.Ming;
         }
 
-        private static Color ParseColor(string name) => GetColorByName(name);
+        private static Color ParseColor(string name) => ColorPalette.GetColor(name);
 
         private static float SizeToPt(string size)
         {
-            switch (size)
-            {
-                case "16x16":   return 9f;
-                case "英文 5x7": return 7f;
-                default:        return 13f;
-            }
+            if (size == FontName16x16) return 9f;
+            if (size == FontName5x7)   return 7f;
+            return 13f;
         }
 
-        private static int GetBoardIndex(RadioButton rdo)
-            => (rdo?.Text?.Length > 0 && char.IsDigit(rdo.Text[0])) ? (rdo.Text[0] - '0') : 0;
+        // GetBoardIndex(RadioButton) 已廢棄，請改用 Array.IndexOf(_upBoardRadios / _dnBoardRadios, rdo)
     }
 }

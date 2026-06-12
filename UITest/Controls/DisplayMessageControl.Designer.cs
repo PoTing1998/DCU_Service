@@ -250,7 +250,7 @@ namespace UITest.Controls
             this.cmbUpLevel.Size          = new System.Drawing.Size(105, 21);
             this.cmbUpLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbUpLevel.Items.AddRange(new object[] { "最高Level 1", "高Level 2", "低Level 3", "最低Level 4" });
-            this.cmbUpLevel.SelectedIndex = 0;
+            this.cmbUpLevel.SelectedIndex = 3; // 預設最低Level 4
 
             this.lblUpAction.AutoSize = true;
             this.lblUpAction.Location = new System.Drawing.Point(10, 359);
@@ -386,7 +386,7 @@ namespace UITest.Controls
             this.cmbDnLevel.Size          = new System.Drawing.Size(105, 21);
             this.cmbDnLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbDnLevel.Items.AddRange(new object[] { "最高Level 1", "高Level 2", "低Level 3", "最低Level 4" });
-            this.cmbDnLevel.SelectedIndex = 0;
+            this.cmbDnLevel.SelectedIndex = 3; // 預設最低Level 4
 
             this.lblDnAction.AutoSize = true;
             this.lblDnAction.Location = new System.Drawing.Point(595, 359);
