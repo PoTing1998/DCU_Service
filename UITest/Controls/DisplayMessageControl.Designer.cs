@@ -23,14 +23,18 @@ namespace UITest.Controls
             this.btnSave        = new System.Windows.Forms.Button();
             this.chkDnMulti     = new System.Windows.Forms.CheckBox();
             // ── 上行 ──
-            this.lblUpMsgType   = new System.Windows.Forms.Label();
-            this.rdoUpGeneral   = new System.Windows.Forms.RadioButton();
-            this.rdoUpPreRec    = new System.Windows.Forms.RadioButton();
-            this.lblUpMsg       = new System.Windows.Forms.Label();
-            this.txtUpMsg       = new System.Windows.Forms.TextBox();
-            this.btnUpMsgBrowse = new System.Windows.Forms.Button();
-            this.btnUpMsgShow   = new System.Windows.Forms.Button();
-            this.btnUpMsgAdd    = new System.Windows.Forms.Button();
+            this.pnlUpMsgType      = new System.Windows.Forms.Panel();
+            this.lblUpMsgType      = new System.Windows.Forms.Label();
+            this.rdoUpGeneral      = new System.Windows.Forms.RadioButton();
+            this.rdoUpPreRec       = new System.Windows.Forms.RadioButton();
+            this.lblUpMsg          = new System.Windows.Forms.Label();
+            this.txtUpMsg          = new System.Windows.Forms.TextBox();
+            this.btnUpMsgBrowse    = new System.Windows.Forms.Button();
+            this.btnUpMsgShow      = new System.Windows.Forms.Button();
+            this.btnUpMsgAdd       = new System.Windows.Forms.Button();
+            this.lstUpMultiMsgs    = new System.Windows.Forms.ListBox();
+            this.btnUpMultiAdd     = new System.Windows.Forms.Button();
+            this.btnUpMultiRemove  = new System.Windows.Forms.Button();
             this.lblUpFont      = new System.Windows.Forms.Label();
             this.cmbUpFontSize  = new System.Windows.Forms.ComboBox();
             this.cmbUpFontStyle = new System.Windows.Forms.ComboBox();
@@ -38,6 +42,7 @@ namespace UITest.Controls
             this.cmbUpColor     = new System.Windows.Forms.ComboBox();
             this.cmbUpLevel     = new System.Windows.Forms.ComboBox();
             this.lblUpAction    = new System.Windows.Forms.Label();
+            this.pnlUpAction    = new System.Windows.Forms.Panel();
             this.rdoUpAct61     = new System.Windows.Forms.RadioButton();
             this.rdoUpAct62     = new System.Windows.Forms.RadioButton();
             this.rdoUpAct63     = new System.Windows.Forms.RadioButton();
@@ -52,14 +57,18 @@ namespace UITest.Controls
             this.nudUpPause     = new System.Windows.Forms.NumericUpDown();
             this.lblUpPauseUnit = new System.Windows.Forms.Label();
             // ── 下行 ──
-            this.lblDnMsgType   = new System.Windows.Forms.Label();
-            this.rdoDnGeneral   = new System.Windows.Forms.RadioButton();
-            this.rdoDnPreRec    = new System.Windows.Forms.RadioButton();
-            this.lblDnMsg       = new System.Windows.Forms.Label();
-            this.txtDnMsg       = new System.Windows.Forms.TextBox();
-            this.btnDnMsgBrowse = new System.Windows.Forms.Button();
-            this.btnDnMsgShow   = new System.Windows.Forms.Button();
-            this.btnDnMsgAdd    = new System.Windows.Forms.Button();
+            this.pnlDnMsgType      = new System.Windows.Forms.Panel();
+            this.lblDnMsgType      = new System.Windows.Forms.Label();
+            this.rdoDnGeneral      = new System.Windows.Forms.RadioButton();
+            this.rdoDnPreRec       = new System.Windows.Forms.RadioButton();
+            this.lblDnMsg          = new System.Windows.Forms.Label();
+            this.txtDnMsg          = new System.Windows.Forms.TextBox();
+            this.btnDnMsgBrowse    = new System.Windows.Forms.Button();
+            this.btnDnMsgShow      = new System.Windows.Forms.Button();
+            this.btnDnMsgAdd       = new System.Windows.Forms.Button();
+            this.lstDnMultiMsgs    = new System.Windows.Forms.ListBox();
+            this.btnDnMultiAdd     = new System.Windows.Forms.Button();
+            this.btnDnMultiRemove  = new System.Windows.Forms.Button();
             this.lblDnFont      = new System.Windows.Forms.Label();
             this.cmbDnFontSize  = new System.Windows.Forms.ComboBox();
             this.cmbDnFontStyle = new System.Windows.Forms.ComboBox();
@@ -67,6 +76,7 @@ namespace UITest.Controls
             this.cmbDnColor     = new System.Windows.Forms.ComboBox();
             this.cmbDnLevel     = new System.Windows.Forms.ComboBox();
             this.lblDnAction    = new System.Windows.Forms.Label();
+            this.pnlDnAction    = new System.Windows.Forms.Panel();
             this.rdoDnAct61     = new System.Windows.Forms.RadioButton();
             this.rdoDnAct62     = new System.Windows.Forms.RadioButton();
             this.rdoDnAct63     = new System.Windows.Forms.RadioButton();
@@ -100,10 +110,16 @@ namespace UITest.Controls
             this.rdoDnBoard7 = new System.Windows.Forms.RadioButton();
             this.rdoDnBoard8 = new System.Windows.Forms.RadioButton();
             // ── 上行 Extra 子選項 ──
-            this.lblUpTimeHdr   = new System.Windows.Forms.Label();
-            this.cmbUpTimeType  = new System.Windows.Forms.ComboBox();
-            this.pnlUpTimeClr   = new System.Windows.Forms.Panel();
-            this.cmbUpTimeClr   = new System.Windows.Forms.ComboBox();
+            this.lblUpTimeHdr        = new System.Windows.Forms.Label();
+            this.cmbUpTimeType       = new System.Windows.Forms.ComboBox();
+            this.pnlUpTimeClr        = new System.Windows.Forms.Panel();
+            this.cmbUpTimeClr        = new System.Windows.Forms.ComboBox();
+            this.lblUpCountStart     = new System.Windows.Forms.Label();
+            this.nudUpCountStart     = new System.Windows.Forms.NumericUpDown();
+            this.lblUpCountStartTime = new System.Windows.Forms.Label();
+            this.lblUpCountStop      = new System.Windows.Forms.Label();
+            this.nudUpCountStop      = new System.Windows.Forms.NumericUpDown();
+            this.lblUpCountStopTime  = new System.Windows.Forms.Label();
             this.lblUpPlatHdr   = new System.Windows.Forms.Label();
             this.lblUpPlatIdx   = new System.Windows.Forms.Label();
             this.nudUpPlatIdx   = new System.Windows.Forms.NumericUpDown();
@@ -111,16 +127,44 @@ namespace UITest.Controls
             this.pnlUpPlatClr   = new System.Windows.Forms.Panel();
             this.cmbUpPlatClr   = new System.Windows.Forms.ComboBox();
             // ── 下行 Extra 子選項 ──
-            this.lblDnTimeHdr   = new System.Windows.Forms.Label();
-            this.cmbDnTimeType  = new System.Windows.Forms.ComboBox();
-            this.pnlDnTimeClr   = new System.Windows.Forms.Panel();
-            this.cmbDnTimeClr   = new System.Windows.Forms.ComboBox();
+            this.lblDnTimeHdr        = new System.Windows.Forms.Label();
+            this.cmbDnTimeType       = new System.Windows.Forms.ComboBox();
+            this.pnlDnTimeClr        = new System.Windows.Forms.Panel();
+            this.cmbDnTimeClr        = new System.Windows.Forms.ComboBox();
+            this.lblDnCountStart     = new System.Windows.Forms.Label();
+            this.nudDnCountStart     = new System.Windows.Forms.NumericUpDown();
+            this.lblDnCountStartTime = new System.Windows.Forms.Label();
+            this.lblDnCountStop      = new System.Windows.Forms.Label();
+            this.nudDnCountStop      = new System.Windows.Forms.NumericUpDown();
+            this.lblDnCountStopTime  = new System.Windows.Forms.Label();
             this.lblDnPlatHdr   = new System.Windows.Forms.Label();
             this.lblDnPlatIdx   = new System.Windows.Forms.Label();
             this.nudDnPlatIdx   = new System.Windows.Forms.NumericUpDown();
             this.pnlDnPlatThumb = new System.Windows.Forms.Panel();
             this.pnlDnPlatClr   = new System.Windows.Forms.Panel();
             this.cmbDnPlatClr   = new System.Windows.Forms.ComboBox();
+            // ── 上行 警示燈 Extra 子選項 ──
+            this.lblUpAlarmHdr    = new System.Windows.Forms.Label();
+            this.lblUpAlarmMsgLbl = new System.Windows.Forms.Label();
+            this.rdoUpAlarmMsgOn  = new System.Windows.Forms.RadioButton();
+            this.rdoUpAlarmMsgOff = new System.Windows.Forms.RadioButton();
+            this.lblUpAlarmPlay   = new System.Windows.Forms.Label();
+            this.nudUpAlarmPlay   = new System.Windows.Forms.NumericUpDown();
+            this.lblUpAlarmLight  = new System.Windows.Forms.Label();
+            this.rdoUpLightOff    = new System.Windows.Forms.RadioButton();
+            this.rdoUpLightOn     = new System.Windows.Forms.RadioButton();
+            this.rdoUpLightBlink  = new System.Windows.Forms.RadioButton();
+            // ── 下行 警示燈 Extra 子選項 ──
+            this.lblDnAlarmHdr    = new System.Windows.Forms.Label();
+            this.lblDnAlarmMsgLbl = new System.Windows.Forms.Label();
+            this.rdoDnAlarmMsgOn  = new System.Windows.Forms.RadioButton();
+            this.rdoDnAlarmMsgOff = new System.Windows.Forms.RadioButton();
+            this.lblDnAlarmPlay   = new System.Windows.Forms.Label();
+            this.nudDnAlarmPlay   = new System.Windows.Forms.NumericUpDown();
+            this.lblDnAlarmLight  = new System.Windows.Forms.Label();
+            this.rdoDnLightOff    = new System.Windows.Forms.RadioButton();
+            this.rdoDnLightOn     = new System.Windows.Forms.RadioButton();
+            this.rdoDnLightBlink  = new System.Windows.Forms.RadioButton();
 
             ((System.ComponentModel.ISupportInitialize)(this.nudUpSpeed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudUpPause)).BeginInit();
@@ -128,6 +172,12 @@ namespace UITest.Controls
             ((System.ComponentModel.ISupportInitialize)(this.nudDnPause)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudUpPlatIdx)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudDnPlatIdx)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudUpCountStart)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudUpCountStop)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudDnCountStart)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudDnCountStop)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudUpAlarmPlay)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudDnAlarmPlay)).BeginInit();
             this.grpUpBoard.SuspendLayout();
             this.grpDnBoard.SuspendLayout();
             this.SuspendLayout();
@@ -184,13 +234,19 @@ namespace UITest.Controls
             this.lblUpMsgType.Location = new System.Drawing.Point(10, 224);
             this.lblUpMsgType.Text     = "上行訊息頻型";
 
+            // pnlUpMsgType 包住兩個訊息頻型 RadioButton，避免與動作方式互斥
+            this.pnlUpMsgType.Location = new System.Drawing.Point(10, 240);
+            this.pnlUpMsgType.Size     = new System.Drawing.Size(290, 24);
+            this.pnlUpMsgType.Controls.AddRange(new System.Windows.Forms.Control[]
+                { this.rdoUpGeneral, this.rdoUpPreRec });
+
             this.rdoUpGeneral.AutoSize = true;
-            this.rdoUpGeneral.Location = new System.Drawing.Point(10, 242);
+            this.rdoUpGeneral.Location = new System.Drawing.Point(0, 2);
             this.rdoUpGeneral.Text     = "一般訊息(2AH)";
             this.rdoUpGeneral.Checked  = true;
 
             this.rdoUpPreRec.AutoSize = true;
-            this.rdoUpPreRec.Location = new System.Drawing.Point(135, 242);
+            this.rdoUpPreRec.Location = new System.Drawing.Point(125, 2);
             this.rdoUpPreRec.Text     = "預錄訊息(2CH)";
 
             this.lblUpMsg.AutoSize = true;
@@ -204,6 +260,7 @@ namespace UITest.Controls
             this.btnUpMsgBrowse.Location = new System.Drawing.Point(389, 286);
             this.btnUpMsgBrowse.Size     = new System.Drawing.Size(28, 23);
             this.btnUpMsgBrowse.Text     = "...";
+            this.btnUpMsgBrowse.Click   += new System.EventHandler(this.btnUpMsgBrowse_Click);
 
             this.btnUpMsgShow.Location = new System.Drawing.Point(420, 286);
             this.btnUpMsgShow.Size     = new System.Drawing.Size(50, 23);
@@ -214,6 +271,23 @@ namespace UITest.Controls
             this.btnUpMsgAdd.Size     = new System.Drawing.Size(50, 23);
             this.btnUpMsgAdd.Text     = "新增";
             this.btnUpMsgAdd.Click   += new System.EventHandler(this.btnUpMsgAdd_Click);
+
+            // ── 上行多訊息清單（預設隱藏）──
+            this.lstUpMultiMsgs.Location  = new System.Drawing.Point(10, 287);
+            this.lstUpMultiMsgs.Size      = new System.Drawing.Size(375, 82);
+            this.lstUpMultiMsgs.Visible   = false;
+
+            this.btnUpMultiAdd.Location = new System.Drawing.Point(389, 287);
+            this.btnUpMultiAdd.Size     = new System.Drawing.Size(65, 23);
+            this.btnUpMultiAdd.Text     = "新增訊息";
+            this.btnUpMultiAdd.Visible  = false;
+            this.btnUpMultiAdd.Click   += new System.EventHandler(this.btnUpMultiAdd_Click);
+
+            this.btnUpMultiRemove.Location = new System.Drawing.Point(389, 316);
+            this.btnUpMultiRemove.Size     = new System.Drawing.Size(65, 23);
+            this.btnUpMultiRemove.Text     = "移除";
+            this.btnUpMultiRemove.Visible  = false;
+            this.btnUpMultiRemove.Click   += new System.EventHandler(this.btnUpMultiRemove_Click);
 
             this.lblUpFont.AutoSize = true;
             this.lblUpFont.Location = new System.Drawing.Point(10, 314);
@@ -256,33 +330,42 @@ namespace UITest.Controls
             this.lblUpAction.Location = new System.Drawing.Point(10, 359);
             this.lblUpAction.Text     = "上行訊息動作方式";
 
+            // pnlUpAction 包住所有動作方式 RadioButton
+            this.pnlUpAction.Location = new System.Drawing.Point(10, 375);
+            this.pnlUpAction.Size     = new System.Drawing.Size(440, 108);
+            this.pnlUpAction.Controls.AddRange(new System.Windows.Forms.Control[]
+            {
+                this.rdoUpAct61, this.rdoUpAct62, this.rdoUpAct63, this.rdoUpAct64,
+                this.rdoUpAct65, this.rdoUpAct66, this.rdoUpAct67
+            });
+
             this.rdoUpAct61.AutoSize = true;
-            this.rdoUpAct61.Location = new System.Drawing.Point(10, 377);
+            this.rdoUpAct61.Location = new System.Drawing.Point(0, 2);
             this.rdoUpAct61.Text     = "立即顯示(61H)";
             this.rdoUpAct61.Checked  = true;
 
             this.rdoUpAct62.AutoSize = true;
-            this.rdoUpAct62.Location = new System.Drawing.Point(10, 403);
+            this.rdoUpAct62.Location = new System.Drawing.Point(0, 28);
             this.rdoUpAct62.Text     = "向左捲動(靠右對齊)(62H)";
 
             this.rdoUpAct63.AutoSize = true;
-            this.rdoUpAct63.Location = new System.Drawing.Point(10, 429);
+            this.rdoUpAct63.Location = new System.Drawing.Point(0, 54);
             this.rdoUpAct63.Text     = "向左捲動(靠左對齊)(63H)";
 
             this.rdoUpAct64.AutoSize = true;
-            this.rdoUpAct64.Location = new System.Drawing.Point(10, 455);
+            this.rdoUpAct64.Location = new System.Drawing.Point(0, 80);
             this.rdoUpAct64.Text     = "向左捲動(左移消失)(64H)";
 
             this.rdoUpAct65.AutoSize = true;
-            this.rdoUpAct65.Location = new System.Drawing.Point(220, 377);
+            this.rdoUpAct65.Location = new System.Drawing.Point(210, 2);
             this.rdoUpAct65.Text     = "向下捲動(65H)";
 
             this.rdoUpAct66.AutoSize = true;
-            this.rdoUpAct66.Location = new System.Drawing.Point(220, 403);
+            this.rdoUpAct66.Location = new System.Drawing.Point(210, 28);
             this.rdoUpAct66.Text     = "向上捲動(66H)";
 
             this.rdoUpAct67.AutoSize = true;
-            this.rdoUpAct67.Location = new System.Drawing.Point(220, 429);
+            this.rdoUpAct67.Location = new System.Drawing.Point(210, 54);
             this.rdoUpAct67.Text     = "閃爍(67H)";
 
             this.lblUpParam.AutoSize = true;
@@ -295,8 +378,8 @@ namespace UITest.Controls
 
             this.nudUpSpeed.Location = new System.Drawing.Point(45, 505);
             this.nudUpSpeed.Size     = new System.Drawing.Size(50, 20);
-            this.nudUpSpeed.Minimum  = 1;
-            this.nudUpSpeed.Maximum  = 99;
+            this.nudUpSpeed.Minimum  = 0;
+            this.nudUpSpeed.Maximum  = 9;
             this.nudUpSpeed.Value    = 5;
 
             this.lblUpPause.AutoSize = true;
@@ -320,13 +403,19 @@ namespace UITest.Controls
             this.lblDnMsgType.Location = new System.Drawing.Point(595, 224);
             this.lblDnMsgType.Text     = "下行訊息頻型";
 
+            // pnlDnMsgType 包住兩個訊息頻型 RadioButton
+            this.pnlDnMsgType.Location = new System.Drawing.Point(595, 240);
+            this.pnlDnMsgType.Size     = new System.Drawing.Size(290, 24);
+            this.pnlDnMsgType.Controls.AddRange(new System.Windows.Forms.Control[]
+                { this.rdoDnGeneral, this.rdoDnPreRec });
+
             this.rdoDnGeneral.AutoSize = true;
-            this.rdoDnGeneral.Location = new System.Drawing.Point(595, 242);
+            this.rdoDnGeneral.Location = new System.Drawing.Point(0, 2);
             this.rdoDnGeneral.Text     = "一般訊息(2AH)";
             this.rdoDnGeneral.Checked  = true;
 
             this.rdoDnPreRec.AutoSize = true;
-            this.rdoDnPreRec.Location = new System.Drawing.Point(720, 242);
+            this.rdoDnPreRec.Location = new System.Drawing.Point(125, 2);
             this.rdoDnPreRec.Text     = "預錄訊息(2CH)";
 
             this.lblDnMsg.AutoSize = true;
@@ -340,6 +429,7 @@ namespace UITest.Controls
             this.btnDnMsgBrowse.Location = new System.Drawing.Point(974, 286);
             this.btnDnMsgBrowse.Size     = new System.Drawing.Size(28, 23);
             this.btnDnMsgBrowse.Text     = "...";
+            this.btnDnMsgBrowse.Click   += new System.EventHandler(this.btnDnMsgBrowse_Click);
 
             this.btnDnMsgShow.Location = new System.Drawing.Point(1005, 286);
             this.btnDnMsgShow.Size     = new System.Drawing.Size(50, 23);
@@ -350,6 +440,23 @@ namespace UITest.Controls
             this.btnDnMsgAdd.Size     = new System.Drawing.Size(50, 23);
             this.btnDnMsgAdd.Text     = "新增";
             this.btnDnMsgAdd.Click   += new System.EventHandler(this.btnDnMsgAdd_Click);
+
+            // ── 下行多訊息清單（預設隱藏）──
+            this.lstDnMultiMsgs.Location  = new System.Drawing.Point(595, 287);
+            this.lstDnMultiMsgs.Size      = new System.Drawing.Size(375, 82);
+            this.lstDnMultiMsgs.Visible   = false;
+
+            this.btnDnMultiAdd.Location = new System.Drawing.Point(974, 287);
+            this.btnDnMultiAdd.Size     = new System.Drawing.Size(65, 23);
+            this.btnDnMultiAdd.Text     = "新增訊息";
+            this.btnDnMultiAdd.Visible  = false;
+            this.btnDnMultiAdd.Click   += new System.EventHandler(this.btnDnMultiAdd_Click);
+
+            this.btnDnMultiRemove.Location = new System.Drawing.Point(974, 316);
+            this.btnDnMultiRemove.Size     = new System.Drawing.Size(65, 23);
+            this.btnDnMultiRemove.Text     = "移除";
+            this.btnDnMultiRemove.Visible  = false;
+            this.btnDnMultiRemove.Click   += new System.EventHandler(this.btnDnMultiRemove_Click);
 
             this.lblDnFont.AutoSize = true;
             this.lblDnFont.Location = new System.Drawing.Point(595, 314);
@@ -392,33 +499,42 @@ namespace UITest.Controls
             this.lblDnAction.Location = new System.Drawing.Point(595, 359);
             this.lblDnAction.Text     = "下行訊息動作方式";
 
+            // pnlDnAction 包住所有動作方式 RadioButton
+            this.pnlDnAction.Location = new System.Drawing.Point(595, 375);
+            this.pnlDnAction.Size     = new System.Drawing.Size(440, 108);
+            this.pnlDnAction.Controls.AddRange(new System.Windows.Forms.Control[]
+            {
+                this.rdoDnAct61, this.rdoDnAct62, this.rdoDnAct63, this.rdoDnAct64,
+                this.rdoDnAct65, this.rdoDnAct66, this.rdoDnAct67
+            });
+
             this.rdoDnAct61.AutoSize = true;
-            this.rdoDnAct61.Location = new System.Drawing.Point(595, 377);
+            this.rdoDnAct61.Location = new System.Drawing.Point(0, 2);
             this.rdoDnAct61.Text     = "立即顯示(61H)";
             this.rdoDnAct61.Checked  = true;
 
             this.rdoDnAct62.AutoSize = true;
-            this.rdoDnAct62.Location = new System.Drawing.Point(595, 403);
+            this.rdoDnAct62.Location = new System.Drawing.Point(0, 28);
             this.rdoDnAct62.Text     = "向左捲動(靠右對齊)(62H)";
 
             this.rdoDnAct63.AutoSize = true;
-            this.rdoDnAct63.Location = new System.Drawing.Point(595, 429);
+            this.rdoDnAct63.Location = new System.Drawing.Point(0, 54);
             this.rdoDnAct63.Text     = "向左捲動(靠左對齊)(63H)";
 
             this.rdoDnAct64.AutoSize = true;
-            this.rdoDnAct64.Location = new System.Drawing.Point(595, 455);
+            this.rdoDnAct64.Location = new System.Drawing.Point(0, 80);
             this.rdoDnAct64.Text     = "向左捲動(左移消失)(64H)";
 
             this.rdoDnAct65.AutoSize = true;
-            this.rdoDnAct65.Location = new System.Drawing.Point(805, 377);
+            this.rdoDnAct65.Location = new System.Drawing.Point(210, 2);
             this.rdoDnAct65.Text     = "向下捲動(65H)";
 
             this.rdoDnAct66.AutoSize = true;
-            this.rdoDnAct66.Location = new System.Drawing.Point(805, 403);
+            this.rdoDnAct66.Location = new System.Drawing.Point(210, 28);
             this.rdoDnAct66.Text     = "向上捲動(66H)";
 
             this.rdoDnAct67.AutoSize = true;
-            this.rdoDnAct67.Location = new System.Drawing.Point(805, 429);
+            this.rdoDnAct67.Location = new System.Drawing.Point(210, 54);
             this.rdoDnAct67.Text     = "閃爍(67H)";
 
             this.lblDnParam.AutoSize = true;
@@ -431,8 +547,8 @@ namespace UITest.Controls
 
             this.nudDnSpeed.Location = new System.Drawing.Point(630, 505);
             this.nudDnSpeed.Size     = new System.Drawing.Size(50, 20);
-            this.nudDnSpeed.Minimum  = 1;
-            this.nudDnSpeed.Maximum  = 99;
+            this.nudDnSpeed.Minimum  = 0;
+            this.nudDnSpeed.Maximum  = 9;
             this.nudDnSpeed.Value    = 5;
 
             this.lblDnPause.AutoSize = true;
@@ -569,18 +685,20 @@ namespace UITest.Controls
             this.cmbUpTimeType.Location      = new System.Drawing.Point(10, 124);
             this.cmbUpTimeType.Size          = new System.Drawing.Size(130, 21);
             this.cmbUpTimeType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbUpTimeType.Items.AddRange(new object[] { "標準時間", "列車到站倒數" });
+            this.cmbUpTimeType.Items.AddRange(new object[] { "標準時間", "開始倒數" });
             this.cmbUpTimeType.SelectedIndex = 0;
             this.cmbUpTimeType.Visible       = false;
+            this.cmbUpTimeType.SelectedIndexChanged += new System.EventHandler(this.cmbUpTimeType_SelectedIndexChanged);
 
-            this.pnlUpTimeClr.Location    = new System.Drawing.Point(148, 126);
+            // 顏色選擇器移至第二列 y=148
+            this.pnlUpTimeClr.Location    = new System.Drawing.Point(10, 150);
             this.pnlUpTimeClr.Size        = new System.Drawing.Size(18, 18);
             this.pnlUpTimeClr.BackColor   = System.Drawing.Color.Yellow;
             this.pnlUpTimeClr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlUpTimeClr.Visible     = false;
 
-            this.cmbUpTimeClr.Location      = new System.Drawing.Point(170, 124);
-            this.cmbUpTimeClr.Size          = new System.Drawing.Size(130, 21);
+            this.cmbUpTimeClr.Location      = new System.Drawing.Point(32, 148);
+            this.cmbUpTimeClr.Size          = new System.Drawing.Size(110, 21);
             this.cmbUpTimeClr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbUpTimeClr.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbUpTimeClr.ItemHeight    = 20;
@@ -589,6 +707,43 @@ namespace UITest.Controls
             this.cmbUpTimeClr.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
             this.cmbUpTimeClr.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
             this.cmbUpTimeClr.Visible       = false;
+
+            // 倒數控件（只在「開始倒數」時顯示）
+            this.lblUpCountStart.AutoSize = true;
+            this.lblUpCountStart.Location = new System.Drawing.Point(150, 127);
+            this.lblUpCountStart.Text     = "開始倒數";
+            this.lblUpCountStart.Visible  = false;
+
+            this.nudUpCountStart.Location = new System.Drawing.Point(215, 124);
+            this.nudUpCountStart.Size     = new System.Drawing.Size(55, 20);
+            this.nudUpCountStart.Minimum  = 0;
+            this.nudUpCountStart.Maximum  = 255;
+            this.nudUpCountStart.Value    = 12;
+            this.nudUpCountStart.Visible  = false;
+            this.nudUpCountStart.ValueChanged += new System.EventHandler(this.nudUpCountStart_ValueChanged);
+
+            this.lblUpCountStartTime.AutoSize = true;
+            this.lblUpCountStartTime.Location = new System.Drawing.Point(275, 127);
+            this.lblUpCountStartTime.Text     = "(01:00)";
+            this.lblUpCountStartTime.Visible  = false;
+
+            this.lblUpCountStop.AutoSize = true;
+            this.lblUpCountStop.Location = new System.Drawing.Point(150, 151);
+            this.lblUpCountStop.Text     = "停止倒數";
+            this.lblUpCountStop.Visible  = false;
+
+            this.nudUpCountStop.Location = new System.Drawing.Point(215, 148);
+            this.nudUpCountStop.Size     = new System.Drawing.Size(55, 20);
+            this.nudUpCountStop.Minimum  = 0;
+            this.nudUpCountStop.Maximum  = 255;
+            this.nudUpCountStop.Value    = 0;
+            this.nudUpCountStop.Visible  = false;
+            this.nudUpCountStop.ValueChanged += new System.EventHandler(this.nudUpCountStop_ValueChanged);
+
+            this.lblUpCountStopTime.AutoSize = true;
+            this.lblUpCountStopTime.Location = new System.Drawing.Point(275, 151);
+            this.lblUpCountStopTime.Text     = "(00:00)";
+            this.lblUpCountStopTime.Visible  = false;
 
             this.lblUpPlatHdr.AutoSize = true;
             this.lblUpPlatHdr.Location = new System.Drawing.Point(10, 158);
@@ -641,18 +796,20 @@ namespace UITest.Controls
             this.cmbDnTimeType.Location      = new System.Drawing.Point(595, 124);
             this.cmbDnTimeType.Size          = new System.Drawing.Size(130, 21);
             this.cmbDnTimeType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbDnTimeType.Items.AddRange(new object[] { "標準時間", "列車到站倒數" });
+            this.cmbDnTimeType.Items.AddRange(new object[] { "標準時間", "開始倒數" });
             this.cmbDnTimeType.SelectedIndex = 0;
             this.cmbDnTimeType.Visible       = false;
+            this.cmbDnTimeType.SelectedIndexChanged += new System.EventHandler(this.cmbDnTimeType_SelectedIndexChanged);
 
-            this.pnlDnTimeClr.Location    = new System.Drawing.Point(733, 126);
+            // 顏色選擇器移至第二列 y=148
+            this.pnlDnTimeClr.Location    = new System.Drawing.Point(595, 150);
             this.pnlDnTimeClr.Size        = new System.Drawing.Size(18, 18);
             this.pnlDnTimeClr.BackColor   = System.Drawing.Color.Yellow;
             this.pnlDnTimeClr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlDnTimeClr.Visible     = false;
 
-            this.cmbDnTimeClr.Location      = new System.Drawing.Point(755, 124);
-            this.cmbDnTimeClr.Size          = new System.Drawing.Size(130, 21);
+            this.cmbDnTimeClr.Location      = new System.Drawing.Point(617, 148);
+            this.cmbDnTimeClr.Size          = new System.Drawing.Size(110, 21);
             this.cmbDnTimeClr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbDnTimeClr.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbDnTimeClr.ItemHeight    = 20;
@@ -661,6 +818,43 @@ namespace UITest.Controls
             this.cmbDnTimeClr.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
             this.cmbDnTimeClr.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
             this.cmbDnTimeClr.Visible       = false;
+
+            // 倒數控件（只在「開始倒數」時顯示）
+            this.lblDnCountStart.AutoSize = true;
+            this.lblDnCountStart.Location = new System.Drawing.Point(735, 127);
+            this.lblDnCountStart.Text     = "開始倒數";
+            this.lblDnCountStart.Visible  = false;
+
+            this.nudDnCountStart.Location = new System.Drawing.Point(800, 124);
+            this.nudDnCountStart.Size     = new System.Drawing.Size(55, 20);
+            this.nudDnCountStart.Minimum  = 0;
+            this.nudDnCountStart.Maximum  = 255;
+            this.nudDnCountStart.Value    = 12;
+            this.nudDnCountStart.Visible  = false;
+            this.nudDnCountStart.ValueChanged += new System.EventHandler(this.nudDnCountStart_ValueChanged);
+
+            this.lblDnCountStartTime.AutoSize = true;
+            this.lblDnCountStartTime.Location = new System.Drawing.Point(860, 127);
+            this.lblDnCountStartTime.Text     = "(01:00)";
+            this.lblDnCountStartTime.Visible  = false;
+
+            this.lblDnCountStop.AutoSize = true;
+            this.lblDnCountStop.Location = new System.Drawing.Point(735, 151);
+            this.lblDnCountStop.Text     = "停止倒數";
+            this.lblDnCountStop.Visible  = false;
+
+            this.nudDnCountStop.Location = new System.Drawing.Point(800, 148);
+            this.nudDnCountStop.Size     = new System.Drawing.Size(55, 20);
+            this.nudDnCountStop.Minimum  = 0;
+            this.nudDnCountStop.Maximum  = 255;
+            this.nudDnCountStop.Value    = 0;
+            this.nudDnCountStop.Visible  = false;
+            this.nudDnCountStop.ValueChanged += new System.EventHandler(this.nudDnCountStop_ValueChanged);
+
+            this.lblDnCountStopTime.AutoSize = true;
+            this.lblDnCountStopTime.Location = new System.Drawing.Point(860, 151);
+            this.lblDnCountStopTime.Text     = "(00:00)";
+            this.lblDnCountStopTime.Visible  = false;
 
             this.lblDnPlatHdr.AutoSize = true;
             this.lblDnPlatHdr.Location = new System.Drawing.Point(595, 158);
@@ -703,6 +897,145 @@ namespace UITest.Controls
             this.cmbDnPlatClr.Visible       = false;
 
             // ════════════════════════════════════════════════
+            // 上行 警示燈 Extra（板型6，idx==5）
+            // 直接放在 UserControl，AutoCheck=false，手動互斥
+            // ════════════════════════════════════════════════
+            this.lblUpAlarmHdr.AutoSize = true;
+            this.lblUpAlarmHdr.Font     = new System.Drawing.Font("微軟正黑體", 9f, System.Drawing.FontStyle.Bold);
+            this.lblUpAlarmHdr.Location = new System.Drawing.Point(10, 106);
+            this.lblUpAlarmHdr.Text     = "緊急訊息設定";
+            this.lblUpAlarmHdr.Visible  = false;
+
+            this.lblUpAlarmMsgLbl.AutoSize = true;
+            this.lblUpAlarmMsgLbl.Location = new System.Drawing.Point(10, 129);
+            this.lblUpAlarmMsgLbl.Text     = "緊急訊息：";
+            this.lblUpAlarmMsgLbl.Visible  = false;
+
+            this.rdoUpAlarmMsgOn.AutoSize  = true;
+            this.rdoUpAlarmMsgOn.AutoCheck = false;
+            this.rdoUpAlarmMsgOn.Location  = new System.Drawing.Point(80, 127);
+            this.rdoUpAlarmMsgOn.Text      = "打開";
+            this.rdoUpAlarmMsgOn.Checked   = true;
+            this.rdoUpAlarmMsgOn.Visible   = false;
+            this.rdoUpAlarmMsgOn.Click    += new System.EventHandler(this.rdoUpAlarmMsg_Click);
+
+            this.rdoUpAlarmMsgOff.AutoSize  = true;
+            this.rdoUpAlarmMsgOff.AutoCheck = false;
+            this.rdoUpAlarmMsgOff.Location  = new System.Drawing.Point(135, 127);
+            this.rdoUpAlarmMsgOff.Text      = "關閉";
+            this.rdoUpAlarmMsgOff.Visible   = false;
+            this.rdoUpAlarmMsgOff.Click    += new System.EventHandler(this.rdoUpAlarmMsg_Click);
+
+            this.lblUpAlarmPlay.AutoSize = true;
+            this.lblUpAlarmPlay.Location = new System.Drawing.Point(10, 155);
+            this.lblUpAlarmPlay.Text     = "播放次數：";
+            this.lblUpAlarmPlay.Visible  = false;
+
+            this.nudUpAlarmPlay.Location = new System.Drawing.Point(80, 152);
+            this.nudUpAlarmPlay.Size     = new System.Drawing.Size(55, 20);
+            this.nudUpAlarmPlay.Minimum  = 1;
+            this.nudUpAlarmPlay.Maximum  = 255;
+            this.nudUpAlarmPlay.Value    = 1;
+            this.nudUpAlarmPlay.Visible  = false;
+
+            this.lblUpAlarmLight.AutoSize = true;
+            this.lblUpAlarmLight.Font     = new System.Drawing.Font("微軟正黑體", 9f, System.Drawing.FontStyle.Bold);
+            this.lblUpAlarmLight.Location = new System.Drawing.Point(10, 179);
+            this.lblUpAlarmLight.Text     = "警示燈開關設定";
+            this.lblUpAlarmLight.Visible  = false;
+
+            this.rdoUpLightOff.AutoSize  = true;
+            this.rdoUpLightOff.AutoCheck = false;
+            this.rdoUpLightOff.Location  = new System.Drawing.Point(10, 199);
+            this.rdoUpLightOff.Text      = "關閉";
+            this.rdoUpLightOff.Visible   = false;
+            this.rdoUpLightOff.Click    += new System.EventHandler(this.rdoUpLight_Click);
+
+            this.rdoUpLightOn.AutoSize  = true;
+            this.rdoUpLightOn.AutoCheck = false;
+            this.rdoUpLightOn.Location  = new System.Drawing.Point(70, 199);
+            this.rdoUpLightOn.Text      = "打開";
+            this.rdoUpLightOn.Checked   = true;
+            this.rdoUpLightOn.Visible   = false;
+            this.rdoUpLightOn.Click    += new System.EventHandler(this.rdoUpLight_Click);
+
+            this.rdoUpLightBlink.AutoSize  = true;
+            this.rdoUpLightBlink.AutoCheck = false;
+            this.rdoUpLightBlink.Location  = new System.Drawing.Point(130, 199);
+            this.rdoUpLightBlink.Text      = "閃爍";
+            this.rdoUpLightBlink.Visible   = false;
+            this.rdoUpLightBlink.Click    += new System.EventHandler(this.rdoUpLight_Click);
+
+            // ════════════════════════════════════════════════
+            // 下行 警示燈 Extra（板型6，idx==5，x 偏移 585）
+            // ════════════════════════════════════════════════
+            this.lblDnAlarmHdr.AutoSize = true;
+            this.lblDnAlarmHdr.Font     = new System.Drawing.Font("微軟正黑體", 9f, System.Drawing.FontStyle.Bold);
+            this.lblDnAlarmHdr.Location = new System.Drawing.Point(595, 106);
+            this.lblDnAlarmHdr.Text     = "緊急訊息設定";
+            this.lblDnAlarmHdr.Visible  = false;
+
+            this.lblDnAlarmMsgLbl.AutoSize = true;
+            this.lblDnAlarmMsgLbl.Location = new System.Drawing.Point(595, 129);
+            this.lblDnAlarmMsgLbl.Text     = "緊急訊息：";
+            this.lblDnAlarmMsgLbl.Visible  = false;
+
+            this.rdoDnAlarmMsgOn.AutoSize  = true;
+            this.rdoDnAlarmMsgOn.AutoCheck = false;
+            this.rdoDnAlarmMsgOn.Location  = new System.Drawing.Point(665, 127);
+            this.rdoDnAlarmMsgOn.Text      = "打開";
+            this.rdoDnAlarmMsgOn.Checked   = true;
+            this.rdoDnAlarmMsgOn.Visible   = false;
+            this.rdoDnAlarmMsgOn.Click    += new System.EventHandler(this.rdoDnAlarmMsg_Click);
+
+            this.rdoDnAlarmMsgOff.AutoSize  = true;
+            this.rdoDnAlarmMsgOff.AutoCheck = false;
+            this.rdoDnAlarmMsgOff.Location  = new System.Drawing.Point(720, 127);
+            this.rdoDnAlarmMsgOff.Text      = "關閉";
+            this.rdoDnAlarmMsgOff.Visible   = false;
+            this.rdoDnAlarmMsgOff.Click    += new System.EventHandler(this.rdoDnAlarmMsg_Click);
+
+            this.lblDnAlarmPlay.AutoSize = true;
+            this.lblDnAlarmPlay.Location = new System.Drawing.Point(595, 155);
+            this.lblDnAlarmPlay.Text     = "播放次數：";
+            this.lblDnAlarmPlay.Visible  = false;
+
+            this.nudDnAlarmPlay.Location = new System.Drawing.Point(665, 152);
+            this.nudDnAlarmPlay.Size     = new System.Drawing.Size(55, 20);
+            this.nudDnAlarmPlay.Minimum  = 1;
+            this.nudDnAlarmPlay.Maximum  = 255;
+            this.nudDnAlarmPlay.Value    = 1;
+            this.nudDnAlarmPlay.Visible  = false;
+
+            this.lblDnAlarmLight.AutoSize = true;
+            this.lblDnAlarmLight.Font     = new System.Drawing.Font("微軟正黑體", 9f, System.Drawing.FontStyle.Bold);
+            this.lblDnAlarmLight.Location = new System.Drawing.Point(595, 179);
+            this.lblDnAlarmLight.Text     = "警示燈開關設定";
+            this.lblDnAlarmLight.Visible  = false;
+
+            this.rdoDnLightOff.AutoSize  = true;
+            this.rdoDnLightOff.AutoCheck = false;
+            this.rdoDnLightOff.Location  = new System.Drawing.Point(595, 199);
+            this.rdoDnLightOff.Text      = "關閉";
+            this.rdoDnLightOff.Visible   = false;
+            this.rdoDnLightOff.Click    += new System.EventHandler(this.rdoDnLight_Click);
+
+            this.rdoDnLightOn.AutoSize  = true;
+            this.rdoDnLightOn.AutoCheck = false;
+            this.rdoDnLightOn.Location  = new System.Drawing.Point(655, 199);
+            this.rdoDnLightOn.Text      = "打開";
+            this.rdoDnLightOn.Checked   = true;
+            this.rdoDnLightOn.Visible   = false;
+            this.rdoDnLightOn.Click    += new System.EventHandler(this.rdoDnLight_Click);
+
+            this.rdoDnLightBlink.AutoSize  = true;
+            this.rdoDnLightBlink.AutoCheck = false;
+            this.rdoDnLightBlink.Location  = new System.Drawing.Point(715, 199);
+            this.rdoDnLightBlink.Text      = "閃爍";
+            this.rdoDnLightBlink.Visible   = false;
+            this.rdoDnLightBlink.Click    += new System.EventHandler(this.rdoDnLight_Click);
+
+            // ════════════════════════════════════════════════
             // UserControl 本身
             // ════════════════════════════════════════════════
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -714,27 +1047,41 @@ namespace UITest.Controls
                 this.pnlDisplay, this.lblDisplayHint,
                 this.btnUpUpload, this.btnAllUpload, this.chkUpMulti,
                 this.btnDnUpload, this.btnSave,      this.chkDnMulti,
-                this.lblUpMsgType, this.rdoUpGeneral, this.rdoUpPreRec,
+                this.lblUpMsgType, this.pnlUpMsgType,
                 this.lblUpMsg, this.txtUpMsg, this.btnUpMsgBrowse, this.btnUpMsgShow, this.btnUpMsgAdd,
+                this.lstUpMultiMsgs, this.btnUpMultiAdd, this.btnUpMultiRemove,
                 this.lblUpFont, this.cmbUpFontSize, this.cmbUpFontStyle, this.pnlUpColor, this.cmbUpColor, this.cmbUpLevel,
-                this.lblUpAction,
-                this.rdoUpAct61, this.rdoUpAct62, this.rdoUpAct63, this.rdoUpAct64,
-                this.rdoUpAct65, this.rdoUpAct66, this.rdoUpAct67,
+                this.lblUpAction, this.pnlUpAction,
                 this.lblUpParam, this.lblUpSpeed, this.nudUpSpeed, this.lblUpPause, this.nudUpPause, this.lblUpPauseUnit,
-                this.lblDnMsgType, this.rdoDnGeneral, this.rdoDnPreRec,
+                this.lblDnMsgType, this.pnlDnMsgType,
                 this.lblDnMsg, this.txtDnMsg, this.btnDnMsgBrowse, this.btnDnMsgShow, this.btnDnMsgAdd,
+                this.lstDnMultiMsgs, this.btnDnMultiAdd, this.btnDnMultiRemove,
                 this.lblDnFont, this.cmbDnFontSize, this.cmbDnFontStyle, this.pnlDnColor, this.cmbDnColor, this.cmbDnLevel,
-                this.lblDnAction,
-                this.rdoDnAct61, this.rdoDnAct62, this.rdoDnAct63, this.rdoDnAct64,
-                this.rdoDnAct65, this.rdoDnAct66, this.rdoDnAct67,
+                this.lblDnAction, this.pnlDnAction,
                 this.lblDnParam, this.lblDnSpeed, this.nudDnSpeed, this.lblDnPause, this.nudDnPause, this.lblDnPauseUnit,
                 this.grpUpBoard, this.grpDnBoard,
                 // 上行 Extra
                 this.lblUpTimeHdr, this.cmbUpTimeType, this.pnlUpTimeClr, this.cmbUpTimeClr,
+                this.lblUpCountStart, this.nudUpCountStart, this.lblUpCountStartTime,
+                this.lblUpCountStop,  this.nudUpCountStop,  this.lblUpCountStopTime,
                 this.lblUpPlatHdr, this.lblUpPlatIdx, this.nudUpPlatIdx, this.pnlUpPlatThumb, this.pnlUpPlatClr, this.cmbUpPlatClr,
                 // 下行 Extra
                 this.lblDnTimeHdr, this.cmbDnTimeType, this.pnlDnTimeClr, this.cmbDnTimeClr,
-                this.lblDnPlatHdr, this.lblDnPlatIdx, this.nudDnPlatIdx, this.pnlDnPlatThumb, this.pnlDnPlatClr, this.cmbDnPlatClr
+                this.lblDnCountStart, this.nudDnCountStart, this.lblDnCountStartTime,
+                this.lblDnCountStop,  this.nudDnCountStop,  this.lblDnCountStopTime,
+                this.lblDnPlatHdr, this.lblDnPlatIdx, this.nudDnPlatIdx, this.pnlDnPlatThumb, this.pnlDnPlatClr, this.cmbDnPlatClr,
+                // 上行 警示燈 Extra
+                this.lblUpAlarmHdr, this.lblUpAlarmMsgLbl,
+                this.rdoUpAlarmMsgOn, this.rdoUpAlarmMsgOff,
+                this.lblUpAlarmPlay, this.nudUpAlarmPlay,
+                this.lblUpAlarmLight,
+                this.rdoUpLightOff, this.rdoUpLightOn, this.rdoUpLightBlink,
+                // 下行 警示燈 Extra
+                this.lblDnAlarmHdr, this.lblDnAlarmMsgLbl,
+                this.rdoDnAlarmMsgOn, this.rdoDnAlarmMsgOff,
+                this.lblDnAlarmPlay, this.nudDnAlarmPlay,
+                this.lblDnAlarmLight,
+                this.rdoDnLightOff, this.rdoDnLightOn, this.rdoDnLightBlink
             });
 
             ((System.ComponentModel.ISupportInitialize)(this.nudUpSpeed)).EndInit();
@@ -743,6 +1090,12 @@ namespace UITest.Controls
             ((System.ComponentModel.ISupportInitialize)(this.nudDnPause)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudUpPlatIdx)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudDnPlatIdx)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudUpCountStart)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudUpCountStop)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudDnCountStart)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudDnCountStop)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudUpAlarmPlay)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudDnAlarmPlay)).EndInit();
             this.grpUpBoard.ResumeLayout(false);
             this.grpUpBoard.PerformLayout();
             this.grpDnBoard.ResumeLayout(false);
@@ -762,6 +1115,7 @@ namespace UITest.Controls
         private System.Windows.Forms.Button        btnSave;
         private System.Windows.Forms.CheckBox      chkDnMulti;
         // ── 上行 ─────────────────────────────────────────────────
+        private System.Windows.Forms.Panel         pnlUpMsgType;
         private System.Windows.Forms.Label         lblUpMsgType;
         private System.Windows.Forms.RadioButton   rdoUpGeneral;
         private System.Windows.Forms.RadioButton   rdoUpPreRec;
@@ -770,6 +1124,9 @@ namespace UITest.Controls
         private System.Windows.Forms.Button        btnUpMsgBrowse;
         private System.Windows.Forms.Button        btnUpMsgShow;
         private System.Windows.Forms.Button        btnUpMsgAdd;
+        private System.Windows.Forms.ListBox       lstUpMultiMsgs;
+        private System.Windows.Forms.Button        btnUpMultiAdd;
+        private System.Windows.Forms.Button        btnUpMultiRemove;
         private System.Windows.Forms.Label         lblUpFont;
         private System.Windows.Forms.ComboBox      cmbUpFontSize;
         private System.Windows.Forms.ComboBox      cmbUpFontStyle;
@@ -777,6 +1134,7 @@ namespace UITest.Controls
         private System.Windows.Forms.ComboBox      cmbUpColor;
         private System.Windows.Forms.ComboBox      cmbUpLevel;
         private System.Windows.Forms.Label         lblUpAction;
+        private System.Windows.Forms.Panel         pnlUpAction;
         private System.Windows.Forms.RadioButton   rdoUpAct61;
         private System.Windows.Forms.RadioButton   rdoUpAct62;
         private System.Windows.Forms.RadioButton   rdoUpAct63;
@@ -791,6 +1149,7 @@ namespace UITest.Controls
         private System.Windows.Forms.NumericUpDown nudUpPause;
         private System.Windows.Forms.Label         lblUpPauseUnit;
         // ── 下行 ─────────────────────────────────────────────────
+        private System.Windows.Forms.Panel         pnlDnMsgType;
         private System.Windows.Forms.Label         lblDnMsgType;
         private System.Windows.Forms.RadioButton   rdoDnGeneral;
         private System.Windows.Forms.RadioButton   rdoDnPreRec;
@@ -799,6 +1158,9 @@ namespace UITest.Controls
         private System.Windows.Forms.Button        btnDnMsgBrowse;
         private System.Windows.Forms.Button        btnDnMsgShow;
         private System.Windows.Forms.Button        btnDnMsgAdd;
+        private System.Windows.Forms.ListBox       lstDnMultiMsgs;
+        private System.Windows.Forms.Button        btnDnMultiAdd;
+        private System.Windows.Forms.Button        btnDnMultiRemove;
         private System.Windows.Forms.Label         lblDnFont;
         private System.Windows.Forms.ComboBox      cmbDnFontSize;
         private System.Windows.Forms.ComboBox      cmbDnFontStyle;
@@ -806,6 +1168,7 @@ namespace UITest.Controls
         private System.Windows.Forms.ComboBox      cmbDnColor;
         private System.Windows.Forms.ComboBox      cmbDnLevel;
         private System.Windows.Forms.Label         lblDnAction;
+        private System.Windows.Forms.Panel         pnlDnAction;
         private System.Windows.Forms.RadioButton   rdoDnAct61;
         private System.Windows.Forms.RadioButton   rdoDnAct62;
         private System.Windows.Forms.RadioButton   rdoDnAct63;
@@ -843,17 +1206,51 @@ namespace UITest.Controls
         private System.Windows.Forms.ComboBox      cmbUpTimeType;
         private System.Windows.Forms.Panel         pnlUpTimeClr;
         private System.Windows.Forms.ComboBox      cmbUpTimeClr;
+        private System.Windows.Forms.Label         lblUpCountStart;
+        private System.Windows.Forms.NumericUpDown nudUpCountStart;
+        private System.Windows.Forms.Label         lblUpCountStartTime;
+        private System.Windows.Forms.Label         lblUpCountStop;
+        private System.Windows.Forms.NumericUpDown nudUpCountStop;
+        private System.Windows.Forms.Label         lblUpCountStopTime;
         private System.Windows.Forms.Label         lblUpPlatHdr;
         private System.Windows.Forms.Label         lblUpPlatIdx;
         private System.Windows.Forms.NumericUpDown nudUpPlatIdx;
         private System.Windows.Forms.Panel         pnlUpPlatThumb;
         private System.Windows.Forms.Panel         pnlUpPlatClr;
         private System.Windows.Forms.ComboBox      cmbUpPlatClr;
+        // ── 上行 警示燈 Extra ────────────────────────────────────
+        private System.Windows.Forms.Label         lblUpAlarmHdr;
+        private System.Windows.Forms.Label         lblUpAlarmMsgLbl;
+        private System.Windows.Forms.RadioButton   rdoUpAlarmMsgOn;
+        private System.Windows.Forms.RadioButton   rdoUpAlarmMsgOff;
+        private System.Windows.Forms.Label         lblUpAlarmPlay;
+        private System.Windows.Forms.NumericUpDown nudUpAlarmPlay;
+        private System.Windows.Forms.Label         lblUpAlarmLight;
+        private System.Windows.Forms.RadioButton   rdoUpLightOff;
+        private System.Windows.Forms.RadioButton   rdoUpLightOn;
+        private System.Windows.Forms.RadioButton   rdoUpLightBlink;
+        // ── 下行 警示燈 Extra ────────────────────────────────────
+        private System.Windows.Forms.Label         lblDnAlarmHdr;
+        private System.Windows.Forms.Label         lblDnAlarmMsgLbl;
+        private System.Windows.Forms.RadioButton   rdoDnAlarmMsgOn;
+        private System.Windows.Forms.RadioButton   rdoDnAlarmMsgOff;
+        private System.Windows.Forms.Label         lblDnAlarmPlay;
+        private System.Windows.Forms.NumericUpDown nudDnAlarmPlay;
+        private System.Windows.Forms.Label         lblDnAlarmLight;
+        private System.Windows.Forms.RadioButton   rdoDnLightOff;
+        private System.Windows.Forms.RadioButton   rdoDnLightOn;
+        private System.Windows.Forms.RadioButton   rdoDnLightBlink;
         // ── 下行 Extra ───────────────────────────────────────────
         private System.Windows.Forms.Label         lblDnTimeHdr;
         private System.Windows.Forms.ComboBox      cmbDnTimeType;
         private System.Windows.Forms.Panel         pnlDnTimeClr;
         private System.Windows.Forms.ComboBox      cmbDnTimeClr;
+        private System.Windows.Forms.Label         lblDnCountStart;
+        private System.Windows.Forms.NumericUpDown nudDnCountStart;
+        private System.Windows.Forms.Label         lblDnCountStartTime;
+        private System.Windows.Forms.Label         lblDnCountStop;
+        private System.Windows.Forms.NumericUpDown nudDnCountStop;
+        private System.Windows.Forms.Label         lblDnCountStopTime;
         private System.Windows.Forms.Label         lblDnPlatHdr;
         private System.Windows.Forms.Label         lblDnPlatIdx;
         private System.Windows.Forms.NumericUpDown nudDnPlatIdx;

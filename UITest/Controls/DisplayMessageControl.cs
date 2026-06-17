@@ -52,6 +52,8 @@ namespace UITest.Controls
                                      rdoUpBoard5, rdoUpBoard6, rdoUpBoard7, rdoUpBoard8 };
             _dnBoardRadios = new[] { rdoDnBoard1, rdoDnBoard2, rdoDnBoard3, rdoDnBoard4,
                                      rdoDnBoard5, rdoDnBoard6, rdoDnBoard7, rdoDnBoard8 };
+            chkUpMulti.CheckedChanged += chkUpMulti_CheckedChanged;
+            chkDnMulti.CheckedChanged += chkDnMulti_CheckedChanged;
             LoadSettings();
         }
 
@@ -95,6 +97,90 @@ namespace UITest.Controls
             pnlDisplay.Invalidate();
         }
 
+        // ════════════════════════════════════════════════════════════════
+        // 多訊息模式切換
+        // ════════════════════════════════════════════════════════════════
+
+        private void chkUpMulti_CheckedChanged(object sender, EventArgs e)
+        {
+            bool multi = chkUpMulti.Checked;
+            txtUpMsg.Visible        = !multi;
+            btnUpMsgBrowse.Visible  = !multi;
+            btnUpMsgShow.Visible    = !multi;
+            btnUpMsgAdd.Visible     = !multi;
+            lstUpMultiMsgs.Visible  = multi;
+            btnUpMultiAdd.Visible   = multi;
+            btnUpMultiRemove.Visible = multi;
+        }
+
+        private void chkDnMulti_CheckedChanged(object sender, EventArgs e)
+        {
+            bool multi = chkDnMulti.Checked;
+            txtDnMsg.Visible        = !multi;
+            btnDnMsgBrowse.Visible  = !multi;
+            btnDnMsgShow.Visible    = !multi;
+            btnDnMsgAdd.Visible     = !multi;
+            lstDnMultiMsgs.Visible  = multi;
+            btnDnMultiAdd.Visible   = multi;
+            btnDnMultiRemove.Visible = multi;
+        }
+
+        // ── 多訊息清單操作 ────────────────────────────────────────────────
+
+        private void btnUpMultiAdd_Click(object sender, EventArgs e)
+        {
+            using (var picker = new MessagePickerForm(PickerMode.Up, multiSelect: true))
+            {
+                if (picker.ShowDialog(this) == DialogResult.OK)
+                    foreach (var msg in picker.SelectedMessages)
+                        if (!string.IsNullOrEmpty(msg))
+                            lstUpMultiMsgs.Items.Add(msg);
+            }
+        }
+
+        private void btnUpMultiRemove_Click(object sender, EventArgs e)
+        {
+            while (lstUpMultiMsgs.SelectedIndices.Count > 0)
+                lstUpMultiMsgs.Items.RemoveAt(lstUpMultiMsgs.SelectedIndices[0]);
+        }
+
+        private void btnDnMultiAdd_Click(object sender, EventArgs e)
+        {
+            using (var picker = new MessagePickerForm(PickerMode.Down, multiSelect: true))
+            {
+                if (picker.ShowDialog(this) == DialogResult.OK)
+                    foreach (var msg in picker.SelectedMessages)
+                        if (!string.IsNullOrEmpty(msg))
+                            lstDnMultiMsgs.Items.Add(msg);
+            }
+        }
+
+        private void btnDnMultiRemove_Click(object sender, EventArgs e)
+        {
+            while (lstDnMultiMsgs.SelectedIndices.Count > 0)
+                lstDnMultiMsgs.Items.RemoveAt(lstDnMultiMsgs.SelectedIndices[0]);
+        }
+
+        // ── 單訊息 Browse ─────────────────────────────────────────────────
+
+        private void btnUpMsgBrowse_Click(object sender, EventArgs e)
+        {
+            using (var picker = new MessagePickerForm(PickerMode.Up))
+            {
+                if (picker.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(picker.SelectedMessage))
+                    txtUpMsg.Text = picker.SelectedMessage;
+            }
+        }
+
+        private void btnDnMsgBrowse_Click(object sender, EventArgs e)
+        {
+            using (var picker = new MessagePickerForm(PickerMode.Down))
+            {
+                if (picker.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(picker.SelectedMessage))
+                    txtDnMsg.Text = picker.SelectedMessage;
+            }
+        }
+
         private void btnUpMsgAdd_Click(object sender, EventArgs e)
         {
             MessageBox.Show("新增上行訊息", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -121,10 +207,11 @@ namespace UITest.Controls
         {
             var rdo = sender as RadioButton;
             if (rdo == null || !rdo.Checked) return;
-            // 0-based: boards 2,3,7 → index 1,2,6 ; boards 3,5 → index 2,4
+            // 0-based: boards 2,3,7 → index 1,2,6 ; boards 3,5 → index 2,4 ; board 6 → index 5
             int idx = Array.IndexOf(_upBoardRadios, rdo);
             SetUpTimeVisible(idx == 1 || idx == 2 || idx == 6);
             SetUpPlatVisible(idx == 2 || idx == 4);
+            SetUpAlarmVisible(idx == 5);
         }
 
         private void rdoDnBoard_CheckedChanged(object sender, EventArgs e)
@@ -134,6 +221,7 @@ namespace UITest.Controls
             int idx = Array.IndexOf(_dnBoardRadios, rdo);
             SetDnTimeVisible(idx == 1 || idx == 2 || idx == 6);
             SetDnPlatVisible(idx == 2 || idx == 4);
+            SetDnAlarmVisible(idx == 5);
         }
 
         // ════════════════════════════════════════════════════════════════
@@ -162,8 +250,42 @@ namespace UITest.Controls
                 {
                     errors.AppendLine("上行：未在串列埠設定中勾選任何上行月台 ID。");
                 }
+                else if (chkUpMulti.Checked)
+                {
+                    // ── 多訊息模式：依序發送 ──
+                    if (lstUpMultiMsgs.Items.Count == 0)
+                    {
+                        errors.AppendLine("上行：多訊息清單為空，請先新增訊息。");
+                    }
+                    else
+                    {
+                        int sent = 0;
+                        for (int i = 0; i < lstUpMultiMsgs.Items.Count; i++)
+                        {
+                            string msg    = lstUpMultiMsgs.Items[i].ToString();
+                            var    result = _service.Build(BuildUpParams(ids, msg));
+                            if (result.IsValid)
+                            {
+                                mon.Log(Services.ConnectionMonitor.LogLevel.Send, "DisplayMsg",
+                                    $"上行[{i + 1}/{lstUpMultiMsgs.Items.Count}] → {msg}  HEX:{result.HexDump}");
+                                if (SendAction(result.Value))
+                                    sent++;
+                                else
+                                    errors.AppendLine($"上行訊息 {i + 1}（{msg}）：傳送失敗。");
+                            }
+                            else
+                            {
+                                errors.AppendLine($"上行訊息 {i + 1}（{msg}）：封包組建失敗 - {result.ErrorMessage}");
+                            }
+                        }
+                        if (sent > 0)
+                            mon.Log(Services.ConnectionMonitor.LogLevel.Recv, "DisplayMsg",
+                                $"上行多訊息：共傳送 {sent}/{lstUpMultiMsgs.Items.Count} 則");
+                    }
+                }
                 else
                 {
+                    // ── 單訊息模式 ──
                     var result = _service.Build(BuildUpParams(ids));
                     if (result.IsValid)
                     {
@@ -176,9 +298,7 @@ namespace UITest.Controls
                             errors.AppendLine("上行：傳送失敗（串列埠未開啟）。");
                         }
                         else
-                        {
                             mon.Log(Services.ConnectionMonitor.LogLevel.Recv, "DisplayMsg", "上行傳送成功");
-                        }
                     }
                     else
                     {
@@ -196,8 +316,42 @@ namespace UITest.Controls
                 {
                     errors.AppendLine("下行：未在串列埠設定中勾選任何下行月台 ID。");
                 }
+                else if (chkDnMulti.Checked)
+                {
+                    // ── 多訊息模式：依序發送 ──
+                    if (lstDnMultiMsgs.Items.Count == 0)
+                    {
+                        errors.AppendLine("下行：多訊息清單為空，請先新增訊息。");
+                    }
+                    else
+                    {
+                        int sent = 0;
+                        for (int i = 0; i < lstDnMultiMsgs.Items.Count; i++)
+                        {
+                            string msg    = lstDnMultiMsgs.Items[i].ToString();
+                            var    result = _service.Build(BuildDnParams(ids, msg));
+                            if (result.IsValid)
+                            {
+                                mon.Log(Services.ConnectionMonitor.LogLevel.Send, "DisplayMsg",
+                                    $"下行[{i + 1}/{lstDnMultiMsgs.Items.Count}] → {msg}  HEX:{result.HexDump}");
+                                if (SendAction(result.Value))
+                                    sent++;
+                                else
+                                    errors.AppendLine($"下行訊息 {i + 1}（{msg}）：傳送失敗。");
+                            }
+                            else
+                            {
+                                errors.AppendLine($"下行訊息 {i + 1}（{msg}）：封包組建失敗 - {result.ErrorMessage}");
+                            }
+                        }
+                        if (sent > 0)
+                            mon.Log(Services.ConnectionMonitor.LogLevel.Recv, "DisplayMsg",
+                                $"下行多訊息：共傳送 {sent}/{lstDnMultiMsgs.Items.Count} 則");
+                    }
+                }
                 else
                 {
+                    // ── 單訊息模式 ──
                     var result = _service.Build(BuildDnParams(ids));
                     if (result.IsValid)
                     {
@@ -210,9 +364,7 @@ namespace UITest.Controls
                             errors.AppendLine("下行：傳送失敗（串列埠未開啟）。");
                         }
                         else
-                        {
                             mon.Log(Services.ConnectionMonitor.LogLevel.Recv, "DisplayMsg", "下行傳送成功");
-                        }
                     }
                     else
                     {
@@ -232,9 +384,9 @@ namespace UITest.Controls
         }
 
         // ── 組上行參數 ────────────────────────────────────────────────────
-        private DisplayMessageParams BuildUpParams(List<byte> ids) => new DisplayMessageParams
+        private DisplayMessageParams BuildUpParams(List<byte> ids, string text = null) => new DisplayMessageParams
         {
-            Text         = txtUpMsg.Text,
+            Text         = text ?? txtUpMsg.Text,
             HexColor     = NameToHex(cmbUpColor.SelectedItem?.ToString()),
             FontSz       = NameToFontSize(cmbUpFontSize.SelectedItem?.ToString()),
             FontSty      = NameToFontStyle(cmbUpFontStyle.SelectedItem?.ToString()),
@@ -249,9 +401,9 @@ namespace UITest.Controls
         };
 
         // ── 組下行參數 ────────────────────────────────────────────────────
-        private DisplayMessageParams BuildDnParams(List<byte> ids) => new DisplayMessageParams
+        private DisplayMessageParams BuildDnParams(List<byte> ids, string text = null) => new DisplayMessageParams
         {
-            Text         = txtDnMsg.Text,
+            Text         = text ?? txtDnMsg.Text,
             HexColor     = NameToHex(cmbDnColor.SelectedItem?.ToString()),
             FontSz       = NameToFontSize(cmbDnFontSize.SelectedItem?.ToString()),
             FontSty      = NameToFontStyle(cmbDnFontStyle.SelectedItem?.ToString()),
@@ -311,7 +463,34 @@ namespace UITest.Controls
             cmbUpTimeType.Visible = v;
             pnlUpTimeClr.Visible  = v;
             cmbUpTimeClr.Visible  = v;
+            if (v) UpdateUpCountdownVisible();
+            else   SetUpCountdownVisible(false);
         }
+
+        private void cmbUpTimeType_SelectedIndexChanged(object sender, EventArgs e)
+            => UpdateUpCountdownVisible();
+
+        private void UpdateUpCountdownVisible()
+        {
+            bool isCountdown = cmbUpTimeType.SelectedIndex == 1;
+            SetUpCountdownVisible(isCountdown);
+        }
+
+        private void SetUpCountdownVisible(bool v)
+        {
+            lblUpCountStart.Visible     = v;
+            nudUpCountStart.Visible     = v;
+            lblUpCountStartTime.Visible = v;
+            lblUpCountStop.Visible      = v;
+            nudUpCountStop.Visible      = v;
+            lblUpCountStopTime.Visible  = v;
+        }
+
+        private void nudUpCountStart_ValueChanged(object sender, EventArgs e)
+            => lblUpCountStartTime.Text = CountToTime((int)nudUpCountStart.Value);
+
+        private void nudUpCountStop_ValueChanged(object sender, EventArgs e)
+            => lblUpCountStopTime.Text = CountToTime((int)nudUpCountStop.Value);
 
         private void SetUpPlatVisible(bool v)
         {
@@ -323,12 +502,74 @@ namespace UITest.Controls
             cmbUpPlatClr.Visible   = v;
         }
 
+        private void SetUpAlarmVisible(bool v)
+        {
+            lblUpAlarmHdr.Visible     = v;
+            lblUpAlarmMsgLbl.Visible  = v;
+            rdoUpAlarmMsgOn.Visible   = v;
+            rdoUpAlarmMsgOff.Visible  = v;
+            lblUpAlarmPlay.Visible    = v;
+            nudUpAlarmPlay.Visible    = v;
+            lblUpAlarmLight.Visible   = v;
+            rdoUpLightOff.Visible     = v;
+            rdoUpLightOn.Visible      = v;
+            rdoUpLightBlink.Visible   = v;
+        }
+
+        private void rdoUpAlarmMsg_Click(object sender, EventArgs e)
+        {
+            rdoUpAlarmMsgOn.Checked  = (sender == rdoUpAlarmMsgOn);
+            rdoUpAlarmMsgOff.Checked = (sender == rdoUpAlarmMsgOff);
+        }
+
+        private void rdoUpLight_Click(object sender, EventArgs e)
+        {
+            rdoUpLightOff.Checked   = (sender == rdoUpLightOff);
+            rdoUpLightOn.Checked    = (sender == rdoUpLightOn);
+            rdoUpLightBlink.Checked = (sender == rdoUpLightBlink);
+        }
+
         private void SetDnTimeVisible(bool v)
         {
             lblDnTimeHdr.Visible  = v;
             cmbDnTimeType.Visible = v;
             pnlDnTimeClr.Visible  = v;
             cmbDnTimeClr.Visible  = v;
+            if (v) UpdateDnCountdownVisible();
+            else   SetDnCountdownVisible(false);
+        }
+
+        private void cmbDnTimeType_SelectedIndexChanged(object sender, EventArgs e)
+            => UpdateDnCountdownVisible();
+
+        private void UpdateDnCountdownVisible()
+        {
+            bool isCountdown = cmbDnTimeType.SelectedIndex == 1;
+            SetDnCountdownVisible(isCountdown);
+        }
+
+        private void SetDnCountdownVisible(bool v)
+        {
+            lblDnCountStart.Visible     = v;
+            nudDnCountStart.Visible     = v;
+            lblDnCountStartTime.Visible = v;
+            lblDnCountStop.Visible      = v;
+            nudDnCountStop.Visible      = v;
+            lblDnCountStopTime.Visible  = v;
+        }
+
+        private void nudDnCountStart_ValueChanged(object sender, EventArgs e)
+            => lblDnCountStartTime.Text = CountToTime((int)nudDnCountStart.Value);
+
+        private void nudDnCountStop_ValueChanged(object sender, EventArgs e)
+            => lblDnCountStopTime.Text = CountToTime((int)nudDnCountStop.Value);
+
+        private static string CountToTime(int value)
+        {
+            int totalSeconds = value * 5;
+            int minutes      = totalSeconds / 60;
+            int seconds      = totalSeconds % 60;
+            return $"({minutes:D2}:{seconds:D2})";
         }
 
         private void SetDnPlatVisible(bool v)
@@ -339,6 +580,33 @@ namespace UITest.Controls
             pnlDnPlatThumb.Visible = v;
             pnlDnPlatClr.Visible   = v;
             cmbDnPlatClr.Visible   = v;
+        }
+
+        private void SetDnAlarmVisible(bool v)
+        {
+            lblDnAlarmHdr.Visible     = v;
+            lblDnAlarmMsgLbl.Visible  = v;
+            rdoDnAlarmMsgOn.Visible   = v;
+            rdoDnAlarmMsgOff.Visible  = v;
+            lblDnAlarmPlay.Visible    = v;
+            nudDnAlarmPlay.Visible    = v;
+            lblDnAlarmLight.Visible   = v;
+            rdoDnLightOff.Visible     = v;
+            rdoDnLightOn.Visible      = v;
+            rdoDnLightBlink.Visible   = v;
+        }
+
+        private void rdoDnAlarmMsg_Click(object sender, EventArgs e)
+        {
+            rdoDnAlarmMsgOn.Checked  = (sender == rdoDnAlarmMsgOn);
+            rdoDnAlarmMsgOff.Checked = (sender == rdoDnAlarmMsgOff);
+        }
+
+        private void rdoDnLight_Click(object sender, EventArgs e)
+        {
+            rdoDnLightOff.Checked   = (sender == rdoDnLightOff);
+            rdoDnLightOn.Checked    = (sender == rdoDnLightOn);
+            rdoDnLightBlink.Checked = (sender == rdoDnLightBlink);
         }
 
         // ════════════════════════════════════════════════════════════════

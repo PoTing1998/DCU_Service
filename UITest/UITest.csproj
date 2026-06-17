@@ -75,6 +75,7 @@
     <Compile Include="Services\PacketBuilderService.cs" />
     <Compile Include="Services\DisplayMessageService.cs" />
     <Compile Include="Services\ConnectionMonitor.cs" />
+    <Compile Include="Services\MessageStoreService.cs" />
     <Compile Include="Controls\ConnectionMonitorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -130,6 +131,12 @@
     </Compile>
     <Compile Include="Controls\DisplayMessageControl.Designer.cs">
       <DependentUpon>DisplayMessageControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MessagePickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\MessagePickerForm.Designer.cs">
+      <DependentUpon>MessagePickerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\PacketBuilderControl.cs">
       <SubType>UserControl</SubType>
