@@ -143,7 +143,8 @@ namespace UITest.Controls
             this.pnlDnPlatThumb = new System.Windows.Forms.Panel();
             this.pnlDnPlatClr   = new System.Windows.Forms.Panel();
             this.cmbDnPlatClr   = new System.Windows.Forms.ComboBox();
-            // ── 上行 警示燈 Extra 子選項 ──
+            // ── 上行 警示燈 Extra 子選項（包在 pnlUpAlarm 內）──
+            this.pnlUpAlarm       = new System.Windows.Forms.Panel();
             this.lblUpAlarmHdr    = new System.Windows.Forms.Label();
             this.lblUpAlarmMsgLbl = new System.Windows.Forms.Label();
             this.rdoUpAlarmMsgOn  = new System.Windows.Forms.RadioButton();
@@ -154,7 +155,8 @@ namespace UITest.Controls
             this.rdoUpLightOff    = new System.Windows.Forms.RadioButton();
             this.rdoUpLightOn     = new System.Windows.Forms.RadioButton();
             this.rdoUpLightBlink  = new System.Windows.Forms.RadioButton();
-            // ── 下行 警示燈 Extra 子選項 ──
+            // ── 下行 警示燈 Extra 子選項（包在 pnlDnAlarm 內）──
+            this.pnlDnAlarm       = new System.Windows.Forms.Panel();
             this.lblDnAlarmHdr    = new System.Windows.Forms.Label();
             this.lblDnAlarmMsgLbl = new System.Windows.Forms.Label();
             this.rdoDnAlarmMsgOn  = new System.Windows.Forms.RadioButton();
@@ -252,6 +254,7 @@ namespace UITest.Controls
             this.lblUpMsg.AutoSize = true;
             this.lblUpMsg.Location = new System.Drawing.Point(10, 269);
             this.lblUpMsg.Text     = "上行一般訊息";
+            this.lblUpMsg.Visible  = false;
 
             this.txtUpMsg.Location = new System.Drawing.Point(10, 287);
             this.txtUpMsg.Size     = new System.Drawing.Size(375, 21);
@@ -315,8 +318,7 @@ namespace UITest.Controls
             this.cmbUpColor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbUpColor.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbUpColor.ItemHeight    = 20;
-            this.cmbUpColor.Items.AddRange(ColorComboItems);
-            this.cmbUpColor.SelectedIndex = 3; // clYellow
+            // Items 和 SelectedIndex 在建構子裡設定（ColorComboItems 為動態屬性，設計工具不支援）
             this.cmbUpColor.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
             this.cmbUpColor.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
 
@@ -421,6 +423,7 @@ namespace UITest.Controls
             this.lblDnMsg.AutoSize = true;
             this.lblDnMsg.Location = new System.Drawing.Point(595, 269);
             this.lblDnMsg.Text     = "下行一般訊息";
+            this.lblDnMsg.Visible  = false;
 
             this.txtDnMsg.Location = new System.Drawing.Point(595, 287);
             this.txtDnMsg.Size     = new System.Drawing.Size(375, 21);
@@ -484,8 +487,7 @@ namespace UITest.Controls
             this.cmbDnColor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbDnColor.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbDnColor.ItemHeight    = 20;
-            this.cmbDnColor.Items.AddRange(ColorComboItems);
-            this.cmbDnColor.SelectedIndex = 3; // clYellow
+            // Items 和 SelectedIndex 在建構子裡設定
             this.cmbDnColor.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
             this.cmbDnColor.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
 
@@ -702,8 +704,7 @@ namespace UITest.Controls
             this.cmbUpTimeClr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbUpTimeClr.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbUpTimeClr.ItemHeight    = 20;
-            this.cmbUpTimeClr.Items.AddRange(ColorComboItems);
-            this.cmbUpTimeClr.SelectedIndex = 0;
+            // Items 和 SelectedIndex 在建構子裡設定
             this.cmbUpTimeClr.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
             this.cmbUpTimeClr.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
             this.cmbUpTimeClr.Visible       = false;
@@ -728,11 +729,11 @@ namespace UITest.Controls
             this.lblUpCountStartTime.Visible  = false;
 
             this.lblUpCountStop.AutoSize = true;
-            this.lblUpCountStop.Location = new System.Drawing.Point(150, 151);
+            this.lblUpCountStop.Location = new System.Drawing.Point(170, 151);
             this.lblUpCountStop.Text     = "停止倒數";
             this.lblUpCountStop.Visible  = false;
 
-            this.nudUpCountStop.Location = new System.Drawing.Point(215, 148);
+            this.nudUpCountStop.Location = new System.Drawing.Point(240, 148);
             this.nudUpCountStop.Size     = new System.Drawing.Size(55, 20);
             this.nudUpCountStop.Minimum  = 0;
             this.nudUpCountStop.Maximum  = 255;
@@ -741,46 +742,45 @@ namespace UITest.Controls
             this.nudUpCountStop.ValueChanged += new System.EventHandler(this.nudUpCountStop_ValueChanged);
 
             this.lblUpCountStopTime.AutoSize = true;
-            this.lblUpCountStopTime.Location = new System.Drawing.Point(275, 151);
+            this.lblUpCountStopTime.Location = new System.Drawing.Point(305, 151);
             this.lblUpCountStopTime.Text     = "(00:00)";
             this.lblUpCountStopTime.Visible  = false;
 
             this.lblUpPlatHdr.AutoSize = true;
-            this.lblUpPlatHdr.Location = new System.Drawing.Point(10, 158);
+            this.lblUpPlatHdr.Location = new System.Drawing.Point(10, 180);
             this.lblUpPlatHdr.Text     = "上行月台碼設定";
             this.lblUpPlatHdr.Visible  = false;
 
             this.lblUpPlatIdx.AutoSize = true;
-            this.lblUpPlatIdx.Location = new System.Drawing.Point(10, 179);
+            this.lblUpPlatIdx.Location = new System.Drawing.Point(10, 201);
             this.lblUpPlatIdx.Text     = "圖檔索引值";
             this.lblUpPlatIdx.Visible  = false;
 
-            this.nudUpPlatIdx.Location = new System.Drawing.Point(80, 176);
+            this.nudUpPlatIdx.Location = new System.Drawing.Point(80, 198);
             this.nudUpPlatIdx.Size     = new System.Drawing.Size(50, 20);
             this.nudUpPlatIdx.Minimum  = 0;
             this.nudUpPlatIdx.Maximum  = 99;
             this.nudUpPlatIdx.Value    = 1;
             this.nudUpPlatIdx.Visible  = false;
 
-            this.pnlUpPlatThumb.Location    = new System.Drawing.Point(140, 171);
+            this.pnlUpPlatThumb.Location    = new System.Drawing.Point(140, 193);
             this.pnlUpPlatThumb.Size        = new System.Drawing.Size(30, 30);
             this.pnlUpPlatThumb.BackColor   = System.Drawing.Color.DimGray;
             this.pnlUpPlatThumb.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlUpPlatThumb.Visible     = false;
 
-            this.pnlUpPlatClr.Location    = new System.Drawing.Point(180, 176);
+            this.pnlUpPlatClr.Location    = new System.Drawing.Point(180, 198);
             this.pnlUpPlatClr.Size        = new System.Drawing.Size(18, 18);
             this.pnlUpPlatClr.BackColor   = System.Drawing.Color.Yellow;
             this.pnlUpPlatClr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlUpPlatClr.Visible     = false;
 
-            this.cmbUpPlatClr.Location      = new System.Drawing.Point(202, 176);
+            this.cmbUpPlatClr.Location      = new System.Drawing.Point(202, 198);
             this.cmbUpPlatClr.Size          = new System.Drawing.Size(130, 21);
             this.cmbUpPlatClr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbUpPlatClr.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbUpPlatClr.ItemHeight    = 20;
-            this.cmbUpPlatClr.Items.AddRange(ColorComboItems);
-            this.cmbUpPlatClr.SelectedIndex = 0;
+            // Items 和 SelectedIndex 在建構子裡設定
             this.cmbUpPlatClr.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
             this.cmbUpPlatClr.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
             this.cmbUpPlatClr.Visible       = false;
@@ -813,8 +813,7 @@ namespace UITest.Controls
             this.cmbDnTimeClr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbDnTimeClr.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbDnTimeClr.ItemHeight    = 20;
-            this.cmbDnTimeClr.Items.AddRange(ColorComboItems);
-            this.cmbDnTimeClr.SelectedIndex = 0;
+            // Items 和 SelectedIndex 在建構子裡設定
             this.cmbDnTimeClr.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
             this.cmbDnTimeClr.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
             this.cmbDnTimeClr.Visible       = false;
@@ -839,11 +838,11 @@ namespace UITest.Controls
             this.lblDnCountStartTime.Visible  = false;
 
             this.lblDnCountStop.AutoSize = true;
-            this.lblDnCountStop.Location = new System.Drawing.Point(735, 151);
+            this.lblDnCountStop.Location = new System.Drawing.Point(755, 151);
             this.lblDnCountStop.Text     = "停止倒數";
             this.lblDnCountStop.Visible  = false;
 
-            this.nudDnCountStop.Location = new System.Drawing.Point(800, 148);
+            this.nudDnCountStop.Location = new System.Drawing.Point(825, 148);
             this.nudDnCountStop.Size     = new System.Drawing.Size(55, 20);
             this.nudDnCountStop.Minimum  = 0;
             this.nudDnCountStop.Maximum  = 255;
@@ -852,188 +851,196 @@ namespace UITest.Controls
             this.nudDnCountStop.ValueChanged += new System.EventHandler(this.nudDnCountStop_ValueChanged);
 
             this.lblDnCountStopTime.AutoSize = true;
-            this.lblDnCountStopTime.Location = new System.Drawing.Point(860, 151);
+            this.lblDnCountStopTime.Location = new System.Drawing.Point(890, 151);
             this.lblDnCountStopTime.Text     = "(00:00)";
             this.lblDnCountStopTime.Visible  = false;
 
             this.lblDnPlatHdr.AutoSize = true;
-            this.lblDnPlatHdr.Location = new System.Drawing.Point(595, 158);
+            this.lblDnPlatHdr.Location = new System.Drawing.Point(595, 180);
             this.lblDnPlatHdr.Text     = "下行月台碼設定";
             this.lblDnPlatHdr.Visible  = false;
 
             this.lblDnPlatIdx.AutoSize = true;
-            this.lblDnPlatIdx.Location = new System.Drawing.Point(595, 179);
+            this.lblDnPlatIdx.Location = new System.Drawing.Point(595, 201);
             this.lblDnPlatIdx.Text     = "圖檔索引值";
             this.lblDnPlatIdx.Visible  = false;
 
-            this.nudDnPlatIdx.Location = new System.Drawing.Point(665, 176);
+            this.nudDnPlatIdx.Location = new System.Drawing.Point(665, 198);
             this.nudDnPlatIdx.Size     = new System.Drawing.Size(50, 20);
             this.nudDnPlatIdx.Minimum  = 0;
             this.nudDnPlatIdx.Maximum  = 99;
             this.nudDnPlatIdx.Value    = 1;
             this.nudDnPlatIdx.Visible  = false;
 
-            this.pnlDnPlatThumb.Location    = new System.Drawing.Point(725, 171);
+            this.pnlDnPlatThumb.Location    = new System.Drawing.Point(725, 193);
             this.pnlDnPlatThumb.Size        = new System.Drawing.Size(30, 30);
             this.pnlDnPlatThumb.BackColor   = System.Drawing.Color.DimGray;
             this.pnlDnPlatThumb.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlDnPlatThumb.Visible     = false;
 
-            this.pnlDnPlatClr.Location    = new System.Drawing.Point(765, 176);
+            this.pnlDnPlatClr.Location    = new System.Drawing.Point(765, 198);
             this.pnlDnPlatClr.Size        = new System.Drawing.Size(18, 18);
             this.pnlDnPlatClr.BackColor   = System.Drawing.Color.Yellow;
             this.pnlDnPlatClr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlDnPlatClr.Visible     = false;
 
-            this.cmbDnPlatClr.Location      = new System.Drawing.Point(787, 176);
+            this.cmbDnPlatClr.Location      = new System.Drawing.Point(787, 198);
             this.cmbDnPlatClr.Size          = new System.Drawing.Size(130, 21);
             this.cmbDnPlatClr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbDnPlatClr.DrawMode      = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbDnPlatClr.ItemHeight    = 20;
-            this.cmbDnPlatClr.Items.AddRange(ColorComboItems);
-            this.cmbDnPlatClr.SelectedIndex = 0;
+            // Items 和 SelectedIndex 在建構子裡設定
             this.cmbDnPlatClr.DrawItem     += new System.Windows.Forms.DrawItemEventHandler(this.cmbColor_DrawItem);
             this.cmbDnPlatClr.SelectedIndexChanged += new System.EventHandler(this.cmbColor_SelectedIndexChanged);
             this.cmbDnPlatClr.Visible       = false;
 
             // ════════════════════════════════════════════════
-            // 上行 警示燈 Extra（板型6，idx==5）
-            // 直接放在 UserControl，AutoCheck=false，手動互斥
+            // 上行 警示燈 Extra ── 全部放在 pnlUpAlarm 內
+            // Panel 有實體背景色，不用透明，子控件保證顯示
             // ════════════════════════════════════════════════
+            // --- 子控件（相對座標）---
             this.lblUpAlarmHdr.AutoSize = true;
             this.lblUpAlarmHdr.Font     = new System.Drawing.Font("微軟正黑體", 9f, System.Drawing.FontStyle.Bold);
-            this.lblUpAlarmHdr.Location = new System.Drawing.Point(10, 106);
+            this.lblUpAlarmHdr.Location = new System.Drawing.Point(0, 0);
             this.lblUpAlarmHdr.Text     = "緊急訊息設定";
-            this.lblUpAlarmHdr.Visible  = false;
 
             this.lblUpAlarmMsgLbl.AutoSize = true;
-            this.lblUpAlarmMsgLbl.Location = new System.Drawing.Point(10, 129);
+            this.lblUpAlarmMsgLbl.Location = new System.Drawing.Point(0, 22);
             this.lblUpAlarmMsgLbl.Text     = "緊急訊息：";
-            this.lblUpAlarmMsgLbl.Visible  = false;
 
             this.rdoUpAlarmMsgOn.AutoSize  = true;
             this.rdoUpAlarmMsgOn.AutoCheck = false;
-            this.rdoUpAlarmMsgOn.Location  = new System.Drawing.Point(80, 127);
+            this.rdoUpAlarmMsgOn.Location  = new System.Drawing.Point(70, 20);
             this.rdoUpAlarmMsgOn.Text      = "打開";
             this.rdoUpAlarmMsgOn.Checked   = true;
-            this.rdoUpAlarmMsgOn.Visible   = false;
             this.rdoUpAlarmMsgOn.Click    += new System.EventHandler(this.rdoUpAlarmMsg_Click);
 
             this.rdoUpAlarmMsgOff.AutoSize  = true;
             this.rdoUpAlarmMsgOff.AutoCheck = false;
-            this.rdoUpAlarmMsgOff.Location  = new System.Drawing.Point(135, 127);
+            this.rdoUpAlarmMsgOff.Location  = new System.Drawing.Point(125, 20);
             this.rdoUpAlarmMsgOff.Text      = "關閉";
-            this.rdoUpAlarmMsgOff.Visible   = false;
             this.rdoUpAlarmMsgOff.Click    += new System.EventHandler(this.rdoUpAlarmMsg_Click);
 
             this.lblUpAlarmPlay.AutoSize = true;
-            this.lblUpAlarmPlay.Location = new System.Drawing.Point(10, 155);
+            this.lblUpAlarmPlay.Location = new System.Drawing.Point(0, 46);
             this.lblUpAlarmPlay.Text     = "播放次數：";
-            this.lblUpAlarmPlay.Visible  = false;
 
-            this.nudUpAlarmPlay.Location = new System.Drawing.Point(80, 152);
+            this.nudUpAlarmPlay.Location = new System.Drawing.Point(70, 43);
             this.nudUpAlarmPlay.Size     = new System.Drawing.Size(55, 20);
             this.nudUpAlarmPlay.Minimum  = 1;
             this.nudUpAlarmPlay.Maximum  = 255;
             this.nudUpAlarmPlay.Value    = 1;
-            this.nudUpAlarmPlay.Visible  = false;
 
             this.lblUpAlarmLight.AutoSize = true;
             this.lblUpAlarmLight.Font     = new System.Drawing.Font("微軟正黑體", 9f, System.Drawing.FontStyle.Bold);
-            this.lblUpAlarmLight.Location = new System.Drawing.Point(10, 179);
+            this.lblUpAlarmLight.Location = new System.Drawing.Point(0, 70);
             this.lblUpAlarmLight.Text     = "警示燈開關設定";
-            this.lblUpAlarmLight.Visible  = false;
 
             this.rdoUpLightOff.AutoSize  = true;
             this.rdoUpLightOff.AutoCheck = false;
-            this.rdoUpLightOff.Location  = new System.Drawing.Point(10, 199);
+            this.rdoUpLightOff.Location  = new System.Drawing.Point(0, 90);
             this.rdoUpLightOff.Text      = "關閉";
-            this.rdoUpLightOff.Visible   = false;
             this.rdoUpLightOff.Click    += new System.EventHandler(this.rdoUpLight_Click);
 
             this.rdoUpLightOn.AutoSize  = true;
             this.rdoUpLightOn.AutoCheck = false;
-            this.rdoUpLightOn.Location  = new System.Drawing.Point(70, 199);
+            this.rdoUpLightOn.Location  = new System.Drawing.Point(55, 90);
             this.rdoUpLightOn.Text      = "打開";
             this.rdoUpLightOn.Checked   = true;
-            this.rdoUpLightOn.Visible   = false;
             this.rdoUpLightOn.Click    += new System.EventHandler(this.rdoUpLight_Click);
 
             this.rdoUpLightBlink.AutoSize  = true;
             this.rdoUpLightBlink.AutoCheck = false;
-            this.rdoUpLightBlink.Location  = new System.Drawing.Point(130, 199);
+            this.rdoUpLightBlink.Location  = new System.Drawing.Point(110, 90);
             this.rdoUpLightBlink.Text      = "閃爍";
-            this.rdoUpLightBlink.Visible   = false;
             this.rdoUpLightBlink.Click    += new System.EventHandler(this.rdoUpLight_Click);
 
+            // --- Panel 本身（y=5，與上傳按鈕同高；SetUpAlarmVisible 裡面同步隱藏/顯示被蓋住的按鈕）---
+            this.pnlUpAlarm.Location  = new System.Drawing.Point(10, 5);
+            this.pnlUpAlarm.Size      = new System.Drawing.Size(245, 118);
+            this.pnlUpAlarm.BackColor = System.Drawing.SystemColors.Control;
+            this.pnlUpAlarm.Visible  = false;
+            this.pnlUpAlarm.Controls.AddRange(new System.Windows.Forms.Control[]
+            {
+                this.lblUpAlarmHdr, this.lblUpAlarmMsgLbl,
+                this.rdoUpAlarmMsgOn, this.rdoUpAlarmMsgOff,
+                this.lblUpAlarmPlay, this.nudUpAlarmPlay,
+                this.lblUpAlarmLight,
+                this.rdoUpLightOff, this.rdoUpLightOn, this.rdoUpLightBlink
+            });
+
             // ════════════════════════════════════════════════
-            // 下行 警示燈 Extra（板型6，idx==5，x 偏移 585）
+            // 下行 警示燈 Extra ── 全部放在 pnlDnAlarm 內（x=595）
             // ════════════════════════════════════════════════
             this.lblDnAlarmHdr.AutoSize = true;
             this.lblDnAlarmHdr.Font     = new System.Drawing.Font("微軟正黑體", 9f, System.Drawing.FontStyle.Bold);
-            this.lblDnAlarmHdr.Location = new System.Drawing.Point(595, 106);
+            this.lblDnAlarmHdr.Location = new System.Drawing.Point(0, 0);
             this.lblDnAlarmHdr.Text     = "緊急訊息設定";
-            this.lblDnAlarmHdr.Visible  = false;
 
             this.lblDnAlarmMsgLbl.AutoSize = true;
-            this.lblDnAlarmMsgLbl.Location = new System.Drawing.Point(595, 129);
+            this.lblDnAlarmMsgLbl.Location = new System.Drawing.Point(0, 22);
             this.lblDnAlarmMsgLbl.Text     = "緊急訊息：";
-            this.lblDnAlarmMsgLbl.Visible  = false;
 
             this.rdoDnAlarmMsgOn.AutoSize  = true;
             this.rdoDnAlarmMsgOn.AutoCheck = false;
-            this.rdoDnAlarmMsgOn.Location  = new System.Drawing.Point(665, 127);
+            this.rdoDnAlarmMsgOn.Location  = new System.Drawing.Point(70, 20);
             this.rdoDnAlarmMsgOn.Text      = "打開";
             this.rdoDnAlarmMsgOn.Checked   = true;
-            this.rdoDnAlarmMsgOn.Visible   = false;
             this.rdoDnAlarmMsgOn.Click    += new System.EventHandler(this.rdoDnAlarmMsg_Click);
 
             this.rdoDnAlarmMsgOff.AutoSize  = true;
             this.rdoDnAlarmMsgOff.AutoCheck = false;
-            this.rdoDnAlarmMsgOff.Location  = new System.Drawing.Point(720, 127);
+            this.rdoDnAlarmMsgOff.Location  = new System.Drawing.Point(125, 20);
             this.rdoDnAlarmMsgOff.Text      = "關閉";
-            this.rdoDnAlarmMsgOff.Visible   = false;
             this.rdoDnAlarmMsgOff.Click    += new System.EventHandler(this.rdoDnAlarmMsg_Click);
 
             this.lblDnAlarmPlay.AutoSize = true;
-            this.lblDnAlarmPlay.Location = new System.Drawing.Point(595, 155);
+            this.lblDnAlarmPlay.Location = new System.Drawing.Point(0, 46);
             this.lblDnAlarmPlay.Text     = "播放次數：";
-            this.lblDnAlarmPlay.Visible  = false;
 
-            this.nudDnAlarmPlay.Location = new System.Drawing.Point(665, 152);
+            this.nudDnAlarmPlay.Location = new System.Drawing.Point(70, 43);
             this.nudDnAlarmPlay.Size     = new System.Drawing.Size(55, 20);
             this.nudDnAlarmPlay.Minimum  = 1;
             this.nudDnAlarmPlay.Maximum  = 255;
             this.nudDnAlarmPlay.Value    = 1;
-            this.nudDnAlarmPlay.Visible  = false;
 
             this.lblDnAlarmLight.AutoSize = true;
             this.lblDnAlarmLight.Font     = new System.Drawing.Font("微軟正黑體", 9f, System.Drawing.FontStyle.Bold);
-            this.lblDnAlarmLight.Location = new System.Drawing.Point(595, 179);
+            this.lblDnAlarmLight.Location = new System.Drawing.Point(0, 70);
             this.lblDnAlarmLight.Text     = "警示燈開關設定";
-            this.lblDnAlarmLight.Visible  = false;
 
             this.rdoDnLightOff.AutoSize  = true;
             this.rdoDnLightOff.AutoCheck = false;
-            this.rdoDnLightOff.Location  = new System.Drawing.Point(595, 199);
+            this.rdoDnLightOff.Location  = new System.Drawing.Point(0, 90);
             this.rdoDnLightOff.Text      = "關閉";
-            this.rdoDnLightOff.Visible   = false;
             this.rdoDnLightOff.Click    += new System.EventHandler(this.rdoDnLight_Click);
 
             this.rdoDnLightOn.AutoSize  = true;
             this.rdoDnLightOn.AutoCheck = false;
-            this.rdoDnLightOn.Location  = new System.Drawing.Point(655, 199);
+            this.rdoDnLightOn.Location  = new System.Drawing.Point(55, 90);
             this.rdoDnLightOn.Text      = "打開";
             this.rdoDnLightOn.Checked   = true;
-            this.rdoDnLightOn.Visible   = false;
             this.rdoDnLightOn.Click    += new System.EventHandler(this.rdoDnLight_Click);
 
             this.rdoDnLightBlink.AutoSize  = true;
             this.rdoDnLightBlink.AutoCheck = false;
-            this.rdoDnLightBlink.Location  = new System.Drawing.Point(715, 199);
+            this.rdoDnLightBlink.Location  = new System.Drawing.Point(110, 90);
             this.rdoDnLightBlink.Text      = "閃爍";
-            this.rdoDnLightBlink.Visible   = false;
             this.rdoDnLightBlink.Click    += new System.EventHandler(this.rdoDnLight_Click);
+
+            // --- Panel 本身（y=5，與 pnlUpAlarm 對齊，寬度245）---
+            this.pnlDnAlarm.Location  = new System.Drawing.Point(595, 5);
+            this.pnlDnAlarm.Size      = new System.Drawing.Size(245, 118);
+            this.pnlDnAlarm.BackColor = System.Drawing.SystemColors.Control;
+            this.pnlDnAlarm.Visible  = false;
+            this.pnlDnAlarm.Controls.AddRange(new System.Windows.Forms.Control[]
+            {
+                this.lblDnAlarmHdr, this.lblDnAlarmMsgLbl,
+                this.rdoDnAlarmMsgOn, this.rdoDnAlarmMsgOff,
+                this.lblDnAlarmPlay, this.nudDnAlarmPlay,
+                this.lblDnAlarmLight,
+                this.rdoDnLightOff, this.rdoDnLightOn, this.rdoDnLightBlink
+            });
 
             // ════════════════════════════════════════════════
             // UserControl 本身
@@ -1070,18 +1077,8 @@ namespace UITest.Controls
                 this.lblDnCountStart, this.nudDnCountStart, this.lblDnCountStartTime,
                 this.lblDnCountStop,  this.nudDnCountStop,  this.lblDnCountStopTime,
                 this.lblDnPlatHdr, this.lblDnPlatIdx, this.nudDnPlatIdx, this.pnlDnPlatThumb, this.pnlDnPlatClr, this.cmbDnPlatClr,
-                // 上行 警示燈 Extra
-                this.lblUpAlarmHdr, this.lblUpAlarmMsgLbl,
-                this.rdoUpAlarmMsgOn, this.rdoUpAlarmMsgOff,
-                this.lblUpAlarmPlay, this.nudUpAlarmPlay,
-                this.lblUpAlarmLight,
-                this.rdoUpLightOff, this.rdoUpLightOn, this.rdoUpLightBlink,
-                // 下行 警示燈 Extra
-                this.lblDnAlarmHdr, this.lblDnAlarmMsgLbl,
-                this.rdoDnAlarmMsgOn, this.rdoDnAlarmMsgOff,
-                this.lblDnAlarmPlay, this.nudDnAlarmPlay,
-                this.lblDnAlarmLight,
-                this.rdoDnLightOff, this.rdoDnLightOn, this.rdoDnLightBlink
+                // 警示燈 Panel：最後加入 = z-order 最高，確保蓋過同區其他控件
+                this.pnlUpAlarm, this.pnlDnAlarm
             });
 
             ((System.ComponentModel.ISupportInitialize)(this.nudUpSpeed)).EndInit();
@@ -1219,6 +1216,7 @@ namespace UITest.Controls
         private System.Windows.Forms.Panel         pnlUpPlatClr;
         private System.Windows.Forms.ComboBox      cmbUpPlatClr;
         // ── 上行 警示燈 Extra ────────────────────────────────────
+        private System.Windows.Forms.Panel         pnlUpAlarm;
         private System.Windows.Forms.Label         lblUpAlarmHdr;
         private System.Windows.Forms.Label         lblUpAlarmMsgLbl;
         private System.Windows.Forms.RadioButton   rdoUpAlarmMsgOn;
@@ -1230,6 +1228,7 @@ namespace UITest.Controls
         private System.Windows.Forms.RadioButton   rdoUpLightOn;
         private System.Windows.Forms.RadioButton   rdoUpLightBlink;
         // ── 下行 警示燈 Extra ────────────────────────────────────
+        private System.Windows.Forms.Panel         pnlDnAlarm;
         private System.Windows.Forms.Label         lblDnAlarmHdr;
         private System.Windows.Forms.Label         lblDnAlarmMsgLbl;
         private System.Windows.Forms.RadioButton   rdoDnAlarmMsgOn;

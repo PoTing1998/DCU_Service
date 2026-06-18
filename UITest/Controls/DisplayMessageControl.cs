@@ -52,6 +52,15 @@ namespace UITest.Controls
                                      rdoUpBoard5, rdoUpBoard6, rdoUpBoard7, rdoUpBoard8 };
             _dnBoardRadios = new[] { rdoDnBoard1, rdoDnBoard2, rdoDnBoard3, rdoDnBoard4,
                                      rdoDnBoard5, rdoDnBoard6, rdoDnBoard7, rdoDnBoard8 };
+            // 顏色 ComboBox 的 Items 無法在 Designer.cs 內引用 ColorComboItems（動態屬性），改在此初始化
+            foreach (var cmb in new[] { cmbUpColor, cmbDnColor, cmbUpTimeClr, cmbDnTimeClr, cmbUpPlatClr, cmbDnPlatClr })
+                cmb.Items.AddRange(ColorComboItems);
+            cmbUpColor.SelectedIndex   = 3; // clYellow
+            cmbDnColor.SelectedIndex   = 3; // clYellow
+            cmbUpTimeClr.SelectedIndex = 0; // clBlack
+            cmbDnTimeClr.SelectedIndex = 0; // clBlack
+            cmbUpPlatClr.SelectedIndex = 0; // clBlack
+            cmbDnPlatClr.SelectedIndex = 0; // clBlack
             chkUpMulti.CheckedChanged += chkUpMulti_CheckedChanged;
             chkDnMulti.CheckedChanged += chkDnMulti_CheckedChanged;
             LoadSettings();
@@ -504,16 +513,14 @@ namespace UITest.Controls
 
         private void SetUpAlarmVisible(bool v)
         {
-            lblUpAlarmHdr.Visible     = v;
-            lblUpAlarmMsgLbl.Visible  = v;
-            rdoUpAlarmMsgOn.Visible   = v;
-            rdoUpAlarmMsgOff.Visible  = v;
-            lblUpAlarmPlay.Visible    = v;
-            nudUpAlarmPlay.Visible    = v;
-            lblUpAlarmLight.Visible   = v;
-            rdoUpLightOff.Visible     = v;
-            rdoUpLightOn.Visible      = v;
-            rdoUpLightBlink.Visible   = v;
+            pnlUpAlarm.Visible = v;
+            // pnlUpAlarm 在 y=5，會蓋住上傳/存檔/多訊息按鈕，同步隱藏/顯示
+            btnUpUpload.Visible  = !v;
+            btnAllUpload.Visible = !v;
+            btnDnUpload.Visible  = !v;
+            btnSave.Visible      = !v;
+            chkUpMulti.Visible   = !v;
+            chkDnMulti.Visible   = !v;
         }
 
         private void rdoUpAlarmMsg_Click(object sender, EventArgs e)
@@ -583,18 +590,7 @@ namespace UITest.Controls
         }
 
         private void SetDnAlarmVisible(bool v)
-        {
-            lblDnAlarmHdr.Visible     = v;
-            lblDnAlarmMsgLbl.Visible  = v;
-            rdoDnAlarmMsgOn.Visible   = v;
-            rdoDnAlarmMsgOff.Visible  = v;
-            lblDnAlarmPlay.Visible    = v;
-            nudDnAlarmPlay.Visible    = v;
-            lblDnAlarmLight.Visible   = v;
-            rdoDnLightOff.Visible     = v;
-            rdoDnLightOn.Visible      = v;
-            rdoDnLightBlink.Visible   = v;
-        }
+            => pnlDnAlarm.Visible = v;
 
         private void rdoDnAlarmMsg_Click(object sender, EventArgs e)
         {
