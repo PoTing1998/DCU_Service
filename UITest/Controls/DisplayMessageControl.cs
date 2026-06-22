@@ -21,6 +21,8 @@ namespace UITest.Controls
         public Func<List<byte>>     GetUpIDsFunc    { get; set; }
         /// <summary>取得目前勾選的下行月台 ID 清單。</summary>
         public Func<List<byte>>     GetDnIDsFunc    { get; set; }
+        /// <summary>取得目前勾選的大廳層 ID 清單。</summary>
+        public Func<List<byte>>     GetLobbyIDsFunc { get; set; }
 
         // ── 預覽狀態 ─────────────────────────────────────────────────────
         private string _upText   = "";
@@ -45,9 +47,129 @@ namespace UITest.Controls
         private RadioButton[] _upBoardRadios;
         private RadioButton[] _dnBoardRadios;
 
+        // 板型子選項容器 Panel（程式碼建立，避免 VS Designer DPI 縮放）
+        private Panel _pnlUpOpts;
+        private Panel _pnlDnOpts;
+
+        // ── 時間顯示開關（右側，boards 2/3/7）───────────────────────
+        private Label       _lblUpTimeToggle, _lblDnTimeToggle;
+        private RadioButton _rdoUpTimeOff, _rdoUpTimeOn;
+        private RadioButton _rdoDnTimeOff, _rdoDnTimeOn;
+        private bool        _syncingBoards;   // 防止 Up↔Dn radio 互鎖
+
+        // ── 板型7 上行：路線碼設定 ─────────────────────────────────
+        private Label         _lblUpRouteHdr, _lblUpRouteIdxLbl, _lblUpRouteToggle;
+        private NumericUpDown _nudUpRouteIdx;
+        private Panel         _pnlUpRouteThumb, _pnlUpRouteClr;
+        private ComboBox      _cmbUpRouteClr;
+        private RadioButton   _rdoUpRouteOff, _rdoUpRouteOn;
+
+        // ── 板型7 下行：左側時間 ───────────────────────────────────
+        private Label         _lblDnTimeLeftHdr, _lblDnTimeLeftToggle;
+        private ComboBox      _cmbDnTimeLeftType, _cmbDnTimeLeftClr;
+        private Panel         _pnlDnTimeLeftClr;
+        private RadioButton   _rdoDnTimeLeftOff, _rdoDnTimeLeftOn;
+
         public DisplayMessageControl()
         {
             InitializeComponent();
+            // 強制關閉 DPI 縮放：Designer.cs 會被 VS 重新產生並可能設回 Font，
+            // 在此覆蓋確保 PerformAutoScale 不會縮放子控件座標。
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+
+            // ── 建立選項容器 Panel，並將 extra 控件移入 ──────────────────
+            // 子控件移入後，Location 自動變為 Panel-relative，與外層縮放無關。
+            _pnlUpOpts = new Panel { BorderStyle = BorderStyle.FixedSingle };
+            _pnlDnOpts = new Panel { BorderStyle = BorderStyle.FixedSingle };
+
+            _pnlUpOpts.Controls.AddRange(new Control[] {
+                lblUpTimeHdr, cmbUpTimeType, pnlUpTimeClr, cmbUpTimeClr,
+                lblUpCountStart, nudUpCountStart, lblUpCountStartTime,
+                lblUpCountStop,  nudUpCountStop,  lblUpCountStopTime,
+                lblUpPlatHdr, lblUpPlatIdx, nudUpPlatIdx,
+                pnlUpPlatThumb, pnlUpPlatClr, cmbUpPlatClr,
+                pnlUpAlarm
+            });
+            _pnlDnOpts.Controls.AddRange(new Control[] {
+                lblDnTimeHdr, cmbDnTimeType, pnlDnTimeClr, cmbDnTimeClr,
+                lblDnCountStart, nudDnCountStart, lblDnCountStartTime,
+                lblDnCountStop,  nudDnCountStop,  lblDnCountStopTime,
+                lblDnPlatHdr, lblDnPlatIdx, nudDnPlatIdx,
+                pnlDnPlatThumb, pnlDnPlatClr, cmbDnPlatClr,
+                pnlDnAlarm
+            });
+            this.Controls.Add(_pnlUpOpts);
+            this.Controls.Add(_pnlDnOpts);
+
+            // ── 時間顯示開關（上下行各自獨立）────────────────────────
+            _lblUpTimeToggle = new Label { Text = "時間顯示", AutoSize = true, Visible = false };
+            _rdoUpTimeOff    = new RadioButton { Text = "關", AutoSize = true, Visible = false };
+            _rdoUpTimeOn     = new RadioButton { Text = "開", AutoSize = true, Checked = true, Visible = false };
+            _lblDnTimeToggle = new Label { Text = "時間顯示", AutoSize = true, Visible = false };
+            _rdoDnTimeOff    = new RadioButton { Text = "關", AutoSize = true, Visible = false };
+            _rdoDnTimeOn     = new RadioButton { Text = "開", AutoSize = true, Checked = true, Visible = false };
+            _pnlUpOpts.Controls.AddRange(new Control[] { _lblUpTimeToggle, _rdoUpTimeOff, _rdoUpTimeOn });
+            _pnlDnOpts.Controls.AddRange(new Control[] { _lblDnTimeToggle, _rdoDnTimeOff, _rdoDnTimeOn });
+
+            // ── 板型7 上行：路線碼設定 ─────────────────────────────
+            _lblUpRouteHdr    = new Label { Text = "上行路線碼設定", AutoSize = false,
+                Size = new Size(220, 18), TextAlign = ContentAlignment.MiddleLeft,
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = System.Drawing.Color.FromArgb(220, 235, 255), Visible = false };
+            _lblUpRouteIdxLbl = new Label { Text = "圖檔索引值", AutoSize = true, Visible = false };
+            _nudUpRouteIdx    = new NumericUpDown { Minimum = 1, Maximum = 9, Value = 1,
+                Size = new Size(45, 22), Visible = false };
+            _pnlUpRouteThumb  = new Panel { Size = new Size(24, 24),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = System.Drawing.Color.Black, Visible = false };
+            _pnlUpRouteClr    = new Panel { Size = new Size(18, 18),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = System.Drawing.Color.Yellow, Visible = false };
+            _cmbUpRouteClr    = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList,
+                DrawMode = DrawMode.OwnerDrawFixed, ItemHeight = 18,
+                Size = new Size(110, 21), Visible = false };
+            _cmbUpRouteClr.Items.AddRange(ColorComboItems);
+            _cmbUpRouteClr.SelectedIndex = 3;
+            _cmbUpRouteClr.DrawItem += cmbColor_DrawItem;
+            _cmbUpRouteClr.SelectedIndexChanged += (s, e) =>
+                _pnlUpRouteClr.BackColor = ColorPalette.GetColor(_cmbUpRouteClr.SelectedItem?.ToString());
+            _lblUpRouteToggle = new Label { Text = "路線碼", AutoSize = true, Visible = false };
+            _rdoUpRouteOff    = new RadioButton { Text = "關", AutoSize = true, Visible = false };
+            _rdoUpRouteOn     = new RadioButton { Text = "開", AutoSize = true, Checked = true, Visible = false };
+            _pnlUpOpts.Controls.AddRange(new Control[] {
+                _lblUpRouteHdr, _lblUpRouteIdxLbl, _nudUpRouteIdx,
+                _pnlUpRouteThumb, _pnlUpRouteClr, _cmbUpRouteClr,
+                _lblUpRouteToggle, _rdoUpRouteOff, _rdoUpRouteOn });
+
+            // ── 板型7 下行：左側時間 ───────────────────────────────
+            _lblDnTimeLeftHdr   = new Label { Text = "下行時間(左側顯示)", AutoSize = false,
+                Size = new Size(220, 18), TextAlign = ContentAlignment.MiddleLeft,
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = System.Drawing.Color.FromArgb(220, 235, 255), Visible = false };
+            _cmbDnTimeLeftType  = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList,
+                Size = new Size(110, 21), Visible = false };
+            _cmbDnTimeLeftType.Items.AddRange(new object[] { "標準時間", "開始倒數" });
+            _cmbDnTimeLeftType.SelectedIndex = 0;
+            _pnlDnTimeLeftClr   = new Panel { Size = new Size(18, 18),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = System.Drawing.Color.Yellow, Visible = false };
+            _cmbDnTimeLeftClr   = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList,
+                DrawMode = DrawMode.OwnerDrawFixed, ItemHeight = 18,
+                Size = new Size(110, 21), Visible = false };
+            _cmbDnTimeLeftClr.Items.AddRange(ColorComboItems);
+            _cmbDnTimeLeftClr.SelectedIndex = 3;
+            _cmbDnTimeLeftClr.DrawItem += cmbColor_DrawItem;
+            _cmbDnTimeLeftClr.SelectedIndexChanged += (s, e) =>
+                _pnlDnTimeLeftClr.BackColor = ColorPalette.GetColor(_cmbDnTimeLeftClr.SelectedItem?.ToString());
+            _lblDnTimeLeftToggle = new Label { Text = "時間顯示", AutoSize = true, Visible = false };
+            _rdoDnTimeLeftOff   = new RadioButton { Text = "關", AutoSize = true, Visible = false };
+            _rdoDnTimeLeftOn    = new RadioButton { Text = "開", AutoSize = true, Checked = true, Visible = false };
+            _pnlDnOpts.Controls.AddRange(new Control[] {
+                _lblDnTimeLeftHdr, _cmbDnTimeLeftType,
+                _pnlDnTimeLeftClr, _cmbDnTimeLeftClr,
+                _lblDnTimeLeftToggle, _rdoDnTimeLeftOff, _rdoDnTimeLeftOn });
+
+            ApplyLayout();   // 覆蓋 Designer 產生的座標，防止 VS 重新產生時跑版
             _upBoardRadios = new[] { rdoUpBoard1, rdoUpBoard2, rdoUpBoard3, rdoUpBoard4,
                                      rdoUpBoard5, rdoUpBoard6, rdoUpBoard7, rdoUpBoard8 };
             _dnBoardRadios = new[] { rdoDnBoard1, rdoDnBoard2, rdoDnBoard3, rdoDnBoard4,
@@ -216,11 +338,18 @@ namespace UITest.Controls
         {
             var rdo = sender as RadioButton;
             if (rdo == null || !rdo.Checked) return;
-            // 0-based: boards 2,3,7 → index 1,2,6 ; boards 3,5 → index 2,4 ; board 6 → index 5
             int idx = Array.IndexOf(_upBoardRadios, rdo);
             SetUpTimeVisible(idx == 1 || idx == 2 || idx == 6);
             SetUpPlatVisible(idx == 2 || idx == 4);
             SetUpAlarmVisible(idx == 5);
+            SetUpRouteVisible(idx == 6);
+            // 同步 Dn radio
+            if (!_syncingBoards && idx >= 0 && idx < _dnBoardRadios.Length)
+            {
+                _syncingBoards = true;
+                _dnBoardRadios[idx].Checked = true;
+                _syncingBoards = false;
+            }
         }
 
         private void rdoDnBoard_CheckedChanged(object sender, EventArgs e)
@@ -231,6 +360,14 @@ namespace UITest.Controls
             SetDnTimeVisible(idx == 1 || idx == 2 || idx == 6);
             SetDnPlatVisible(idx == 2 || idx == 4);
             SetDnAlarmVisible(idx == 5);
+            SetDnTimeLeftVisible(idx == 6);
+            // 同步 Up radio
+            if (!_syncingBoards && idx >= 0 && idx < _upBoardRadios.Length)
+            {
+                _syncingBoards = true;
+                _upBoardRadios[idx].Checked = true;
+                _syncingBoards = false;
+            }
         }
 
         // ════════════════════════════════════════════════════════════════
@@ -254,10 +391,12 @@ namespace UITest.Controls
 
             if (uploadUp)
             {
-                var ids = GetUpIDsFunc?.Invoke() ?? new List<byte>();
+                var ids = new List<byte>();
+                ids.AddRange(GetUpIDsFunc?.Invoke() ?? new List<byte>());
+                ids.AddRange(GetLobbyIDsFunc?.Invoke() ?? new List<byte>());
                 if (ids.Count == 0)
                 {
-                    errors.AppendLine("上行：未在串列埠設定中勾選任何上行月台 ID。");
+                    errors.AppendLine("上行：未在串列埠設定中勾選任何 ID。");
                 }
                 else if (chkUpMulti.Checked)
                 {
@@ -320,10 +459,12 @@ namespace UITest.Controls
 
             if (uploadDn)
             {
-                var ids = GetDnIDsFunc?.Invoke() ?? new List<byte>();
+                var ids = new List<byte>();
+                ids.AddRange(GetDnIDsFunc?.Invoke() ?? new List<byte>());
+                ids.AddRange(GetLobbyIDsFunc?.Invoke() ?? new List<byte>());
                 if (ids.Count == 0)
                 {
-                    errors.AppendLine("下行：未在串列埠設定中勾選任何下行月台 ID。");
+                    errors.AppendLine("下行：未在串列埠設定中勾選任何 ID。");
                 }
                 else if (chkDnMulti.Checked)
                 {
@@ -426,6 +567,7 @@ namespace UITest.Controls
             FunctionCode = 0x34
         };
 
+
         // ════════════════════════════════════════════════════════════════
         // 預覽 Paint
         // ════════════════════════════════════════════════════════════════
@@ -466,12 +608,190 @@ namespace UITest.Controls
         // Visible 控制（Extra 子選項）
         // ════════════════════════════════════════════════════════════════
 
+        /// <summary>
+        /// 在 InitializeComponent 後立即套用正確座標。
+        /// VS Designer 每次開啟都會重新產生 Designer.cs，此方法確保 Runtime 永遠用正確位置。
+        /// </summary>
+        // PerformAutoScale 在 constructor 完成後才懶惰執行，OnCreateControl 在其後觸發，
+        // 再次呼叫 ApplyLayout 可確保縮放後的座標被我們的版本覆蓋。
+        protected override void OnCreateControl()
+        {
+            base.OnCreateControl();
+            ApplyLayout();
+        }
+
+        private void ApplyLayout()
+        {
+            // ── 選項容器 Panel 位置與大小 ────────────────────────────────
+            // 高度 200px：時間(0-76) + 開關行(77-97) + 次區段(98-195)
+            if (_pnlUpOpts != null)
+            {
+                _pnlUpOpts.Location = new Point(0,   100);
+                _pnlUpOpts.Size     = new Size(580,  200);
+                _pnlDnOpts.Location = new Point(585, 100);
+                _pnlDnOpts.Size     = new Size(580,  200);
+            }
+
+            // ── 上行 Extra（Panel-relative 座標）────────────────────────
+            // Row 0 – 時間區段 header（y=6）
+            lblUpTimeHdr.Location        = new Point(10,  6);
+            // Row 1 – 時間類型 + 倒數開始（y=32）
+            cmbUpTimeType.Location       = new Point(10,  32);
+            lblUpCountStart.Location     = new Point(140, 35);
+            nudUpCountStart.Location     = new Point(193, 31);
+            lblUpCountStartTime.Location = new Point(248, 35);
+            // Row 2 – 顏色 + 倒數停止（y=62）
+            pnlUpTimeClr.Location        = new Point(10,  64);
+            cmbUpTimeClr.Location        = new Point(32,  62);
+            lblUpCountStop.Location      = new Point(140, 65);
+            nudUpCountStop.Location      = new Point(193, 61);
+            lblUpCountStopTime.Location  = new Point(248, 65);
+            // Row 3 – 時間顯示開關（y=92，獨立一行）
+            if (_lblUpTimeToggle != null)
+            {
+                _lblUpTimeToggle.Location = new Point(10,  94);
+                _rdoUpTimeOff.Location    = new Point(72,  92);
+                _rdoUpTimeOn.Location     = new Point(120, 92);
+            }
+
+            // Row 4 – 月台碼區段 header（y=122）
+            lblUpPlatHdr.Location        = new Point(10,  122);
+            // Row 5 – 月台碼控件（y=150）
+            lblUpPlatIdx.Location        = new Point(10,  153);
+            nudUpPlatIdx.Location        = new Point(58,  149);
+            pnlUpPlatThumb.Location      = new Point(108, 148);
+            pnlUpPlatClr.Location        = new Point(138, 153);
+            cmbUpPlatClr.Location        = new Point(160, 149);
+
+            // Row 4 – 路線碼設定 header（板型7 Up，y=122）
+            if (_lblUpRouteHdr != null)
+            {
+                _lblUpRouteHdr.Location    = new Point(10,  122);
+                // Row 5 – 路線碼控件（y=150）
+                _lblUpRouteIdxLbl.Location = new Point(10,  153);
+                _nudUpRouteIdx.Location    = new Point(58,  149);
+                _pnlUpRouteThumb.Location  = new Point(108, 148);
+                _pnlUpRouteClr.Location    = new Point(138, 153);
+                _cmbUpRouteClr.Location    = new Point(160, 149);
+                _lblUpRouteToggle.Location = new Point(290, 153);
+                _rdoUpRouteOff.Location    = new Point(340, 151);
+                _rdoUpRouteOn.Location     = new Point(392, 151);
+            }
+
+            // 緊急訊息區段（板型 6）
+            pnlUpAlarm.Location          = new Point(10,  6);
+
+            // ── 下行 Extra（Panel-relative，與上行對稱）─────────────────
+            // Row 0 – 時間區段 header（y=6）
+            lblDnTimeHdr.Location        = new Point(10,  6);
+            // Row 1 – 時間類型 + 倒數開始（y=32）
+            cmbDnTimeType.Location       = new Point(10,  32);
+            lblDnCountStart.Location     = new Point(140, 35);
+            nudDnCountStart.Location     = new Point(193, 31);
+            lblDnCountStartTime.Location = new Point(248, 35);
+            // Row 2 – 顏色 + 倒數停止（y=62）
+            pnlDnTimeClr.Location        = new Point(10,  64);
+            cmbDnTimeClr.Location        = new Point(32,  62);
+            lblDnCountStop.Location      = new Point(140, 65);
+            nudDnCountStop.Location      = new Point(193, 61);
+            lblDnCountStopTime.Location  = new Point(248, 65);
+            // Row 3 – 時間顯示開關（y=92，獨立一行）
+            if (_lblDnTimeToggle != null)
+            {
+                _lblDnTimeToggle.Location = new Point(10,  94);
+                _rdoDnTimeOff.Location    = new Point(72,  92);
+                _rdoDnTimeOn.Location     = new Point(120, 92);
+            }
+
+            // Row 4 – 月台碼區段 header（y=122）
+            lblDnPlatHdr.Location        = new Point(10,  122);
+            // Row 5 – 月台碼控件（y=150）
+            lblDnPlatIdx.Location        = new Point(10,  153);
+            nudDnPlatIdx.Location        = new Point(58,  149);
+            pnlDnPlatThumb.Location      = new Point(108, 148);
+            pnlDnPlatClr.Location        = new Point(138, 153);
+            cmbDnPlatClr.Location        = new Point(160, 149);
+
+            // Row 4 – 左側時間 header（板型7 Dn，y=122）
+            if (_lblDnTimeLeftHdr != null)
+            {
+                _lblDnTimeLeftHdr.Location    = new Point(10,  122);
+                // Row 5 – 左側時間控件（y=150）
+                _cmbDnTimeLeftType.Location   = new Point(10,  149);
+                _pnlDnTimeLeftClr.Location    = new Point(130, 153);
+                _cmbDnTimeLeftClr.Location    = new Point(152, 149);
+                _lblDnTimeLeftToggle.Location = new Point(270, 153);
+                _rdoDnTimeLeftOff.Location    = new Point(330, 151);
+                _rdoDnTimeLeftOn.Location     = new Point(382, 151);
+            }
+
+            // 緊急訊息區段（板型 6）
+            pnlDnAlarm.Location          = new Point(10,  6);
+
+            // ── 主要內容 Up（+60 位移，為 Extra 區段讓出空間）────────────
+            lblUpMsgType.Location        = new Point(10,  284);
+            pnlUpMsgType.Location        = new Point(10,  300);
+            lblUpMsg.Location            = new Point(10,  329);
+            txtUpMsg.Location            = new Point(10,  347);
+            lstUpMultiMsgs.Location      = new Point(10,  347);
+            btnUpMsgBrowse.Location      = new Point(389, 346);
+            btnUpMsgShow.Location        = new Point(420, 346);
+            btnUpMsgAdd.Location         = new Point(473, 346);
+            btnUpMultiAdd.Location       = new Point(389, 347);
+            btnUpMultiRemove.Location    = new Point(389, 376);
+            lblUpFont.Location           = new Point(10,  374);
+            cmbUpFontSize.Location       = new Point(10,  392);
+            cmbUpFontStyle.Location      = new Point(80,  392);
+            pnlUpColor.Location          = new Point(150, 394);
+            cmbUpColor.Location          = new Point(172, 392);
+            cmbUpLevel.Location          = new Point(310, 392);
+            lblUpAction.Location         = new Point(10,  419);
+            pnlUpAction.Location         = new Point(10,  435);
+            lblUpParam.Location          = new Point(10,  547);
+            lblUpSpeed.Location          = new Point(10,  567);
+            nudUpSpeed.Location          = new Point(45,  565);
+            lblUpPause.Location          = new Point(105, 567);
+            nudUpPause.Location          = new Point(165, 565);
+            lblUpPauseUnit.Location      = new Point(220, 567);
+            grpUpBoard.Location          = new Point(10,  603);
+
+            // ── 主要內容 Dn（+60 位移）───────────────────────────────────
+            lblDnMsgType.Location        = new Point(595, 284);
+            pnlDnMsgType.Location        = new Point(595, 300);
+            lblDnMsg.Location            = new Point(595, 329);
+            txtDnMsg.Location            = new Point(595, 347);
+            lstDnMultiMsgs.Location      = new Point(595, 347);
+            btnDnMsgBrowse.Location      = new Point(974, 346);
+            btnDnMsgShow.Location        = new Point(1005,346);
+            btnDnMsgAdd.Location         = new Point(1058,346);
+            btnDnMultiAdd.Location       = new Point(974, 347);
+            btnDnMultiRemove.Location    = new Point(974, 376);
+            lblDnFont.Location           = new Point(595, 374);
+            cmbDnFontSize.Location       = new Point(595, 392);
+            cmbDnFontStyle.Location      = new Point(665, 392);
+            pnlDnColor.Location          = new Point(735, 394);
+            cmbDnColor.Location          = new Point(757, 392);
+            cmbDnLevel.Location          = new Point(895, 392);
+            lblDnAction.Location         = new Point(595, 419);
+            pnlDnAction.Location         = new Point(595, 435);
+            lblDnParam.Location          = new Point(595, 547);
+            lblDnSpeed.Location          = new Point(595, 567);
+            nudDnSpeed.Location          = new Point(630, 565);
+            lblDnPause.Location          = new Point(690, 567);
+            nudDnPause.Location          = new Point(750, 565);
+            lblDnPauseUnit.Location      = new Point(805, 567);
+            grpDnBoard.Location          = new Point(595, 603);
+        }
+
         private void SetUpTimeVisible(bool v)
         {
             lblUpTimeHdr.Visible  = v;
             cmbUpTimeType.Visible = v;
             pnlUpTimeClr.Visible  = v;
             cmbUpTimeClr.Visible  = v;
+            _lblUpTimeToggle.Visible = v;
+            _rdoUpTimeOff.Visible    = v;
+            _rdoUpTimeOn.Visible     = v;
             if (v) UpdateUpCountdownVisible();
             else   SetUpCountdownVisible(false);
         }
@@ -513,14 +833,8 @@ namespace UITest.Controls
 
         private void SetUpAlarmVisible(bool v)
         {
+            // pnlUpAlarm 已移入 _pnlUpOpts，不再蓋住按鈕，直接控制顯示即可
             pnlUpAlarm.Visible = v;
-            // pnlUpAlarm 在 y=5，會蓋住上傳/存檔/多訊息按鈕，同步隱藏/顯示
-            btnUpUpload.Visible  = !v;
-            btnAllUpload.Visible = !v;
-            btnDnUpload.Visible  = !v;
-            btnSave.Visible      = !v;
-            chkUpMulti.Visible   = !v;
-            chkDnMulti.Visible   = !v;
         }
 
         private void rdoUpAlarmMsg_Click(object sender, EventArgs e)
@@ -542,6 +856,9 @@ namespace UITest.Controls
             cmbDnTimeType.Visible = v;
             pnlDnTimeClr.Visible  = v;
             cmbDnTimeClr.Visible  = v;
+            _lblDnTimeToggle.Visible = v;
+            _rdoDnTimeOff.Visible    = v;
+            _rdoDnTimeOn.Visible     = v;
             if (v) UpdateDnCountdownVisible();
             else   SetDnCountdownVisible(false);
         }
@@ -591,6 +908,30 @@ namespace UITest.Controls
 
         private void SetDnAlarmVisible(bool v)
             => pnlDnAlarm.Visible = v;
+
+        private void SetUpRouteVisible(bool v)
+        {
+            _lblUpRouteHdr.Visible    = v;
+            _lblUpRouteIdxLbl.Visible = v;
+            _nudUpRouteIdx.Visible    = v;
+            _pnlUpRouteThumb.Visible  = v;
+            _pnlUpRouteClr.Visible    = v;
+            _cmbUpRouteClr.Visible    = v;
+            _lblUpRouteToggle.Visible = v;
+            _rdoUpRouteOff.Visible    = v;
+            _rdoUpRouteOn.Visible     = v;
+        }
+
+        private void SetDnTimeLeftVisible(bool v)
+        {
+            _lblDnTimeLeftHdr.Visible    = v;
+            _cmbDnTimeLeftType.Visible   = v;
+            _pnlDnTimeLeftClr.Visible    = v;
+            _cmbDnTimeLeftClr.Visible    = v;
+            _lblDnTimeLeftToggle.Visible = v;
+            _rdoDnTimeLeftOff.Visible    = v;
+            _rdoDnTimeLeftOn.Visible     = v;
+        }
 
         private void rdoDnAlarmMsg_Click(object sender, EventArgs e)
         {
@@ -693,15 +1034,26 @@ namespace UITest.Controls
                 UpPause = (int)nudUpPause.Value,
                 DnSpeed = (int)nudDnSpeed.Value,
                 DnPause = (int)nudDnPause.Value,
-                // Extra
+                // Extra：時間
                 UpTimeTypeIndex = cmbUpTimeType.SelectedIndex,
                 UpTimeClrIndex  = cmbUpTimeClr.SelectedIndex,
+                UpTimeOn        = _rdoUpTimeOn.Checked,
                 DnTimeTypeIndex = cmbDnTimeType.SelectedIndex,
                 DnTimeClrIndex  = cmbDnTimeClr.SelectedIndex,
+                DnTimeOn        = _rdoDnTimeOn.Checked,
+                // Extra：月台碼
                 UpPlatIdx       = (int)nudUpPlatIdx.Value,
                 UpPlatClrIndex  = cmbUpPlatClr.SelectedIndex,
                 DnPlatIdx       = (int)nudDnPlatIdx.Value,
                 DnPlatClrIndex  = cmbDnPlatClr.SelectedIndex,
+                // Extra：板型7 路線碼（上行）
+                UpRouteIdx      = (int)_nudUpRouteIdx.Value,
+                UpRouteClrIndex = _cmbUpRouteClr.SelectedIndex,
+                UpRouteOn       = _rdoUpRouteOn.Checked,
+                // Extra：板型7 左側時間（下行）
+                DnTimeLeftTypeIndex = _cmbDnTimeLeftType.SelectedIndex,
+                DnTimeLeftClrIndex  = _cmbDnTimeLeftClr.SelectedIndex,
+                DnTimeLeftOn        = _rdoDnTimeLeftOn.Checked,
             };
 
             var serializer = new XmlSerializer(typeof(DisplayMessageSettings));
@@ -748,15 +1100,30 @@ namespace UITest.Controls
                 nudUpPause.Value = Clamp(s.UpPause, nudUpPause);
                 nudDnSpeed.Value = Clamp(s.DnSpeed, nudDnSpeed);
                 nudDnPause.Value = Clamp(s.DnPause, nudDnPause);
-                // Extra
+                // Extra：時間
                 SetComboIndex(cmbUpTimeType, s.UpTimeTypeIndex);
                 SetComboIndex(cmbUpTimeClr,  s.UpTimeClrIndex);
+                _rdoUpTimeOff.Checked = !s.UpTimeOn;
+                _rdoUpTimeOn.Checked  =  s.UpTimeOn;
                 SetComboIndex(cmbDnTimeType, s.DnTimeTypeIndex);
                 SetComboIndex(cmbDnTimeClr,  s.DnTimeClrIndex);
+                _rdoDnTimeOff.Checked = !s.DnTimeOn;
+                _rdoDnTimeOn.Checked  =  s.DnTimeOn;
+                // Extra：月台碼
                 nudUpPlatIdx.Value = Clamp(s.UpPlatIdx, nudUpPlatIdx);
                 SetComboIndex(cmbUpPlatClr,  s.UpPlatClrIndex);
                 nudDnPlatIdx.Value = Clamp(s.DnPlatIdx, nudDnPlatIdx);
                 SetComboIndex(cmbDnPlatClr,  s.DnPlatClrIndex);
+                // Extra：板型7 路線碼（上行）
+                _nudUpRouteIdx.Value = Clamp(s.UpRouteIdx, _nudUpRouteIdx);
+                SetComboIndex(_cmbUpRouteClr, s.UpRouteClrIndex);
+                _rdoUpRouteOff.Checked = !s.UpRouteOn;
+                _rdoUpRouteOn.Checked  =  s.UpRouteOn;
+                // Extra：板型7 左側時間（下行）
+                SetComboIndex(_cmbDnTimeLeftType, s.DnTimeLeftTypeIndex);
+                SetComboIndex(_cmbDnTimeLeftClr,  s.DnTimeLeftClrIndex);
+                _rdoDnTimeLeftOff.Checked = !s.DnTimeLeftOn;
+                _rdoDnTimeLeftOn.Checked  =  s.DnTimeLeftOn;
             }
             catch
             {

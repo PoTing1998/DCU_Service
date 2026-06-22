@@ -20,6 +20,7 @@ namespace UITest
             displayMessageCtrl.SendAction       = bytes => serialSettingCtrl.SendData(bytes);
             displayMessageCtrl.GetUpIDsFunc     = () => serialSettingCtrl.GetSelectedUpPlatformIDs();
             displayMessageCtrl.GetDnIDsFunc     = () => serialSettingCtrl.GetSelectedDnPlatformIDs();
+            displayMessageCtrl.GetLobbyIDsFunc  = () => serialSettingCtrl.GetSelectedLobbyIDs();
 
             // ── 顯示模式 / 開關機 ────────────────────────────────────────
             sysCtrlPanel.CommTimeoutSendAction  = bytes => serialSettingCtrl.SendData(bytes);

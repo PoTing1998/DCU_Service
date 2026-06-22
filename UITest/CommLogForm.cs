@@ -64,12 +64,13 @@ namespace UITest
             // Source
             AppendRaw($"[{entry.Source}] ", Color.FromArgb(130, 210, 210));
 
-            // Message — HEX 部分特別標亮
+            // Message — HEX 部分換行並特別標亮
             string msg = entry.Message;
             int hexIdx = msg.IndexOf("HEX:", StringComparison.OrdinalIgnoreCase);
             if (hexIdx >= 0)
             {
-                AppendRaw(msg.Substring(0, hexIdx), Color.White);
+                AppendRaw(msg.Substring(0, hexIdx).TrimEnd(), Color.White);
+                AppendRaw("\n    ", Color.White); // 換行 + 縮排對齊
                 AppendRaw(msg.Substring(hexIdx), Color.FromArgb(255, 230, 100)); // HEX 內容黃色
             }
             else

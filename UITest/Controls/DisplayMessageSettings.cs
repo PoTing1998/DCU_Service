@@ -42,16 +42,28 @@ namespace UITest.Controls
         public int DnSpeed  { get; set; } = 5;
         public int DnPause  { get; set; } = 8;
 
-        // ── Extra：時間子選項 ─────────────────────────────────────
-        public int UpTimeTypeIndex  { get; set; } = 0;
-        public int UpTimeClrIndex   { get; set; } = 0;
-        public int DnTimeTypeIndex  { get; set; } = 0;
-        public int DnTimeClrIndex   { get; set; } = 0;
+        // ── Extra：時間子選項（右側）──────────────────────────────
+        public int  UpTimeTypeIndex  { get; set; } = 0;
+        public int  UpTimeClrIndex   { get; set; } = 0;
+        public bool UpTimeOn         { get; set; } = true;
+        public int  DnTimeTypeIndex  { get; set; } = 0;
+        public int  DnTimeClrIndex   { get; set; } = 0;
+        public bool DnTimeOn         { get; set; } = true;
 
         // ── Extra：月台碼子選項 ───────────────────────────────────
         public int UpPlatIdx        { get; set; } = 1;
         public int UpPlatClrIndex   { get; set; } = 0;
         public int DnPlatIdx        { get; set; } = 1;
         public int DnPlatClrIndex   { get; set; } = 0;
+
+        // ── Extra：板型7 路線碼（上行）────────────────────────────
+        public int  UpRouteIdx      { get; set; } = 1;
+        public int  UpRouteClrIndex { get; set; } = 3;   // clYellow
+        public bool UpRouteOn       { get; set; } = true;
+
+        // ── Extra：板型7 左側時間（下行）──────────────────────────
+        public int  DnTimeLeftTypeIndex { get; set; } = 0;
+        public int  DnTimeLeftClrIndex  { get; set; } = 3;   // clYellow
+        public bool DnTimeLeftOn        { get; set; } = true;
     }
 }
