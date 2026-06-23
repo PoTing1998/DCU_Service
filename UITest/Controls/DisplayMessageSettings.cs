@@ -65,5 +65,14 @@ namespace UITest.Controls
         public int  DnTimeLeftTypeIndex { get; set; } = 0;
         public int  DnTimeLeftClrIndex  { get; set; } = 3;   // clYellow
         public bool DnTimeLeftOn        { get; set; } = true;
+
+        // ── Extra：板型8 下行 站與站之間連續圖片 ───────────────────
+        // 站名列 3 個；圖檔子列 2 個（最後一站不含圖檔）
+        public int[]    DnTrain83StationIdx { get; set; } = new int[]    { 0, 1, 2 };
+        public string[] DnTrain83Dest       { get; set; } = new string[] { "", "", "" };
+        public int[]    DnTrain83ScrollIdx  { get; set; } = new int[]    { 0, 0, 0 };
+        public int[]    DnTrain83ImgStart   { get; set; } = new int[]    { 1, 1 };
+        public int[]    DnTrain83ImgEnd     { get; set; } = new int[]    { 1, 1 };
+        public int      DnTrain83ClrIndex   { get; set; } = 3;           // clYellow
     }
 }

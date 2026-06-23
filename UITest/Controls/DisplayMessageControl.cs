@@ -33,7 +33,8 @@ namespace UITest.Controls
         private Color  _dnColor  = Color.Yellow;
         private float  _dnFontPt = 14f;
 
-        private readonly DisplayMessageService _service = new DisplayMessageService();
+        private readonly DisplayMessageService  _service = new DisplayMessageService();
+        private readonly PacketBuilderService   _builder = new PacketBuilderService();
 
         // 字型名稱常數，確保 Designer / 邏輯端完全一致
         private const string FontName24x24 = "24x24";
@@ -69,6 +70,22 @@ namespace UITest.Controls
         private ComboBox      _cmbDnTimeLeftType, _cmbDnTimeLeftClr;
         private Panel         _pnlDnTimeLeftClr;
         private RadioButton   _rdoDnTimeLeftOff, _rdoDnTimeLeftOn;
+
+        // ── 板型8 下行：站與站之間連續圖片 ─────────────────────────────────
+        // 3 個站名列；圖檔子列只在前 2 列（DnTrain83ImgRows = DnTrain83Rows - 1）
+        private const int     DnTrain83Rows    = 3;
+        private const int     DnTrain83ImgRows = DnTrain83Rows - 1;   // = 2
+        private Label         _lblDnTrain83Hdr;
+        private ComboBox[]    _cmbDnTrain83Station;
+        private TextBox[]     _txtDnTrain83Dest;
+        private ComboBox[]    _cmbDnTrain83Scroll;
+        private Label[]       _lblDnTrain83Img;
+        private NumericUpDown[] _nudDnTrain83ImgStart;
+        private NumericUpDown[] _nudDnTrain83ImgEnd;
+        private Panel[]       _pnlDnTrain83RowClr;
+        private Label         _lblDnTrain83ClrTitle;
+        private Panel         _pnlDnTrain83Clr;
+        private ComboBox      _cmbDnTrain83Clr;
 
         public DisplayMessageControl()
         {
@@ -169,9 +186,104 @@ namespace UITest.Controls
                 _pnlDnTimeLeftClr, _cmbDnTimeLeftClr,
                 _lblDnTimeLeftToggle, _rdoDnTimeLeftOff, _rdoDnTimeLeftOn });
 
+            // ── 板型8 下行：站與站之間連續圖片 ────────────────────────────
+            _lblDnTrain83Hdr = new Label {
+                AutoSize = false, Size = new Size(380, 18),
+                TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = System.Drawing.Color.FromArgb(220, 235, 255),
+                Text = "下行站與站之間(連續圖片動態顯示模式)", Visible = false };
+
+            string[] stationItems83 = {
+                "LG01", "LG02", "LG03", "LG04", "LG05",
+                "LG06", "LG07", "LG08", "LG09", "LG10" };
+
+            _cmbDnTrain83Station  = new ComboBox[DnTrain83Rows];
+            _txtDnTrain83Dest     = new TextBox[DnTrain83Rows];
+            _cmbDnTrain83Scroll   = new ComboBox[DnTrain83Rows];
+            _lblDnTrain83Img      = new Label[DnTrain83ImgRows];
+            _nudDnTrain83ImgStart = new NumericUpDown[DnTrain83ImgRows];
+            _nudDnTrain83ImgEnd   = new NumericUpDown[DnTrain83ImgRows];
+            _pnlDnTrain83RowClr   = new Panel[DnTrain83ImgRows];
+
+            // 站名列（3 列）
+            for (int r = 0; r < DnTrain83Rows; r++)
+            {
+                _cmbDnTrain83Station[r] = new ComboBox {
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    Size = new System.Drawing.Size(80, 21), Visible = false };
+                _cmbDnTrain83Station[r].Items.AddRange(stationItems83);
+                _cmbDnTrain83Station[r].SelectedIndex = Math.Min(r, stationItems83.Length - 1);
+
+                _txtDnTrain83Dest[r] = new TextBox {
+                    Size = new System.Drawing.Size(60, 21), Visible = false };
+
+                _cmbDnTrain83Scroll[r] = new ComboBox {
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    Size = new System.Drawing.Size(70, 21), Visible = false };
+                _cmbDnTrain83Scroll[r].Items.AddRange(new object[] { "靜止", "閃爍" });
+                _cmbDnTrain83Scroll[r].SelectedIndex = 0;
+            }
+
+            // 圖檔子列（2 列，最後一站無圖檔）
+            for (int r = 0; r < DnTrain83ImgRows; r++)
+            {
+                _lblDnTrain83Img[r] = new Label { Text = "圖檔", AutoSize = true, Visible = false };
+
+                _nudDnTrain83ImgStart[r] = new NumericUpDown {
+                    Minimum = 1, Maximum = 255, Value = 1,
+                    Size = new System.Drawing.Size(45, 22), Visible = false };
+
+                _nudDnTrain83ImgEnd[r] = new NumericUpDown {
+                    Minimum = 1, Maximum = 255, Value = 1,
+                    Size = new System.Drawing.Size(45, 22), Visible = false };
+
+                _pnlDnTrain83RowClr[r] = new Panel {
+                    Size = new System.Drawing.Size(18, 18),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    BackColor = System.Drawing.Color.Yellow, Visible = false };
+            }
+
+            // 全域圖檔顏色
+            _lblDnTrain83ClrTitle = new Label { Text = "圖檔顏色", AutoSize = true, Visible = false };
+            _pnlDnTrain83Clr = new Panel {
+                Size = new System.Drawing.Size(18, 18),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = System.Drawing.Color.Yellow, Visible = false };
+            _cmbDnTrain83Clr = new ComboBox {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                DrawMode = DrawMode.OwnerDrawFixed, ItemHeight = 18,
+                Size = new System.Drawing.Size(110, 21), Visible = false };
+            _cmbDnTrain83Clr.Items.AddRange(ColorComboItems);
+            _cmbDnTrain83Clr.SelectedIndex = 3; // clYellow
+            _cmbDnTrain83Clr.DrawItem += cmbColor_DrawItem;
+            _cmbDnTrain83Clr.SelectedIndexChanged += (s, e) => {
+                var c = ColorPalette.GetColor(_cmbDnTrain83Clr.SelectedItem?.ToString());
+                _pnlDnTrain83Clr.BackColor = c;
+                foreach (var p in _pnlDnTrain83RowClr) p.BackColor = c;
+            };
+
+            // 加入 _pnlDnOpts
+            var train83Ctrls = new System.Collections.Generic.List<System.Windows.Forms.Control> {
+                _lblDnTrain83Hdr, _lblDnTrain83ClrTitle, _pnlDnTrain83Clr, _cmbDnTrain83Clr };
+            for (int r = 0; r < DnTrain83Rows; r++)
+            {
+                train83Ctrls.Add(_cmbDnTrain83Station[r]);
+                train83Ctrls.Add(_txtDnTrain83Dest[r]);
+                train83Ctrls.Add(_cmbDnTrain83Scroll[r]);
+            }
+            for (int r = 0; r < DnTrain83ImgRows; r++)
+            {
+                train83Ctrls.Add(_lblDnTrain83Img[r]);
+                train83Ctrls.Add(_nudDnTrain83ImgStart[r]);
+                train83Ctrls.Add(_nudDnTrain83ImgEnd[r]);
+                train83Ctrls.Add(_pnlDnTrain83RowClr[r]);
+            }
+            _pnlDnOpts.Controls.AddRange(train83Ctrls.ToArray());
+
             ApplyLayout();   // 覆蓋 Designer 產生的座標，防止 VS 重新產生時跑版
             _upBoardRadios = new[] { rdoUpBoard1, rdoUpBoard2, rdoUpBoard3, rdoUpBoard4,
-                                     rdoUpBoard5, rdoUpBoard6, rdoUpBoard7, rdoUpBoard8 };
+                                     rdoUpBoard5, rdoUpBoard6, rdoUpBoard7 };
             _dnBoardRadios = new[] { rdoDnBoard1, rdoDnBoard2, rdoDnBoard3, rdoDnBoard4,
                                      rdoDnBoard5, rdoDnBoard6, rdoDnBoard7, rdoDnBoard8 };
             // 顏色 ComboBox 的 Items 無法在 Designer.cs 內引用 ColorComboItems（動態屬性），改在此初始化
@@ -361,6 +473,7 @@ namespace UITest.Controls
             SetDnPlatVisible(idx == 2 || idx == 4);
             SetDnAlarmVisible(idx == 5);
             SetDnTimeLeftVisible(idx == 6);
+            SetDnTrain83Visible(idx == 7);
             // 同步 Up radio
             if (!_syncingBoards && idx >= 0 && idx < _upBoardRadios.Length)
             {
@@ -502,7 +615,9 @@ namespace UITest.Controls
                 else
                 {
                     // ── 單訊息模式 ──
-                    var result = _service.Build(BuildDnParams(ids));
+                    var result = GetMessageType(false) == 0x83
+                        ? BuildDnTrain83Packet(ids)
+                        : _service.Build(BuildDnParams(ids));
                     if (result.IsValid)
                     {
                         mon.Log(Services.ConnectionMonitor.LogLevel.Send, "DisplayMsg",
@@ -567,6 +682,97 @@ namespace UITest.Controls
             FunctionCode = 0x34
         };
 
+        /// <summary>板型8 (0x83) 下行：站與站之間連續圖片封包</summary>
+        private BuildResult<byte[]> BuildDnTrain83Packet(List<byte> ids)
+        {
+            try
+            {
+                // ── 圖片顏色 RGB ─────────────────────────────────────────────
+                Color imgColor = ParseColor(_cmbDnTrain83Clr.SelectedItem?.ToString());
+
+                // ── 文字顏色 RGB（使用下行共用顏色）────────────────────────
+                byte[] textRgb = DataConversion.FromHex(NameToHex(cmbDnColor.SelectedItem?.ToString()));
+                if (textRgb == null || textRgb.Length != 3)
+                    return BuildResult<byte[]>.Fail("文字顏色格式錯誤。");
+
+                // ── 組建 5 個 StringMessage（text[0]→photo[0]→text[1]→photo[1]→text[2]）──
+                var content = new List<StringMessage>();
+                for (int r = 0; r < DnTrain83Rows; r++)
+                {
+                    // 文字段：靜止=0x2A，閃爍=0x2B
+                    byte strMode = (_cmbDnTrain83Scroll[r].SelectedIndex == 1) ? (byte)0x2B : (byte)0x2A;
+                    content.Add(new StringMessage
+                    {
+                        StringMode = strMode,
+                        StringBody = new TextStringBody
+                        {
+                            RedColor   = textRgb[0],
+                            GreenColor = textRgb[1],
+                            BlueColor  = textRgb[2],
+                            StringText = _txtDnTrain83Dest[r].Text
+                        }
+                    });
+
+                    // 圖片段（最後一站無圖片）
+                    if (r < DnTrain83ImgRows)
+                    {
+                        ushort startIdx = (ushort)_nudDnTrain83ImgStart[r].Value;
+                        byte   num      = (byte)Math.Max(1,
+                            (int)_nudDnTrain83ImgEnd[r].Value - startIdx + 1);
+                        content.Add(new StringMessage
+                        {
+                            StringMode = 0x2D,   // Pre_RecordedPicturesStatic_Dynamic
+                            StringBody = new PreRecordedGraphicBody
+                            {
+                                GraphicStartIndex = startIdx,
+                                GraphicNumber     = num,
+                                RedColor          = imgColor.R,
+                                GreenColor        = imgColor.G,
+                                BlueColor         = imgColor.B
+                            }
+                        });
+                    }
+                }
+
+                // ── trainDynamic ─────────────────────────────────────────────
+                var td = new trainDynamic
+                {
+                    MessageType   = 0x83,
+                    MessageLevel  = ParseLevel(cmbDnLevel),
+                    MessageScroll = new ScrollInfo
+                    {
+                        ScrollMode  = 0x61,
+                        ScrollSpeed = (byte)nudDnSpeed.Value,
+                        PauseTime   = (byte)nudDnPause.Value
+                    },
+                    MessageContent = content
+                };
+
+                // ── Sequence ─────────────────────────────────────────────────
+                var seq = new Sequence
+                {
+                    SequenceNo = 0x02,   // 下行
+                    Font       = new FontSetting
+                    {
+                        Size  = NameToFontSize(cmbDnFontSize.SelectedItem?.ToString()),
+                        Style = NameToFontStyle(cmbDnFontStyle.SelectedItem?.ToString())
+                    },
+                    Messages = new List<IMessage> { td }
+                };
+
+                // ── Packet ───────────────────────────────────────────────────
+                var r5 = _builder.BuildPacket(seq, ids, 0x34);
+                if (!r5.IsValid)
+                    return BuildResult<byte[]>.Fail($"[Train83 Packet] {r5.ErrorMessage}");
+
+                byte[] bytes = r5.Value.ToBytes();
+                return BuildResult<byte[]>.Success(bytes, PacketBuilderService.ToHex(bytes));
+            }
+            catch (Exception ex)
+            {
+                return BuildResult<byte[]>.Fail($"BuildDnTrain83Packet 失敗：{ex.Message}");
+            }
+        }
 
         // ════════════════════════════════════════════════════════════════
         // 預覽 Paint
@@ -658,10 +864,10 @@ namespace UITest.Controls
             lblUpPlatHdr.Location        = new Point(10,  122);
             // Row 5 – 月台碼控件（y=150）
             lblUpPlatIdx.Location        = new Point(10,  153);
-            nudUpPlatIdx.Location        = new Point(58,  149);
-            pnlUpPlatThumb.Location      = new Point(108, 148);
-            pnlUpPlatClr.Location        = new Point(138, 153);
-            cmbUpPlatClr.Location        = new Point(160, 149);
+            nudUpPlatIdx.Location        = new Point(78,  149);
+            pnlUpPlatThumb.Location      = new Point(128, 148);
+            pnlUpPlatClr.Location        = new Point(158, 153);
+            cmbUpPlatClr.Location        = new Point(180, 149);
 
             // Row 4 – 路線碼設定 header（板型7 Up，y=122）
             if (_lblUpRouteHdr != null)
@@ -669,10 +875,10 @@ namespace UITest.Controls
                 _lblUpRouteHdr.Location    = new Point(10,  122);
                 // Row 5 – 路線碼控件（y=150）
                 _lblUpRouteIdxLbl.Location = new Point(10,  153);
-                _nudUpRouteIdx.Location    = new Point(58,  149);
-                _pnlUpRouteThumb.Location  = new Point(108, 148);
-                _pnlUpRouteClr.Location    = new Point(138, 153);
-                _cmbUpRouteClr.Location    = new Point(160, 149);
+                _nudUpRouteIdx.Location    = new Point(78,  149);
+                _pnlUpRouteThumb.Location  = new Point(128, 148);
+                _pnlUpRouteClr.Location    = new Point(158, 153);
+                _cmbUpRouteClr.Location    = new Point(180, 149);
                 _lblUpRouteToggle.Location = new Point(290, 153);
                 _rdoUpRouteOff.Location    = new Point(340, 151);
                 _rdoUpRouteOn.Location     = new Point(392, 151);
@@ -707,10 +913,10 @@ namespace UITest.Controls
             lblDnPlatHdr.Location        = new Point(10,  122);
             // Row 5 – 月台碼控件（y=150）
             lblDnPlatIdx.Location        = new Point(10,  153);
-            nudDnPlatIdx.Location        = new Point(58,  149);
-            pnlDnPlatThumb.Location      = new Point(108, 148);
-            pnlDnPlatClr.Location        = new Point(138, 153);
-            cmbDnPlatClr.Location        = new Point(160, 149);
+            nudDnPlatIdx.Location        = new Point(78,  149);
+            pnlDnPlatThumb.Location      = new Point(128, 148);
+            pnlDnPlatClr.Location        = new Point(158, 153);
+            cmbDnPlatClr.Location        = new Point(180, 149);
 
             // Row 4 – 左側時間 header（板型7 Dn，y=122）
             if (_lblDnTimeLeftHdr != null)
@@ -727,6 +933,34 @@ namespace UITest.Controls
 
             // 緊急訊息區段（板型 6）
             pnlDnAlarm.Location          = new Point(10,  6);
+
+            // ── 板型8 下行：Train 83（交錯排列：站名列→圖檔列→站名列→圖檔列→站名列）
+            if (_lblDnTrain83Hdr != null)
+            {
+                _lblDnTrain83Hdr.Location = new Point(10, 4);
+                // 每個站名列 26px 高，圖檔子列 26px 高，共 5 sub-rows
+                // 順序：station[0] img[0] station[1] img[1] station[2]
+                int[] stationY = { 28, 80, 132 };   // y 座標：station 0,1,2
+                int[] imgY     = { 54, 106 };        // y 座標：img 0,1
+                for (int r = 0; r < DnTrain83Rows; r++)
+                {
+                    int sy = stationY[r];
+                    _cmbDnTrain83Station[r].Location = new Point(10,  sy);
+                    _txtDnTrain83Dest[r].Location    = new Point(94,  sy);
+                    _cmbDnTrain83Scroll[r].Location  = new Point(158, sy);
+                }
+                for (int r = 0; r < DnTrain83ImgRows; r++)
+                {
+                    int iy = imgY[r];
+                    _lblDnTrain83Img[r].Location      = new Point(20,  iy + 4);
+                    _nudDnTrain83ImgStart[r].Location = new Point(48,  iy - 1);
+                    _nudDnTrain83ImgEnd[r].Location   = new Point(98,  iy - 1);
+                    _pnlDnTrain83RowClr[r].Location   = new Point(148, iy + 2);
+                }
+                _lblDnTrain83ClrTitle.Location = new Point(395, 28);
+                _pnlDnTrain83Clr.Location      = new Point(395, 50);
+                _cmbDnTrain83Clr.Location      = new Point(417, 48);
+            }
 
             // ── 主要內容 Up（+60 位移，為 Extra 區段讓出空間）────────────
             lblUpMsgType.Location        = new Point(10,  284);
@@ -933,6 +1167,27 @@ namespace UITest.Controls
             _rdoDnTimeLeftOn.Visible     = v;
         }
 
+        private void SetDnTrain83Visible(bool v)
+        {
+            _lblDnTrain83Hdr.Visible      = v;
+            _lblDnTrain83ClrTitle.Visible = v;
+            _pnlDnTrain83Clr.Visible      = v;
+            _cmbDnTrain83Clr.Visible      = v;
+            for (int r = 0; r < DnTrain83Rows; r++)
+            {
+                _cmbDnTrain83Station[r].Visible = v;
+                _txtDnTrain83Dest[r].Visible    = v;
+                _cmbDnTrain83Scroll[r].Visible  = v;
+            }
+            for (int r = 0; r < DnTrain83ImgRows; r++)
+            {
+                _lblDnTrain83Img[r].Visible      = v;
+                _nudDnTrain83ImgStart[r].Visible = v;
+                _nudDnTrain83ImgEnd[r].Visible   = v;
+                _pnlDnTrain83RowClr[r].Visible   = v;
+            }
+        }
+
         private void rdoDnAlarmMsg_Click(object sender, EventArgs e)
         {
             rdoDnAlarmMsgOn.Checked  = (sender == rdoDnAlarmMsgOn);
@@ -981,7 +1236,7 @@ namespace UITest.Controls
         {
             RadioButton[] radios = isUp
                 ? new[] { rdoUpBoard1, rdoUpBoard2, rdoUpBoard3, rdoUpBoard4,
-                          rdoUpBoard5, rdoUpBoard6, rdoUpBoard7, rdoUpBoard8 }
+                          rdoUpBoard5, rdoUpBoard6, rdoUpBoard7 }
                 : new[] { rdoDnBoard1, rdoDnBoard2, rdoDnBoard3, rdoDnBoard4,
                           rdoDnBoard5, rdoDnBoard6, rdoDnBoard7, rdoDnBoard8 };
 
@@ -1054,6 +1309,13 @@ namespace UITest.Controls
                 DnTimeLeftTypeIndex = _cmbDnTimeLeftType.SelectedIndex,
                 DnTimeLeftClrIndex  = _cmbDnTimeLeftClr.SelectedIndex,
                 DnTimeLeftOn        = _rdoDnTimeLeftOn.Checked,
+                // Extra：板型8 下行 Train83
+                DnTrain83StationIdx = System.Array.ConvertAll(_cmbDnTrain83Station,    c => c.SelectedIndex),
+                DnTrain83Dest       = System.Array.ConvertAll(_txtDnTrain83Dest,       t => t.Text),
+                DnTrain83ScrollIdx  = System.Array.ConvertAll(_cmbDnTrain83Scroll,     c => c.SelectedIndex),
+                DnTrain83ImgStart   = System.Array.ConvertAll(_nudDnTrain83ImgStart,   n => (int)n.Value),
+                DnTrain83ImgEnd     = System.Array.ConvertAll(_nudDnTrain83ImgEnd,     n => (int)n.Value),
+                DnTrain83ClrIndex   = _cmbDnTrain83Clr.SelectedIndex,
             };
 
             var serializer = new XmlSerializer(typeof(DisplayMessageSettings));
@@ -1063,14 +1325,23 @@ namespace UITest.Controls
 
         private void LoadSettings()
         {
-            if (!File.Exists(SettingsPath)) return;
+            // 先建立預設值；有設定檔才覆寫
+            var s = new DisplayMessageSettings();
 
+            if (File.Exists(SettingsPath))
             try
             {
-                DisplayMessageSettings s;
                 var serializer = new XmlSerializer(typeof(DisplayMessageSettings));
                 using (var reader = new StreamReader(SettingsPath, Encoding.UTF8))
                     s = (DisplayMessageSettings)serializer.Deserialize(reader);
+            }
+            catch
+            {
+                // 設定檔損毀時靜默忽略，改用預設值
+            }
+
+            try
+            {
 
                 // 板型
                 SetCheckedBoard(true,  s.UpBoardIndex);
@@ -1124,6 +1395,25 @@ namespace UITest.Controls
                 SetComboIndex(_cmbDnTimeLeftClr,  s.DnTimeLeftClrIndex);
                 _rdoDnTimeLeftOff.Checked = !s.DnTimeLeftOn;
                 _rdoDnTimeLeftOn.Checked  =  s.DnTimeLeftOn;
+                // Extra：板型8 下行 Train83（站名列）
+                for (int r = 0; r < DnTrain83Rows; r++)
+                {
+                    if (s.DnTrain83StationIdx != null && r < s.DnTrain83StationIdx.Length)
+                        SetComboIndex(_cmbDnTrain83Station[r], s.DnTrain83StationIdx[r]);
+                    if (s.DnTrain83Dest != null && r < s.DnTrain83Dest.Length)
+                        _txtDnTrain83Dest[r].Text = s.DnTrain83Dest[r] ?? "";
+                    if (s.DnTrain83ScrollIdx != null && r < s.DnTrain83ScrollIdx.Length)
+                        SetComboIndex(_cmbDnTrain83Scroll[r], s.DnTrain83ScrollIdx[r]);
+                }
+                // Extra：板型8 下行 Train83（圖檔子列，只有前 DnTrain83ImgRows 列）
+                for (int r = 0; r < DnTrain83ImgRows; r++)
+                {
+                    if (s.DnTrain83ImgStart != null && r < s.DnTrain83ImgStart.Length)
+                        _nudDnTrain83ImgStart[r].Value = Clamp(s.DnTrain83ImgStart[r], _nudDnTrain83ImgStart[r]);
+                    if (s.DnTrain83ImgEnd != null && r < s.DnTrain83ImgEnd.Length)
+                        _nudDnTrain83ImgEnd[r].Value   = Clamp(s.DnTrain83ImgEnd[r],   _nudDnTrain83ImgEnd[r]);
+                }
+                SetComboIndex(_cmbDnTrain83Clr, s.DnTrain83ClrIndex);
             }
             catch
             {

@@ -94,7 +94,6 @@
             this.rdoUpBoard5 = new System.Windows.Forms.RadioButton();
             this.rdoUpBoard6 = new System.Windows.Forms.RadioButton();
             this.rdoUpBoard7 = new System.Windows.Forms.RadioButton();
-            this.rdoUpBoard8 = new System.Windows.Forms.RadioButton();
             this.grpDnBoard = new System.Windows.Forms.GroupBox();
             this.rdoDnBoard1 = new System.Windows.Forms.RadioButton();
             this.rdoDnBoard2 = new System.Windows.Forms.RadioButton();
@@ -947,10 +946,9 @@
             this.grpUpBoard.Controls.Add(this.rdoUpBoard5);
             this.grpUpBoard.Controls.Add(this.rdoUpBoard6);
             this.grpUpBoard.Controls.Add(this.rdoUpBoard7);
-            this.grpUpBoard.Controls.Add(this.rdoUpBoard8);
             this.grpUpBoard.Location = new System.Drawing.Point(10, 603);
             this.grpUpBoard.Name = "grpUpBoard";
-            this.grpUpBoard.Size = new System.Drawing.Size(575, 228);
+            this.grpUpBoard.Size = new System.Drawing.Size(575, 204);
             this.grpUpBoard.TabIndex = 56;
             this.grpUpBoard.TabStop = false;
             this.grpUpBoard.Text = "上行顯示器板型";
@@ -1026,17 +1024,7 @@
             this.rdoUpBoard7.TabIndex = 6;
             this.rdoUpBoard7.Text = "7. 路線代碼(7DH) + 到站訊息(74H) + 右側（時間倒數）";
             this.rdoUpBoard7.CheckedChanged += new System.EventHandler(this.rdoUpBoard_CheckedChanged);
-            // 
-            // rdoUpBoard8
-            // 
-            this.rdoUpBoard8.AutoSize = true;
-            this.rdoUpBoard8.Location = new System.Drawing.Point(8, 202);
-            this.rdoUpBoard8.Name = "rdoUpBoard8";
-            this.rdoUpBoard8.Size = new System.Drawing.Size(271, 16);
-            this.rdoUpBoard8.TabIndex = 7;
-            this.rdoUpBoard8.Text = "8. 站與站之間，連續圖片動態顯示模式（83H）";
-            this.rdoUpBoard8.CheckedChanged += new System.EventHandler(this.rdoUpBoard_CheckedChanged);
-            // 
+            //
             // grpDnBoard
             // 
             this.grpDnBoard.Controls.Add(this.rdoDnBoard1);
@@ -2006,7 +1994,6 @@
         private System.Windows.Forms.RadioButton   rdoUpBoard5;
         private System.Windows.Forms.RadioButton   rdoUpBoard6;
         private System.Windows.Forms.RadioButton   rdoUpBoard7;
-        private System.Windows.Forms.RadioButton   rdoUpBoard8;
         private System.Windows.Forms.GroupBox      grpDnBoard;
         private System.Windows.Forms.RadioButton   rdoDnBoard1;
         private System.Windows.Forms.RadioButton   rdoDnBoard2;
