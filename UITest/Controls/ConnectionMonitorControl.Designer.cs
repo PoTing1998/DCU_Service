@@ -55,10 +55,10 @@ namespace UITest.Controls
             this.lblModeBadge.Text      = "直連模式";
             this.lblModeBadge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 
-            // Row 2 — DCU_Service (y=46)
+            // Row 2 — DCUService (y=46)
             this.lblSvcTitle.AutoSize = true;
             this.lblSvcTitle.Location = new System.Drawing.Point(12, 48);
-            this.lblSvcTitle.Text     = "DCU_Service";
+            this.lblSvcTitle.Text     = "DCUService";
 
             this.pnlSvcDot.Location  = new System.Drawing.Point(98, 52);
             this.pnlSvcDot.Size      = new System.Drawing.Size(12, 12);

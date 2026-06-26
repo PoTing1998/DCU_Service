@@ -49,6 +49,9 @@ namespace ASI.Wanda.DMD.JsonObject.DCU.FromDMD
         // 目標看板 [stationID]_[areaID]_[deviceID]
         public List<string> target_du { get; set; } = new List<string>();
 
+        // 播放次數（預設 3 次）
+        public int play_count { get; set; } = 3;
+
         public string dbName1 { get; set; } = "dmd_instant_message";
         public string dbName2 { get; set; } = "dmd_target";
 

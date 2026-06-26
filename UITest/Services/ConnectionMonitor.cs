@@ -71,14 +71,14 @@ namespace UITest.Services
 
         // ── 偵測 / 切換 ──────────────────────────────────────────────────
 
-        /// <summary>偵測 DCU_Service 是否在執行，並自動切換模式</summary>
+        /// <summary>偵測 DCUService 是否在執行，並自動切換模式</summary>
         public void AutoDetect(string comPortName = null)
         {
             // 偵測 Windows Service
             try
             {
                 var sc = ServiceController.GetServices()
-                             .FirstOrDefault(s => s.ServiceName == "DCU_Service");
+                             .FirstOrDefault(s => s.ServiceName == "DCUService");
                 IsServiceRunning = sc != null && sc.Status == ServiceControllerStatus.Running;
             }
             catch
@@ -97,7 +97,7 @@ namespace UITest.Services
             {
                 Log(LogLevel.Info, "Monitor",
                     $"偵測到模式變更：{CurrentMode} → {newMode}" +
-                    (IsServiceRunning ? "（DCU_Service 執行中）" : "（DCU_Service 未啟動）"));
+                    (IsServiceRunning ? "（DCUService 執行中）" : "（DCUService 未啟動）"));
             }
             CurrentMode = newMode;
 

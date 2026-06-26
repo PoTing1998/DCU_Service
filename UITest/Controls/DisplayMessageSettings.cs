@@ -42,6 +42,10 @@ namespace UITest.Controls
         public int DnSpeed  { get; set; } = 5;
         public int DnPause  { get; set; } = 8;
 
+        // ── 即時訊息播放次數 ──────────────────────────────────────
+        /// <summary>即時訊息播放次數，預設 3 次</summary>
+        public int InstantMsgPlayCount { get; set; } = 3;
+
         // ── Extra：時間子選項（右側）──────────────────────────────
         public int  UpTimeTypeIndex  { get; set; } = 0;
         public int  UpTimeClrIndex   { get; set; } = 0;

@@ -65,17 +65,17 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
         {
             return Select(messageID);
         }
-        public static void InsertInstantMessages(Guid messageID, int messageType, int messagePriority, int moveMode, int moveSpeed, string interval, string messageContentCHN, string fontTypeCHN, int fontSizeCHN, string fontColorCHN, string messageContentENG, string fontTypeENG, int fontSizeENG, string fontColorENG)
+        public static void InsertInstantMessages(Guid messageID, int messageType, int messagePriority, int moveMode, int moveSpeed, string interval, string messageContentCHN, string fontTypeCHN, int fontSizeCHN, string fontColorCHN, string messageContentENG, string fontTypeENG, int fontSizeENG, string fontColorENG, int playCount = 3)
         {
             Insert(messageID, messageType, messagePriority, moveMode, moveSpeed, interval
                 , messageContentCHN, fontTypeCHN, fontSizeCHN, fontColorCHN
-                , messageContentENG, fontTypeENG, fontSizeENG, fontColorENG);
+                , messageContentENG, fontTypeENG, fontSizeENG, fontColorENG, playCount);
         }
-        public static void UpdateInstantMessages(Guid messageID, int messageType, int messagePriority, int moveMode, int moveSpeed, string interval, string messageContentCHN, string fontTypeCHN, int fontSizeCHN, string fontColorCHN, string messageContentENG, string fontTypeENG, int fontSizeENG, string fontColorENG)
+        public static void UpdateInstantMessages(Guid messageID, int messageType, int messagePriority, int moveMode, int moveSpeed, string interval, string messageContentCHN, string fontTypeCHN, int fontSizeCHN, string fontColorCHN, string messageContentENG, string fontTypeENG, int fontSizeENG, string fontColorENG, int playCount = 3)
         {
             Update(messageID, messageType, messagePriority, moveMode, moveSpeed, interval
                 , messageContentCHN, fontTypeCHN, fontSizeCHN, fontColorCHN
-                , messageContentENG, fontTypeENG, fontSizeENG, fontColorENG);
+                , messageContentENG, fontTypeENG, fontSizeENG, fontColorENG, playCount);
         }
         public static void DeleteInstantMessages(Guid messageID)
         {

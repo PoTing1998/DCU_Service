@@ -252,7 +252,7 @@ namespace ASI.Wanda.DCU.TaskCDU
         }
 
         /// <summary>
-        /// 處理即時訊息的發送邏輯。   
+        /// 處理即時訊息的發送邏輯，依 play_count 重複傳送（預設 3 次）。
         /// </summary>
         private DisplayMessageResult SendInstantMessage(string matchedDevice, Guid messageId)
         {
@@ -268,7 +268,12 @@ namespace ASI.Wanda.DCU.TaskCDU
                 var DUID = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDs(matchedDevice);
                 var packet = CreatePacket(_mDU_ID, instantSequence);
 
-                result.DataByte = SerializeAndSendPacket(packet);
+                int playCount = messageLayout.play_count > 0 ? messageLayout.play_count : 3;
+                for (int i = 0; i < playCount; i++)
+                {
+                    result.DataByte = SerializeAndSendPacket(packet);
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"即時訊息傳送 {i + 1}/{playCount}");
+                }
                 result.Result = "成功傳送";
             }
             catch (Exception ex)

@@ -44,6 +44,9 @@ namespace UITest.Controls
         private static readonly string SettingsPath =
             Path.Combine(Application.StartupPath, "display_settings.xml");
 
+        // 即時訊息播放次數（預設 3 次）
+        private int _instantMsgPlayCount = 3;
+
         // 板型 RadioButton 陣列快取（初始化後不再變動）
         private RadioButton[] _upBoardRadios;
         private RadioButton[] _dnBoardRadios;
@@ -546,20 +549,27 @@ namespace UITest.Controls
                 }
                 else
                 {
-                    // ── 單訊息模式 ──
+                    // ── 單訊息模式（即時訊息，依 _instantMsgPlayCount 重複傳送）──
                     var result = _service.Build(BuildUpParams(ids));
                     if (result.IsValid)
                     {
-                        mon.Log(Services.ConnectionMonitor.LogLevel.Send, "DisplayMsg",
-                            $"上行 → IDs:{string.Join(",", ids.ConvertAll(b => $"{b:X2}"))}  " +
-                            $"模式:{mon.CurrentMode}  HEX:{result.HexDump}");
-                        if (!SendAction(result.Value))
+                        bool anyFail = false;
+                        for (int pi = 0; pi < _instantMsgPlayCount; pi++)
                         {
-                            mon.Log(Services.ConnectionMonitor.LogLevel.Error, "DisplayMsg", "上行傳送失敗");
-                            errors.AppendLine("上行：傳送失敗（串列埠未開啟）。");
+                            mon.Log(Services.ConnectionMonitor.LogLevel.Send, "DisplayMsg",
+                                $"上行[{pi + 1}/{_instantMsgPlayCount}] → IDs:{string.Join(",", ids.ConvertAll(b => $"{b:X2}"))}  " +
+                                $"模式:{mon.CurrentMode}  HEX:{result.HexDump}");
+                            if (!SendAction(result.Value))
+                            {
+                                mon.Log(Services.ConnectionMonitor.LogLevel.Error, "DisplayMsg", "上行傳送失敗");
+                                errors.AppendLine("上行：傳送失敗（串列埠未開啟）。");
+                                anyFail = true;
+                                break;
+                            }
                         }
-                        else
-                            mon.Log(Services.ConnectionMonitor.LogLevel.Recv, "DisplayMsg", "上行傳送成功");
+                        if (!anyFail)
+                            mon.Log(Services.ConnectionMonitor.LogLevel.Recv, "DisplayMsg",
+                                $"上行傳送完成（共 {_instantMsgPlayCount} 次）");
                     }
                     else
                     {
@@ -614,22 +624,29 @@ namespace UITest.Controls
                 }
                 else
                 {
-                    // ── 單訊息模式 ──
+                    // ── 單訊息模式（即時訊息，依 _instantMsgPlayCount 重複傳送）──
                     var result = GetMessageType(false) == 0x83
                         ? BuildDnTrain83Packet(ids)
                         : _service.Build(BuildDnParams(ids));
                     if (result.IsValid)
                     {
-                        mon.Log(Services.ConnectionMonitor.LogLevel.Send, "DisplayMsg",
-                            $"下行 → IDs:{string.Join(",", ids.ConvertAll(b => $"{b:X2}"))}  " +
-                            $"模式:{mon.CurrentMode}  HEX:{result.HexDump}");
-                        if (!SendAction(result.Value))
+                        bool anyFail = false;
+                        for (int pi = 0; pi < _instantMsgPlayCount; pi++)
                         {
-                            mon.Log(Services.ConnectionMonitor.LogLevel.Error, "DisplayMsg", "下行傳送失敗");
-                            errors.AppendLine("下行：傳送失敗（串列埠未開啟）。");
+                            mon.Log(Services.ConnectionMonitor.LogLevel.Send, "DisplayMsg",
+                                $"下行[{pi + 1}/{_instantMsgPlayCount}] → IDs:{string.Join(",", ids.ConvertAll(b => $"{b:X2}"))}  " +
+                                $"模式:{mon.CurrentMode}  HEX:{result.HexDump}");
+                            if (!SendAction(result.Value))
+                            {
+                                mon.Log(Services.ConnectionMonitor.LogLevel.Error, "DisplayMsg", "下行傳送失敗");
+                                errors.AppendLine("下行：傳送失敗（串列埠未開啟）。");
+                                anyFail = true;
+                                break;
+                            }
                         }
-                        else
-                            mon.Log(Services.ConnectionMonitor.LogLevel.Recv, "DisplayMsg", "下行傳送成功");
+                        if (!anyFail)
+                            mon.Log(Services.ConnectionMonitor.LogLevel.Recv, "DisplayMsg",
+                                $"下行傳送完成（共 {_instantMsgPlayCount} 次）");
                     }
                     else
                     {
@@ -1316,6 +1333,8 @@ namespace UITest.Controls
                 DnTrain83ImgStart   = System.Array.ConvertAll(_nudDnTrain83ImgStart,   n => (int)n.Value),
                 DnTrain83ImgEnd     = System.Array.ConvertAll(_nudDnTrain83ImgEnd,     n => (int)n.Value),
                 DnTrain83ClrIndex   = _cmbDnTrain83Clr.SelectedIndex,
+                // 即時訊息播放次數
+                InstantMsgPlayCount = _instantMsgPlayCount,
             };
 
             var serializer = new XmlSerializer(typeof(DisplayMessageSettings));
@@ -1414,6 +1433,8 @@ namespace UITest.Controls
                         _nudDnTrain83ImgEnd[r].Value   = Clamp(s.DnTrain83ImgEnd[r],   _nudDnTrain83ImgEnd[r]);
                 }
                 SetComboIndex(_cmbDnTrain83Clr, s.DnTrain83ClrIndex);
+                // 即時訊息播放次數
+                _instantMsgPlayCount = s.InstantMsgPlayCount > 0 ? s.InstantMsgPlayCount : 3;
             }
             catch
             {

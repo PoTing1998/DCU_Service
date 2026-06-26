@@ -64,7 +64,6 @@ namespace ASI.Wanda.DMD.TaskDMD
         {
             try
             {
-                var sendPreRecordMessage = new JsonObject.DCU.FromDMD.SendPreRecordMessage(Enum.Station.OCC);
                 var MSGFromTaskCDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskcdu"));
                 //組相對應的封包 
                 MSGFromTaskCDU.MessageType = msgType;

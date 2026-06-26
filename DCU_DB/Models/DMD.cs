@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ASI.Wanda.DCU.DB.Models.DMD
@@ -322,6 +322,12 @@ namespace ASI.Wanda.DCU.DB.Models.DMD
             get;
             set;
         }
+
+        /// <summary>
+        /// 即時訊息播放次數
+        /// </summary>
+        /// <remarks>預設值 3</remarks>
+        public int play_count { get; set; } = 3;
 
     }
     public class dmd_schedule_playlist
