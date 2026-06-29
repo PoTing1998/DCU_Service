@@ -119,8 +119,8 @@ namespace ASI.Wanda.DMD.TaskDMD
             {
                 // 從 DMD DB 抓取資料表
                 var tempList = DMD.DB.Tables.DMD.dmdPlayList.SelectAll();
-                ///轉換過程 
-                var convertedList = tempList 
+                ///轉換過程
+                var convertedList = tempList
                     .Select(item => new DB.Models.dmd_playlist
                     {
                         playlist_id = item.playlist_id,
@@ -136,15 +136,25 @@ namespace ASI.Wanda.DMD.TaskDMD
                         upd_user = item.upd_user,
                     })
                     .ToList();
-                ///刪除原本的資料 
+
+                /// FIFO 限制：每個裝置最多保留 5 則，超過則移除最舊的
+                const int MaxMessagesPerDevice = 5;
+                var limitedList = convertedList
+                    .GroupBy(item => new { item.station_id, item.area_id, item.device_id })
+                    .SelectMany(group => group
+                        .OrderByDescending(item => item.ins_time)
+                        .Take(MaxMessagesPerDevice))
+                    .ToList();
+
+                ///刪除原本的資料
                 convertedList.ForEach(item =>
                 {
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.DeletePlayingItem(
                         item.station_id, item.area_id, item.device_id);
                 });
 
-                ///遍歷轉換後的列表，進行更新操作  
-                foreach (var item in convertedList)
+                ///遍歷轉換後的列表，進行更新操作（僅插入符合限制的資料）
+                foreach (var item in limitedList)
                 {
                     ///MSGtype  0 =預錄  1= 及時 
                     ASI.Wanda.DCU.DB.Tables.DMD.dmdPlayList.InsertPlayingItem(
@@ -157,8 +167,8 @@ namespace ASI.Wanda.DMD.TaskDMD
                         item.send_time
                     );
                 }
-                ///選擇並分類同一車站的數據 
-                return convertedList.Cast<DCU.DB.Tables.DMD.dmdPlayList>();
+                ///選擇並分類同一車站的數據
+                return limitedList.Cast<DCU.DB.Tables.DMD.dmdPlayList>();
             }
             catch (Exception updateException)
             {

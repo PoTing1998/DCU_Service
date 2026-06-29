@@ -157,10 +157,9 @@ namespace ASI.Wanda.DCU.TaskCDU
         private List<DisplayMessageResult> CreateAndSendMessage(string targetDu, string dbName1, string dbName2)
         {
             var results = new List<DisplayMessageResult>();
-            var fullWindowMessages = new List<FullWindow>(); // 用於儲存所有生成的 FullWindowMessage 
             try
             {
-                // 驗證輸入參數  
+                // 驗證輸入參數
                 ValidateInput(targetDu);
 
                 string[] deviceStrings = targetDu.Split(',');
@@ -182,35 +181,49 @@ namespace ASI.Wanda.DCU.TaskCDU
                     // 專門處理即時訊息的邏輯
                     results.Add(SendInstantMessage(matchedDevice, messageIds.First()));
                 }
-                else
+                else if (dbName1 == "dmd_pre_record_message")
                 {
-                    // 批量處理預錄訊息  
-                    foreach (var messageId in messageIds)
+                    // 一則一則發送預錄訊息（最多五則）
+                    const int MaxMessages = 5;
+                    var limitedIds = messageIds.Take(MaxMessages).ToList();
+                    foreach (var messageId in limitedIds)
                     {
-                        var result = new DisplayMessageResult(); // 每個 messageId 的結果  
+                        var result = new DisplayMessageResult();
                         try
                         {
-                            if (dbName1 == "dmd_pre_record_message")
-                            {
-                                var messageLayout = GetPreRecordedMessageLayoutById(messageId);
-
-                                // 創建文字內容和完整視窗訊息  
-                                var textStringBody = CreateTextStringBody(messageLayout);//訊息內容 
-                                var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout); //版型
-
-                                // 將 FullWindowMessage 加入集合 
-                                fullWindowMessages.Add(fullWindowMessage);
-                            }
+                            var messageLayout = GetPreRecordedMessageLayoutById(messageId);
+                            var textStringBody = CreateTextStringBody(messageLayout);
+                            var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
+                            results.Add(SendSinglePreRecordMessage(matchedDevice, fullWindowMessage));
                         }
                         catch (Exception ex)
                         {
                             HandleError(ex, result);
+                            results.Add(result);
                         }
-
-                        results.Add(result);
                     }
-
-                    // 統一創建並發送 sequence 最多五則  
+                }
+                else if (dbName1 == "dmd_train_message")
+                {
+                    // 批量處理列車訊息
+                    var fullWindowMessages = new List<FullWindow>();
+                    foreach (var messageId in messageIds)
+                    {
+                        var result = new DisplayMessageResult();
+                        try
+                        {
+                            // TODO: 待決定列車訊息 layout 取得方式
+                            // var messageLayout = GetTrainMessageLayoutById(messageId);
+                            // var textStringBody = CreateTextStringBody(messageLayout);
+                            // var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
+                            // fullWindowMessages.Add(fullWindowMessage);
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleError(ex, result);
+                            results.Add(result);
+                        }
+                    }
                     if (fullWindowMessages.Any())
                     {
                         results.Add(SendBatchMessage(matchedDevice, fullWindowMessages));
@@ -284,7 +297,27 @@ namespace ASI.Wanda.DCU.TaskCDU
             return result;
         }
         /// <summary>
-        /// 處理批量訊息的發送邏輯。  
+        /// 單則預錄訊息發送邏輯，每則訊息各自建立 sequence 並分別發送。
+        /// </summary>
+        private DisplayMessageResult SendSinglePreRecordMessage(string matchedDevice, FullWindow fullWindowMessage)
+        {
+            var result = new DisplayMessageResult();
+            try
+            {
+                var sequence = CreateDisplaySequence(fullWindowMessage);
+                var packet = CreatePacket(_mDU_ID, sequence);
+                result.DataByte = SerializeAndSendPacket(packet);
+                result.Result = "成功發送訊息。";
+            }
+            catch (Exception ex)
+            {
+                HandleError(ex, result);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 處理批量訊息的發送邏輯。
         /// </summary>
         private DisplayMessageResult SendBatchMessage(string matchedDevice, List<FullWindow> fullWindowMessages)
         {
