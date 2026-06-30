@@ -21,9 +21,13 @@ namespace TaskPUP.Strategies
         {
             switch (objectName)
             {
+                case Constants.Constants.SendPreRecordMsg:
                 case Constants.Constants.SendPreRecordMessageSetting:
                 case Constants.Constants.SendInstantMsg:
                     return new DisplayMessageStrategy(procName, serial);
+
+                case Constants.Constants.SendScheduleSetting:
+                    return new ScheduleMessageStrategy(procName, serial);
 
                 case Constants.Constants.SendPowerTimeSetting:
                     return new PowerSettingStrategy(procName, serial, stationId);

@@ -165,9 +165,22 @@ namespace ASI.Wanda.DCU.TaskCDU
                                         break;
                                 }
                                 break;
+                            case ASI.Wanda.DCU.TaskCDU.Constants.SendScheduleSetting: //排程預錄訊息
+                            {
+                                var schedId   = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "sched_id");
+                                var sqlCmdStr = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "SqlCommand");
+                                var sqlCommand = (ASI.Wanda.DMD.Enum.SqlCommand)Enum.Parse(
+                                    typeof(ASI.Wanda.DMD.Enum.SqlCommand), sqlCmdStr, ignoreCase: true);
+
+                                ASI.Lib.Log.DebugLog.Log(_mProcName,
+                                    $"處理排程訊息 schedId={schedId} SqlCommand={sqlCommand}");
+
+                                taskCDUHelper.SendScheduleMessageToDisplay(schedId, sqlCommand);
+                                break;
+                            }
                             case ASI.Wanda.DCU.TaskCDU.Constants.SendPowerTimeSetting:
                                 taskCDUHelper.PowerSetting(Station_ID);
-                                break; 
+                                break;
                             case "節能模式開啟": 
                                 OpenDisplay(); 
                                 break;

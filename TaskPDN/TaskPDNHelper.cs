@@ -200,29 +200,39 @@ namespace ASI.Wanda.DCU.TaskPDN
                 var deviceInfo = GetDeviceInfo(matchedDevice);
                 var messageIds = GetPlayingItemIds(deviceInfo.Station, deviceInfo.Location, deviceInfo.DeviceWithNumber);
 
-                foreach (var messageId in messageIds)
+                if (dbName1 == "dmd_instant_message")
                 {
-                    var result = new DisplayMessageResult();
-
-                    try
+                    // TODO: 即時訊息處理（待實作 GetInstantMessageLayoutById）
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, "PDN 即時訊息處理尚未實作");
+                }
+                else if (dbName1 == "dmd_pre_record_message")
+                {
+                    // 一則一則發送預錄訊息（最多五則）
+                    const int MaxMessages = 5;
+                    foreach (var messageId in messageIds.Take(MaxMessages))
                     {
-                        var messageLayout = GetMessageLayout(messageId);
-                        var textStringBody = CreateTextStringBody(messageLayout);
-                        var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
-
-                        var sequence = CreateDisplaySequence(fullWindowMessage);
-                        var DUID = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDs(matchedDevice);
-                        var packet = CreatePacket(_mDU_ID, sequence);
-
-                        result.DataByte = SerializeAndSendPacket(packet);
-                        result.Result = "成功傳送";
+                        var result = new DisplayMessageResult();
+                        try
+                        {
+                            var messageLayout = GetMessageLayout(messageId);
+                            var textStringBody = CreateTextStringBody(messageLayout);
+                            var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
+                            var sequence = CreateDisplaySequence(fullWindowMessage);
+                            var packet = CreatePacket(_mDU_ID, sequence);
+                            result.DataByte = SerializeAndSendPacket(packet);
+                            result.Result = "成功傳送";
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleError(ex, result);
+                        }
+                        results.Add(result);
                     }
-                    catch (Exception ex)
-                    {
-                        HandleError(ex, result);
-                    }
-
-                    results.Add(result);
+                }
+                else if (dbName1 == "dmd_train_message")
+                {
+                    // TODO: 批量處理列車訊息（待決定 layout 取得方式）
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, "PDN 列車訊息批量處理尚未實作");
                 }
             }
             catch (Exception ex)
@@ -516,7 +526,64 @@ namespace ASI.Wanda.DCU.TaskPDN
             ASI.Lib.Log.DebugLog.Log(_mProcName + "顯示畫面開啟", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
         }
         /// <summary>
-        /// 顯示器的畫面關閉 
+        /// <summary>
+        /// 排程預錄訊息發送邏輯。insert/update 一則一則發（max 5），delete 清除畫面。
+        /// </summary>
+        public List<DisplayMessageResult> SendScheduleMessageToDisplay(string schedId, ASI.Wanda.DMD.Enum.SqlCommand sqlCommand)
+        {
+            var results = new List<DisplayMessageResult>();
+            try
+            {
+                if (sqlCommand == ASI.Wanda.DMD.Enum.SqlCommand.delete)
+                {
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"排程刪除，清除畫面 schedId={schedId}");
+                    PowerSettingOff();
+                    results.Add(new DisplayMessageResult { Result = "排程刪除，畫面已清除。" });
+                    return results;
+                }
+
+                var scheduleId = Guid.Parse(schedId);
+                var messageIds = ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedulePlayList
+                    .GetMessageIdsByScheduleId(scheduleId, _mDU_ID);
+
+                if (!messageIds.Any())
+                {
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"排程 {schedId} 無對應訊息");
+                    return results;
+                }
+
+                const int MaxMessages = 5;
+                foreach (var messageId in messageIds.Take(MaxMessages))
+                {
+                    var result = new DisplayMessageResult();
+                    try
+                    {
+                        var messageLayout = GetMessageLayout(messageId);
+                        var textStringBody = CreateTextStringBody(messageLayout);
+                        var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
+                        var sequence = CreateDisplaySequence(fullWindowMessage);
+                        var packet = CreatePacket(_mDU_ID, sequence);
+                        result.DataByte = SerializeAndSendPacket(packet);
+                        result.Result = "成功傳送";
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"排程訊息發送 messageId={messageId}");
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleError(ex, result);
+                    }
+                    results.Add(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                var result = new DisplayMessageResult { Result = "排程訊息發送失敗" };
+                HandleError(ex, result);
+                results.Add(result);
+            }
+            return results;
+        }
+
+        /// 顯示器的畫面關閉
         /// </summary>
         public void PowerSettingOff()
         {

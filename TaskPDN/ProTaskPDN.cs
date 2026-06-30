@@ -129,28 +129,32 @@ namespace ASI.Wanda.DCU.TaskPDN
                         string sJsonData = mSGFromTaskDMD.JsonData; 
                         string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
 
-                        string sSeatID = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
-                        string msg_id = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
-                        string dbName1 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
-                        string dbName2 = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
-                        string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
-                        List<string> targetDuList = JsonConvert.DeserializeObject<List<string>>(target_du);
-                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息，mSGFromTaskDMD:{mSGFromTaskDMD.JsonData};SeatID:{sSeatID}；MsgID:{msg_id}；target_du:{target_du}; dbName1 :{dbName1};dbName2 :{dbName2}");
                         var taskPDNHelper = new ASI.Wanda.DCU.TaskPDN.TaskPDNHelper(_mProcName, _mSerial);
-                        string result = "";
-                        if (dbName1 == "dmd_pre_record_message")
+
+                        if (sJsonObjectName == ASI.Wanda.DCU.TaskPDN.Constants.SendScheduleSetting)
                         {
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, "處理 dmd_pre_record_message");
+                            // 排程預錄訊息
+                            var schedId   = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "sched_id");
+                            var sqlCmdStr = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "SqlCommand");
+                            var sqlCommand = (ASI.Wanda.DMD.Enum.SqlCommand)Enum.Parse(
+                                typeof(ASI.Wanda.DMD.Enum.SqlCommand), sqlCmdStr, ignoreCase: true);
+                            ASI.Lib.Log.DebugLog.Log(_mProcName, $"處理排程訊息 schedId={schedId} SqlCommand={sqlCommand}");
+                            taskPDNHelper.SendScheduleMessageToDisplay(schedId, sqlCommand);
                         }
                         else
                         {
-                            //判斷收到的訊息ID  
-                            ASI.Lib.Log.DebugLog.Log(_mProcName, "處理其他訊息");
+                            // 預錄訊息 / 即時訊息
+                            string sSeatID  = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
+                            string msg_id   = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "msg_id");
+                            string dbName1  = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
+                            string dbName2  = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
+                            string target_du = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
+                            List<string> targetDuList = JsonConvert.DeserializeObject<List<string>>(target_du);
+                            ASI.Lib.Log.DebugLog.Log(_mProcName, $"收到來自TaskDMD的訊息 SeatID:{sSeatID} MsgID:{msg_id} dbName1:{dbName1}");
+                            string result = "";
+                            taskPDNHelper.SendMessageToDisplay(targetDuList, dbName1, dbName2, out result);
+                            ASI.Lib.Log.DebugLog.Log(_mProcName, $"處理結果：{result}");
                         }
-
-                        byte[] SerialiazedData = new byte[] { };
-                            //傳送到面板上
-                        taskPDNHelper.SendMessageToDisplay(targetDuList, dbName1, dbName2 ,out result);
                     }
                     catch (Exception ex)
                     {

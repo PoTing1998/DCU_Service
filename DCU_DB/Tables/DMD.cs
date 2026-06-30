@@ -259,6 +259,16 @@ namespace ASI.Wanda.DCU.DB.Tables.DMD
             var temp = SelectWhere(string.Format("where station_id = '{0}' AND area_id = '{1}' AND  device_id = '{2}' ", stationID, area_id, deviceID)).SingleOrDefault();
             return temp.message_id;
         }
+
+        /// <summary>
+        /// 依排程 ID 與裝置 ID 取得所有 message_id（一則一則發送用）
+        /// </summary>
+        static public List<Guid> GetMessageIdsByScheduleId(Guid scheduleId, string deviceId)
+        {
+            var temp = SelectWhere(string.Format(
+                "where schedule_id = '{0}' AND device_id = '{1}'", scheduleId, deviceId));
+            return temp?.Select(item => item.message_id).ToList() ?? new List<Guid>();
+        }
         static public void InsertSchedulePlayListItem(Guid scheduleID, Guid messageID, string stationID, string deviceID)
         {
             Insert(

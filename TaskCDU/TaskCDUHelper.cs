@@ -317,6 +317,65 @@ namespace ASI.Wanda.DCU.TaskCDU
         }
 
         /// <summary>
+        /// 排程預錄訊息發送邏輯。
+        /// insert / update：依 schedule_id 查出 message_id，一則一則發送（最多五則）。
+        /// delete：清除畫面。
+        /// </summary>
+        public List<DisplayMessageResult> SendScheduleMessageToDisplay(string schedId, ASI.Wanda.DMD.Enum.SqlCommand sqlCommand)
+        {
+            var results = new List<DisplayMessageResult>();
+            try
+            {
+                if (sqlCommand == ASI.Wanda.DMD.Enum.SqlCommand.delete)
+                {
+                    // 排程刪除 → 清除畫面
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"排程刪除，清除畫面 schedId={schedId}");
+                    PowerSettingOff();
+                    results.Add(new DisplayMessageResult { Result = "排程刪除，畫面已清除。" });
+                    return results;
+                }
+
+                // insert / update → 取出排程內的訊息，一則一則發送
+                var scheduleId = Guid.Parse(schedId);
+                var messageIds = ASI.Wanda.DCU.DB.Tables.DMD.dmdSchedulePlayList
+                    .GetMessageIdsByScheduleId(scheduleId, _mDU_ID);
+
+                if (!messageIds.Any())
+                {
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"排程 {schedId} 無對應訊息");
+                    return results;
+                }
+
+                const int MaxMessages = 5;
+                var limitedIds = messageIds.Take(MaxMessages).ToList();
+                foreach (var messageId in limitedIds)
+                {
+                    var result = new DisplayMessageResult();
+                    try
+                    {
+                        var messageLayout = GetPreRecordedMessageLayoutById(messageId);
+                        var textStringBody = CreateTextStringBody(messageLayout);
+                        var fullWindowMessage = CreateFullWindowMessage(textStringBody, messageLayout);
+                        results.Add(SendSinglePreRecordMessage(_mDU_ID, fullWindowMessage));
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, $"排程訊息發送 messageId={messageId}");
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleError(ex, result);
+                        results.Add(result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                var result = new DisplayMessageResult { Result = "排程訊息發送失敗" };
+                HandleError(ex, result);
+                results.Add(result);
+            }
+            return results;
+        }
+
+        /// <summary>
         /// 處理批量訊息的發送邏輯。
         /// </summary>
         private DisplayMessageResult SendBatchMessage(string matchedDevice, List<FullWindow> fullWindowMessages)

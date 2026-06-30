@@ -152,7 +152,25 @@ namespace ASI.Wanda.DCU.TaskSDU
                                 break;
 
                             case ASI.Wanda.DCU.TaskSDU.Constants.SendInstantMsg: //即時訊息
+                            {
+                                string dbName1_i  = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName1");
+                                string dbName2_i  = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "dbName2");
+                                string target_du_i = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "target_du");
+                                string result_i = "";
+                                taskCDUHelper.SendMessageToDisplay(target_du_i, dbName1_i, dbName2_i, out result_i);
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, "處理即時訊息：" + result_i);
                                 break;
+                            }
+                            case ASI.Wanda.DCU.TaskSDU.Constants.SendScheduleSetting: //排程預錄訊息
+                            {
+                                var schedId   = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "sched_id");
+                                var sqlCmdStr = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "SqlCommand");
+                                var sqlCommand = (ASI.Wanda.DMD.Enum.SqlCommand)Enum.Parse(
+                                    typeof(ASI.Wanda.DMD.Enum.SqlCommand), sqlCmdStr, ignoreCase: true);
+                                ASI.Lib.Log.DebugLog.Log(_mProcName, $"處理排程訊息 schedId={schedId} SqlCommand={sqlCommand}");
+                                taskCDUHelper.SendScheduleMessageToDisplay(schedId, sqlCommand);
+                                break;
+                            }
                             case ASI.Wanda.DCU.TaskSDU.Constants.SendPowerTimeSetting:
                                 taskCDUHelper.PowerSetting(Station_ID);
                                 break;

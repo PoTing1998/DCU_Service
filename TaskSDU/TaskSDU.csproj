@@ -72,6 +72,10 @@
       <Project>{a55f3208-0803-474d-b13d-c93abc96854e}</Project>
       <Name>PA_Frame</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DMD_Frame\DMD_Frame.csproj">
+      <Project>{A169F312-D665-4361-9A74-EDD9D2E807F8}</Project>
+      <Name>DMD_Frame</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
