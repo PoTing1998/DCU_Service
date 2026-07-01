@@ -1,10 +1,26 @@
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
+using UITest.Services;
 
 namespace UITest.Controls
 {
     public partial class CommStatusControl : UserControl
     {
+        /// <summary>由 Form1 注入，實際傳送 byte[]</summary>
+        public Func<byte[], bool> SendAction { get; set; }
+
+        /// <summary>裝置名稱 → 設備 ID byte</summary>
+        private static readonly Dictionary<string, byte> DeviceIdMap = new Dictionary<string, byte>
+        {
+            { "大廳ID1",      0x01 }, { "大廳ID2",      0x02 },
+            { "大廳ID3",      0x03 }, { "大廳ID4",      0x04 },
+            { "交會站ID5",    0x05 }, { "交會站ID6",    0x06 }, { "交會站ID7",    0x07 },
+            { "上行月台ID11", 0x11 }, { "上行月台ID12", 0x12 },
+            { "上行月台ID13", 0x13 }, { "上行月台ID14", 0x14 },
+            { "下行月台ID15", 0x15 }, { "下行月台ID16", 0x16 },
+            { "下行月台ID17", 0x17 }, { "下行月台ID18", 0x18 },
+        };
         // 欄位名稱
         private static readonly string[] ColHeaders = new[]
         {
@@ -75,10 +91,55 @@ namespace UITest.Controls
 
         private void btnGet_Click(object sender, EventArgs e)
         {
-            // TODO: 向選定裝置發送查詢指令並填入版本資訊
             string selected = cmbDevice.SelectedItem?.ToString() ?? "";
-            MessageBox.Show($"查詢裝置：{selected}\n（功能待接入通訊模組）",
-                "取得版本資訊", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var mon = ConnectionMonitor.Instance;
+
+            if (SendAction == null)
+            {
+                mon.Log(ConnectionMonitor.LogLevel.Error, "CommStatus", "傳送失敗：未設定 SendAction");
+                MessageBox.Show("尚未連接串列埠。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!DeviceIdMap.TryGetValue(selected, out byte deviceId))
+            {
+                MessageBox.Show($"無法對應裝置ID：{selected}", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            byte[] packet = BuildVersionQueryPacket(deviceId);
+            mon.Log(ConnectionMonitor.LogLevel.Send, "CommStatus",
+                $"版本查詢 → {selected}(0x{deviceId:X2})  HEX: {PacketBuilderService.ToHex(packet)}");
+
+            bool ok = SendAction(packet);
+            if (!ok)
+            {
+                mon.Log(ConnectionMonitor.LogLevel.Error, "CommStatus", "傳送失敗");
+                MessageBox.Show("傳送失敗：串列埠未開啟。", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 版本查詢封包：功能碼 0x37（設備通訊更新）
+        /// TODO: 依協定規格確認正確功能碼
+        /// data = 0x00（讀取/查詢命令）
+        /// </summary>
+        private static byte[] BuildVersionQueryPacket(byte deviceId)
+        {
+            const byte funcCode = 0x37; // TODO: 確認版本查詢功能碼
+            byte[] data = new byte[] { 0x00 };
+            byte[] len  = BitConverter.GetBytes((ushort)data.Length);
+            byte   cs   = 0x00; // checksum = sum of data bytes
+
+            var result = new List<byte>();
+            result.AddRange(new byte[] { 0x55, 0xAA });
+            result.Add(0x01);       // ID_Len = 1（單一裝置）
+            result.Add(deviceId);   // 目標裝置 ID
+            result.Add(funcCode);
+            result.AddRange(len);
+            result.AddRange(data);
+            result.Add(cs);
+            return result.ToArray();
         }
 
         /// <summary>由外部更新特定裝置的欄位資料</summary>

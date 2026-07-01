@@ -31,6 +31,7 @@ namespace UITest
             sysCtrlPanel.DisplayPowerSendAction = bytes => serialSettingCtrl.SendData(bytes);
             sysCtrlPanel.AlarmLightSendAction    = bytes => serialSettingCtrl.SendData(bytes);
             sysCtrlPanel.CountdownUnitSendAction = bytes => serialSettingCtrl.SendData(bytes);
+            sysCtrlPanel.CommStatusSendAction    = bytes => serialSettingCtrl.SendData(bytes);
 
             // ── 建立 CommLogForm（懶惰初始化，不立即顯示）──────────────
             _logForm = new CommLogForm();

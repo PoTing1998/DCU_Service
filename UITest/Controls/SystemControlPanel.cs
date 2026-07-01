@@ -66,5 +66,11 @@ namespace UITest.Controls
             get => countdownUnitCtrl.SendAction;
             set => countdownUnitCtrl.SendAction = value;
         }
+
+        public Func<byte[], bool> CommStatusSendAction
+        {
+            get => commStatusCtrl.SendAction;
+            set => commStatusCtrl.SendAction = value;
+        }
     }
 }
