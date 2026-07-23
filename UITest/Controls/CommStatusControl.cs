@@ -120,16 +120,16 @@ namespace UITest.Controls
         }
 
         /// <summary>
-        /// 版本查詢封包：功能碼 0x37（設備通訊更新）
-        /// TODO: 依協定規格確認正確功能碼
-        /// data = 0x00（讀取/查詢命令）
+        /// 版本查詢封包：功能碼 0x32（DisplaySettings）
+        /// SetCommand 0x42（showMethod） + 0x03（showIDandFW）
+        /// 讓設備在螢幕上顯示自己的 ID 和 FW 版本
         /// </summary>
         private static byte[] BuildVersionQueryPacket(byte deviceId)
         {
-            const byte funcCode = 0x37; // TODO: 確認版本查詢功能碼
-            byte[] data = new byte[] { 0x00 };
+            const byte funcCode = 0x32;
+            byte[] data = new byte[] { 0x42, 0x03 }; // showMethod = showIDandFW
             byte[] len  = BitConverter.GetBytes((ushort)data.Length);
-            byte   cs   = 0x00; // checksum = sum of data bytes
+            byte   cs   = (byte)((0x42 + 0x03) & 0xFF);
 
             var result = new List<byte>();
             result.AddRange(new byte[] { 0x55, 0xAA });

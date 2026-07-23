@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using DCU_Frame;
+using TaskDU_Common.Protocol;
 
 
 namespace ASI.Wanda.DCU.TaskCDU
@@ -22,23 +23,6 @@ namespace ASI.Wanda.DCU.TaskCDU
         static string _mDU_ID = DU_ID.LG01_CDU_01.ToString();
         static bool _mFront = true;
         static bool _mBack = false;
-
-        /// <summary>
-        /// 火災相關訊息
-        /// </summary>
-        private static class FireAlarmMessages
-        {
-            public static readonly string CheckChinese = Get("FireDetectorCheckInProgressChinese");
-            public static readonly string CheckEnglish = Get("FireDetectorCheckInProgressEnglish");
-            public static readonly string EmergencyChinese = Get("FireEmergencyEvacuateCalmlyChinese");
-            public static readonly string EmergencyEnglish = Get("FireEmergencyEvacuateCalmlyEnglish");
-            public static readonly string ClearedChinese = Get("FireAlarmClearedChinese");
-            public static readonly string ClearedEnglish = Get("FireAlarmClearedEnglish");
-            public static readonly string DetectorChinese = Get("FireDetectorClearConfirmedChinese");
-            public static readonly string DetectorEnglish = Get("FireDetectorClearConfirmedEnglish");
-
-            private static string Get(string key) => ConfigApp.Instance.GetConfigSetting(key);
-        }
         #endregion
         /// <summary>
         /// 處理DMD模組執行程序所收到之訊息 
@@ -218,13 +202,18 @@ namespace ASI.Wanda.DCU.TaskCDU
                 {
                     var sJsonData = MSGFromTaskPA.JsonData;
                     ASI.Lib.Log.DebugLog.Log($"{_mProcName} 收到來自 TaskPA 的消息", sJsonData); // 記錄收到的消息
-                    // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除  
+                    // 將JSON資料轉換為位元組陣列和再轉回十六進位字串的代碼已移除
                     // 假設sJsonData已經是十六進位字串格式，直接解析
                     var sHexString = sJsonData;
-                    byte[] dataBytes = HexStringToBytes(sJsonData);
+                    byte[] dataBytes = PAMessageHandler.HexStringToBytes(sJsonData);
+
+                    var taskCDUHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(_mProcName, _mSerial);
+                    var paMessageHandler = new PAMessageHandler(_mProcName, _mSerial,
+                        (chinese, english, situation) => taskCDUHelper.SendMessageToUrgnt(chinese, english, situation));
+
                     if (dataBytes.Length >= 10) // 確保有足夠長度的陣列
                     {
-                        ProcessDataBytes(dataBytes);
+                        paMessageHandler.ProcessDataBytes(dataBytes);
                     }
                     else
                     {
@@ -232,7 +221,7 @@ namespace ASI.Wanda.DCU.TaskCDU
                     }
                     if (dataBytes.Length >= 3)
                     {
-                        ProcessByteAtIndex2(dataBytes, sRcvTime, sJsonData);
+                        paMessageHandler.ProcessByteAtIndex2(dataBytes, sRcvTime, sJsonData);
                     }
                     else
                     {
@@ -242,102 +231,10 @@ namespace ASI.Wanda.DCU.TaskCDU
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex); // 記錄例外情況  
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex); // 記錄例外情況
             }
 
             return -1;
-        }
-        /// <summary>
-        /// Convert a hexadecimal string to a byte array.
-        /// </summary>
-        /// <param name="hex">The hexadecimal string to convert.</param>
-        /// <returns>A byte array representing the hexadecimal string.</returns>
-        // 已移至 ASI.Lib.Msg.Parsing.ByteArray.HexStringToBytes()
-        public static byte[] HexStringToBytes(string hex)
-            => ASI.Lib.Msg.Parsing.ByteArray.HexStringToBytes(hex);
-        /// <summary>
-        /// 處理緊急訊息
-        /// </summary>
-        /// <param name="dataBytes"></param>
-        /// <returns></returns>
-        private void ProcessDataBytes(byte[] dataBytes)
-        {
-            byte dataByteAtIndex8 = dataBytes[8];
-            var taskUPDHelper = new ASI.Wanda.DCU.TaskCDU.TaskCDUHelper(_mProcName, _mSerial);
-            switch (dataByteAtIndex8)
-            {
-                case 0x81:
-                    taskUPDHelper.SendMessageToUrgnt(FireAlarmMessages.CheckChinese, FireAlarmMessages.CheckEnglish, 81);
-                    break;
-                case 0x82:
-                    taskUPDHelper.SendMessageToUrgnt(FireAlarmMessages.EmergencyChinese, FireAlarmMessages.EmergencyEnglish, 82);
-                    break;
-                case 0x83:
-                    taskUPDHelper.SendMessageToUrgnt(FireAlarmMessages.ClearedChinese, FireAlarmMessages.ClearedEnglish, 83);
-                    break;
-                case 0x84:
-                    taskUPDHelper.SendMessageToUrgnt(FireAlarmMessages.DetectorChinese, FireAlarmMessages.DetectorEnglish, 84);
-                    break;
-                default:
-                    ASI.Lib.Log.DebugLog.Log(_mProcName + " ", $"{_mProcName} unknown byte value at index 9: {dataByteAtIndex8.ToString("X2")}");
-                    break;
-            }
-        }
-
-        private void ProcessByteAtIndex2(byte[] dataBytes, string sRcvTime, string sJsonData)
-        {
-            byte dataByte2 = dataBytes[2];
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataByte2: ", dataByte2.ToString("X2"));
-
-            switch (dataByte2)
-            {
-                case 0x01:
-                    HandleCase01(dataBytes, sRcvTime, sJsonData);
-                    break;
-                case 0x06:
-                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} 收到來自 TaskPA 的正確消息", sJsonData);
-                    break;
-                case 0x15:
-                    HandleCase15(dataBytes, sRcvTime, sJsonData);
-                    break;
-                default:
-                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} 收到來自 PA 的未知錯誤消息", sJsonData);
-                    break;
-            }
-        }
-        private void HandleCase01(byte[] dataBytes, string sRcvTime, string sJsonData)
-        {
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} processing 0x01 case", sJsonData);
-            dataBytes[2] = 0x06;
-            Array.Resize(ref dataBytes, dataBytes.Length - 1);
-            byte newLRC = ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC(dataBytes);
-            Array.Resize(ref dataBytes, dataBytes.Length + 1);
-            dataBytes[dataBytes.Length - 1] = newLRC;
-            _mSerial.Send(dataBytes); // 回傳 ACK 給 PA 設備
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} replied to TaskPA message at {sRcvTime}", sJsonData);
-        }
-
-        private void HandleCase15(byte[] dataBytes, string sRcvTime, string sJsonData)
-        {
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} 處理 0x15 案例", sJsonData);
-            string errorLog;
-            switch (dataBytes[4])
-            {
-                case 0x01:
-                    errorLog = "表示數據包長度錯誤";
-                    break;
-                case 0x02:
-                    errorLog = "表示 LRC 錯誤";
-                    break;
-                case 0x03:
-                    errorLog = "表示其他錯誤";
-                    break;
-                default:
-                    errorLog = "表示未知錯誤";
-                    break;
-            }
-
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} 在 {sRcvTime} 收到來自 TaskPA 的錯誤消息：{errorLog}", sJsonData);
         }
 
         #endregion

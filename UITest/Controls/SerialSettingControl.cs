@@ -218,6 +218,19 @@ namespace UITest.Controls
             return ids;
         }
 
+        /// <summary>
+        /// 所有已勾選的月台 ID（ID11–ID18，不分上/下行分組）。
+        /// 上行/下行傳送共用同一份目標 ID 清單，方向只決定送到看板的
+        /// 第一行還是第二行內容（SequenceNo 0x01/0x02），與 ID 分組無關。
+        /// </summary>
+        public System.Collections.Generic.List<byte> GetSelectedAllPlatformIDs()
+        {
+            var ids = new System.Collections.Generic.List<byte>();
+            ids.AddRange(GetSelectedUpPlatformIDs());
+            ids.AddRange(GetSelectedDnPlatformIDs());
+            return ids;
+        }
+
         /// <summary>大廳 ID1–ID7</summary>
         public System.Collections.Generic.List<byte> GetSelectedLobbyIDs()
         {

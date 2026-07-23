@@ -18,8 +18,10 @@ namespace UITest
 
             // ── 顯示器板型訊息上傳 ───────────────────────────────────────
             displayMessageCtrl.SendAction       = bytes => serialSettingCtrl.SendData(bytes);
-            displayMessageCtrl.GetUpIDsFunc     = () => serialSettingCtrl.GetSelectedUpPlatformIDs();
-            displayMessageCtrl.GetDnIDsFunc     = () => serialSettingCtrl.GetSelectedDnPlatformIDs();
+            // 上行/下行傳送共用同一份勾選 ID 清單（不分上下行分組）。
+            // 方向只決定 SequenceNo（送到看板第一行/第二行），跟目標 ID 無關。
+            displayMessageCtrl.GetUpIDsFunc     = () => serialSettingCtrl.GetSelectedAllPlatformIDs();
+            displayMessageCtrl.GetDnIDsFunc     = () => serialSettingCtrl.GetSelectedAllPlatformIDs();
             displayMessageCtrl.GetLobbyIDsFunc  = () => serialSettingCtrl.GetSelectedLobbyIDs();
 
             // ── 顯示模式 / 開關機 ────────────────────────────────────────

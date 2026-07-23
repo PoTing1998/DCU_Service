@@ -1,20 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{47119529-9882-49DD-BFCF-A11EE5B5494B}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>TaskCDU</RootNamespace>
-    <AssemblyName>TaskCDU</AssemblyName>
+    <ProjectGuid>{3591A33F-FB59-434D-86F9-00DD6E4B8AA6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TaskDU_Common</RootNamespace>
+    <AssemblyName>TaskDU_Common</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -33,7 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -44,13 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TaskCDUHelper.cs" />
-    <Compile Include="ProcTaskCDU.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Constants\FireAlarmMessages.cs" />
+    <Compile Include="Protocol\PAMessageHandler.cs" />
+    <Compile Include="Models\DeviceInfo.cs" />
+    <Compile Include="Models\DisplayMessageResult.cs" />
+    <Compile Include="Helpers\TaskDUHelperBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ASILib\ASILib.csproj">
@@ -61,38 +57,10 @@
       <Project>{a6951f86-d11c-427e-b294-f3d4d34dffb3}</Project>
       <Name>DCU_DB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DCU_Frame\DCU_Frame.csproj">
-      <Project>{0f2e5e11-5e76-4b5a-9a00-5d82dd33918b}</Project>
-      <Name>DCU_Frame</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Display\Display.csproj">
       <Project>{fd5a072f-115d-4896-91d3-996ed55cdae3}</Project>
       <Name>Display</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DMD_DB\DMD_DB.csproj">
-      <Project>{26b445f9-2971-44b6-953a-8b9bf8205408}</Project>
-      <Name>DMD_DB</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DMD_Frame\DMD_Frame.csproj">
-      <Project>{a169f312-d665-4361-9a74-edd9d2e807f8}</Project>
-      <Name>DMD_Frame</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PA_Frame\PA_Frame.csproj">
-      <Project>{a55f3208-0803-474d-b13d-c93abc96854e}</Project>
-      <Name>PA_Frame</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TaskDU_Common\TaskDU_Common.csproj">
-      <Project>{3591a33f-fb59-434d-86f9-00dd6e4b8aa6}</Project>
-      <Name>TaskDU_Common</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.3</Version>
-    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>xcopy /y "$(ProjectDir)$(OutDir)*.*" "D:\ASI.Wanda.DMD.DCUService"</PostBuildEvent>
-  </PropertyGroup>
 </Project>
