@@ -23,11 +23,14 @@ namespace UITest
             this.displayMessageCtrl = new UITest.Controls.DisplayMessageControl();
             this.tabSysCtrl = new System.Windows.Forms.TabPage();
             this.sysCtrlPanel = new UITest.Controls.SystemControlPanel();
+            this.tabPA = new System.Windows.Forms.TabPage();
+            this.paTestCtrl = new UITest.Controls.PATestControl();
             this.pnlToolbar.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSerial.SuspendLayout();
             this.tabDisplayType.SuspendLayout();
             this.tabSysCtrl.SuspendLayout();
+            this.tabPA.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlToolbar
@@ -56,6 +59,7 @@ namespace UITest
             this.tabControl.Controls.Add(this.tabSerial);
             this.tabControl.Controls.Add(this.tabDisplayType);
             this.tabControl.Controls.Add(this.tabSysCtrl);
+            this.tabControl.Controls.Add(this.tabPA);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 32);
             this.tabControl.Name = "tabControl";
@@ -128,9 +132,27 @@ namespace UITest
             this.sysCtrlPanel.PreRecordSendAction = null;
             this.sysCtrlPanel.Size = new System.Drawing.Size(192, 74);
             this.sysCtrlPanel.TabIndex = 0;
-            // 
+            //
+            // tabPA
+            //
+            this.tabPA.Controls.Add(this.paTestCtrl);
+            this.tabPA.Location = new System.Drawing.Point(4, 22);
+            this.tabPA.Name = "tabPA";
+            this.tabPA.Padding = new System.Windows.Forms.Padding(5);
+            this.tabPA.Size = new System.Drawing.Size(1192, 674);
+            this.tabPA.TabIndex = 3;
+            this.tabPA.Text = "PA測試";
+            //
+            // paTestCtrl
+            //
+            this.paTestCtrl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.paTestCtrl.Location = new System.Drawing.Point(5, 5);
+            this.paTestCtrl.Name = "paTestCtrl";
+            this.paTestCtrl.Size = new System.Drawing.Size(1182, 664);
+            this.paTestCtrl.TabIndex = 0;
+            //
             // Form1
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1200, 732);
@@ -144,6 +166,7 @@ namespace UITest
             this.tabSerial.ResumeLayout(false);
             this.tabDisplayType.ResumeLayout(false);
             this.tabSysCtrl.ResumeLayout(false);
+            this.tabPA.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -154,8 +177,10 @@ namespace UITest
         private System.Windows.Forms.TabPage        tabSerial;
         private System.Windows.Forms.TabPage        tabDisplayType;
         private System.Windows.Forms.TabPage        tabSysCtrl;
+        private System.Windows.Forms.TabPage        tabPA;
         private SerialSettingControl                 serialSettingCtrl;
         private DisplayMessageControl                displayMessageCtrl;
         private SystemControlPanel                   sysCtrlPanel;
+        private PATestControl                         paTestCtrl;
     }
 }

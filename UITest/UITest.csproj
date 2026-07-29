@@ -174,6 +174,12 @@
     <Compile Include="Controls\SystemControlPanel.Designer.cs">
       <DependentUpon>SystemControlPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\PATestControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\PATestControl.Designer.cs">
+      <DependentUpon>PATestControl.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Controls\DisplayMessageControl.resx">
       <DependentUpon>DisplayMessageControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -222,6 +228,10 @@
     <ProjectReference Include="..\TaskSDU\TaskSDU.csproj">
       <Project>{34d6f4ab-dd12-47b4-8553-29b455421cb5}</Project>
       <Name>TaskSDU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PA_Frame\PA_Frame.csproj">
+      <Project>{a55f3208-0803-474d-b13d-c93abc96854e}</Project>
+      <Name>PA_Frame</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
