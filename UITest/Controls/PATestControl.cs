@@ -1,6 +1,5 @@
 using System;
 using System.IO.Ports;
-using System.Linq;
 using System.Windows.Forms;
 
 using UITest.Services;
@@ -16,17 +15,21 @@ namespace UITest.Controls
     /// 使用獨立的序列埠連線（對應 TaskPA 實際使用的 PAComPort/PABaudrate 設定），
     /// 不與「串列埠設定」分頁共用連線，可單獨對 PA 設備收送測試。
     ///
-    /// 封包內容沿用 PA_Frame.MsgPacket（cmd=0x01, station, platform, situation，
-    /// textLength 不含 LRC），是否附加 LRC 校驗位元組可由勾選框控制。
+    /// 封包組建使用 PA_Frame.Message + PA_Frame.Helper.Pack()——這是全專案唯一有把
+    /// 完整封包組出來的實作（也是 TaskPUP.PAMessage.SendBroadcastMessage 實際使用的方式），
+    /// 完整格式為：
+    ///   DLE(0x10) STX(0x02) TYP SEQ LEN [cmd station platform situation] LRC DLE(0x10) ETX(0x03)
+    /// （單純只送 MsgPacket.textMessage() 的 5 bytes 本體是不完整的封包，PA 硬體不會接受。）
     ///
     /// 回覆判讀（ACK 0x06 / NAK 0x15 及其錯誤碼）比照 TaskPA.ProcTaskPA 既有的慣例
-    /// （dataBytes[2] 為回應碼，dataBytes[4] 為 NAK 時的錯誤碼）。
+    /// （dataBytes[2] 為回應碼，dataBytes[4] 為 NAK 時的錯誤碼），與 Helper.UnPack 的位置定義一致。
     /// </summary>
     public partial class PATestControl : UserControl
     {
         private SerialPort _port;
         private bool _isOpen;
         private byte[] _lastPacket;
+        private byte _seq;
 
         public PATestControl()
         {
@@ -136,20 +139,18 @@ namespace UITest.Controls
         private byte[] BuildPacket()
         {
             var conv = new MsgPacket();
-            var pkt = new MsgPacket
+            var msg = new ASI.Wanda.PA.Message.Message(ASI.Wanda.PA.Message.Message.MessageType.msg)
             {
                 station   = conv.GetStationValue(cmbStation.SelectedItem.ToString()),
                 platform  = conv.GetPlatformFromValue(cmbPlatform.SelectedItem.ToString()),
-                situation = conv.GetSituationFromValue(cmbSituation.SelectedItem.ToString())
+                situation = conv.GetSituationFromValue(cmbSituation.SelectedItem.ToString()),
+                SEQ       = _seq++
             };
+            msg.LRC = msg.GetMsgLRC();
 
-            byte[] bytes = pkt.textMessage();
-
-            if (chkAppendLRC.Checked)
-            {
-                byte lrc = ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC(bytes);
-                bytes = bytes.Concat(new[] { lrc }).ToArray();
-            }
+            byte[] bytes = Helper.Pack(msg);
+            if (bytes == null)
+                throw new InvalidOperationException("Helper.Pack 組包失敗（回傳 null）");
 
             return bytes;
         }

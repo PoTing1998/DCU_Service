@@ -52,8 +52,14 @@ namespace ASI.Wanda.DCU.TaskPDN
             if (pLabel == MSGFinish.Label)
                 return 0;
 
-            if (pLabel == MSGFromTaskDMD.Label || pLabel == MSGFromTaskPDU.Label)
+            if (pLabel == MSGFromTaskDMD.Label)
                 return ProMsgFromDMD(pBody);
+
+            // MSGFromTaskPDU 的封包格式雖與 MSGFromTaskDMD 相同，但來源與語意不同，
+            // 不應共用 MSGFromTaskDMD 解析。目前全案沒有任何地方送出此標籤，
+            // 故在此明確忽略(與 TaskSDU 的處理方式一致)，避免誤用 DMD 的解析流程。
+            if (pLabel == MSGFromTaskPDU.Label)
+                return 0;
 
             if (pLabel == PA.ProcMsg.MSGFromTaskPA.Label)
                 return ProMsgFromPA(pBody);
@@ -116,32 +122,49 @@ namespace ASI.Wanda.DCU.TaskPDN
 
         /// <summary>
         /// 處理TaskDMD的訊息
-        /// </summary> 
+        /// </summary>
+        /// <returns>1=處理成功；0=未處理(不屬於PDN範圍)；-1=解析或處理失敗</returns>
         private int ProMsgFromDMD(string pMessage)
         {
+            int nResult = -1;
             try
             {
                 ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD mSGFromTaskDMD = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase(""));
                 if (mSGFromTaskDMD.UnPack(pMessage) > 0)
                 {
-                    try
+                    string sJsonData = mSGFromTaskDMD.JsonData; 
+                    string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
+
+                    var taskPDNHelper = new ASI.Wanda.DCU.TaskPDN.TaskPDNHelper(_mProcName, _mSerial);
+
+                    switch (sJsonObjectName)
                     {
-                        string sJsonData = mSGFromTaskDMD.JsonData; 
-                        string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-
-                        var taskPDNHelper = new ASI.Wanda.DCU.TaskPDN.TaskPDNHelper(_mProcName, _mSerial);
-
-                        if (sJsonObjectName == ASI.Wanda.DCU.TaskPDN.Constants.SendScheduleSetting)
+                        case ASI.Wanda.DCU.TaskPDN.Constants.SendScheduleSetting:
                         {
                             // 排程預錄訊息
                             var schedId   = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "sched_id");
                             var sqlCmdStr = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "SqlCommand");
-                            var sqlCommand = (ASI.Wanda.DMD.Enum.SqlCommand)Enum.Parse(
-                                typeof(ASI.Wanda.DMD.Enum.SqlCommand), sqlCmdStr, ignoreCase: true);
+
+                            // SqlCommand 由 TaskDMD 以預設設定序列化，實際傳來的是列舉的數值字串("0"/"1"/"2")。
+                            // TryParse 擋掉欄位缺漏(空字串)與無法解析的內容；
+                            // IsDefined 再擋掉 TryParse 對數值字串不檢查範圍的漏洞(例如 "99" 會回 (SqlCommand)99 而不丟例外)。
+                            ASI.Wanda.DMD.Enum.SqlCommand sqlCommand;
+                            if (!Enum.TryParse(sqlCmdStr, true, out sqlCommand) ||
+                                !Enum.IsDefined(typeof(ASI.Wanda.DMD.Enum.SqlCommand), sqlCommand))
+                            {
+                                ASI.Lib.Log.ErrorLog.Log(_mProcName,
+                                    $"排程訊息 SqlCommand 無效，略過。schedId={schedId} SqlCommand='{sqlCmdStr}'");
+                                break;
+                            }
+
                             ASI.Lib.Log.DebugLog.Log(_mProcName, $"處理排程訊息 schedId={schedId} SqlCommand={sqlCommand}");
                             taskPDNHelper.SendScheduleMessageToDisplay(schedId, sqlCommand);
+                            nResult = 1;
+                            break;
                         }
-                        else
+
+                        case ASI.Wanda.DCU.TaskPDN.Constants.SendPreRecordMsg:
+                        case ASI.Wanda.DCU.TaskPDN.Constants.SendInstantMsg:
                         {
                             // 預錄訊息 / 即時訊息
                             string sSeatID  = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "seatID");
@@ -154,20 +177,35 @@ namespace ASI.Wanda.DCU.TaskPDN
                             string result = "";
                             taskPDNHelper.SendMessageToDisplay(targetDuList, dbName1, dbName2, out result);
                             ASI.Lib.Log.DebugLog.Log(_mProcName, $"處理結果：{result}");
+                            nResult = 1;
+                            break;
+                        }
+
+                        case ASI.Wanda.DCU.TaskPDN.Constants.SendPowerTimeSetting:
+                        {
+                            // 電源時間設定
+                            ASI.Lib.Log.DebugLog.Log(_mProcName, $"處理電源時間設定 Station_ID={Station_ID}");
+                            taskPDNHelper.PowerSetting(Station_ID);
+                            nResult = 1;
+                            break;
+                        }
+
+                        default:
+                        {
+                            // 不屬於 PDN 處理範圍的訊息，僅記錄後略過，避免被誤當成發送訊息處理
+                            ASI.Lib.Log.DebugLog.Log(_mProcName, $"未處理的 JsonObjectName：{sJsonObjectName}");
+                            nResult = 0;
+                            break;
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        ASI.Lib.Log.ErrorLog.Log(_mProcName, ex.ToString());
-                    }
-
                 }
             }
             catch (Exception ex)
             {
-                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex);
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, ex.ToString());
+                nResult = -1;
             }
-            return -1;
+            return nResult;
         }
         /// <summary>
         /// 處理TaskPA的訊息

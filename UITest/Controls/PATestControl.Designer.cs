@@ -27,7 +27,7 @@ namespace UITest.Controls
             this.cmbPlatform    = new System.Windows.Forms.ComboBox();
             this.lblSituation   = new System.Windows.Forms.Label();
             this.cmbSituation   = new System.Windows.Forms.ComboBox();
-            this.chkAppendLRC   = new System.Windows.Forms.CheckBox();
+            this.lblFormatInfo  = new System.Windows.Forms.Label();
             this.btnBuild       = new System.Windows.Forms.Button();
             this.btnSend        = new System.Windows.Forms.Button();
             this.btnClear       = new System.Windows.Forms.Button();
@@ -87,7 +87,7 @@ namespace UITest.Controls
             this.grpPacket.Controls.Add(this.cmbPlatform);
             this.grpPacket.Controls.Add(this.lblSituation);
             this.grpPacket.Controls.Add(this.cmbSituation);
-            this.grpPacket.Controls.Add(this.chkAppendLRC);
+            this.grpPacket.Controls.Add(this.lblFormatInfo);
             this.grpPacket.Controls.Add(this.btnBuild);
             this.grpPacket.Controls.Add(this.btnSend);
             this.grpPacket.Controls.Add(this.btnClear);
@@ -116,10 +116,10 @@ namespace UITest.Controls
             this.cmbSituation.Size          = new System.Drawing.Size(200, 21);
             this.cmbSituation.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 
-            this.chkAppendLRC.AutoSize = true;
-            this.chkAppendLRC.Location = new System.Drawing.Point(16, 62);
-            this.chkAppendLRC.Checked  = true;
-            this.chkAppendLRC.Text     = "傳送時附加 LRC 校驗位元組";
+            this.lblFormatInfo.AutoSize  = true;
+            this.lblFormatInfo.Location  = new System.Drawing.Point(16, 62);
+            this.lblFormatInfo.ForeColor = System.Drawing.Color.DimGray;
+            this.lblFormatInfo.Text      = "封包格式：DLE STX TYP SEQ LEN [cmd 車站 月台 列車狀況] LRC DLE ETX（含完整框架，自動計算 SEQ/LRC）";
 
             this.btnBuild.Location = new System.Drawing.Point(16, 84);
             this.btnBuild.Size     = new System.Drawing.Size(90, 26);
@@ -176,7 +176,7 @@ namespace UITest.Controls
         private System.Windows.Forms.ComboBox cmbPlatform;
         private System.Windows.Forms.Label    lblSituation;
         private System.Windows.Forms.ComboBox cmbSituation;
-        private System.Windows.Forms.CheckBox chkAppendLRC;
+        private System.Windows.Forms.Label    lblFormatInfo;
         private System.Windows.Forms.Button   btnBuild;
         private System.Windows.Forms.Button   btnSend;
         private System.Windows.Forms.Button   btnClear;

@@ -41,7 +41,7 @@ namespace ASI.Wanda.DCU.TaskPA
             {
                 return 0;
             }
-            else if (pLabel == ProcMsg.MSGFromTaskPDU.Label)
+            else if (pLabel == ProcMsg.MSGFromTaskPUP.Label)
             {
                 ProMsgFromPUP(pBody);
             }
@@ -245,9 +245,23 @@ namespace ASI.Wanda.DCU.TaskPA
                     else if (mSGFromTaskDCU.MessageType == 2)
                     {
                         //DMD內部通訊定義:Change/Command
-                        string sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(mSGFromTaskDCU.JsonData, "JsonObjectName");
-                        sLog = $"sJsonObjectName = {sJsonObjectName}"; 
-                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog); 
+                        //來自 TaskPUP.PAMessage.SendBroadcastMessage 的廣播封包：
+                        //JsonData 實際上放的不是 JSON，而是已組好待送出的 PA 封包 HEX 字串，
+                        //必須轉回 byte[] 後透過序列埠實際送給 PA 硬體，否則廣播永遠送不出去。
+                        string sHexPacket = mSGFromTaskDCU.JsonData;
+                        sLog = $"收到 TaskPUP 廣播封包，HEX = {sHexPacket}";
+                        ASI.Lib.Log.DebugLog.Log(_mProcName, sLog);
+
+                        byte[] packetBytes = ASI.Lib.Msg.Parsing.ByteArray.HexStringToBytes(sHexPacket);
+                        if (packetBytes != null && packetBytes.Length > 0 && serial != null && serial.IsOpen)
+                        {
+                            serial.Send(packetBytes);
+                            ASI.Lib.Log.DebugLog.Log(_mProcName, $"已將 TaskPUP 廣播封包送至 PA 硬體：{sHexPacket}");
+                        }
+                        else
+                        {
+                            ASI.Lib.Log.ErrorLog.Log(_mProcName, $"無法送出 PA 廣播封包（序列埠未開啟或封包格式錯誤）：{sHexPacket}");
+                        }
                     }
                     else if (mSGFromTaskDCU.MessageType == 3)
                     {
