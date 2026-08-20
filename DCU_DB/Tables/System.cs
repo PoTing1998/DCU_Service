@@ -143,7 +143,7 @@ namespace ASI.Wanda.DCU.DB.Tables.System
         {
             string sSeatID = "";
             var SeatList = SelectWhere($"where pa_seat_num = '{paSeatNum}'");
-            if (SeatList != null && SeatList.Count == 0)
+            if (SeatList != null && SeatList.Count > 0)
             {
                 sSeatID = SeatList[0].seat_id;
             }
@@ -160,7 +160,7 @@ namespace ASI.Wanda.DCU.DB.Tables.System
         {
             int iPASeatNum = 0;
             var SeatList = SelectWhere($"where seat_id = '{seatID}'");
-            if (SeatList != null && SeatList.Count == 0)
+            if (SeatList != null && SeatList.Count > 0)
             {
                 iPASeatNum = SeatList[0].pa_seat_id;
             }

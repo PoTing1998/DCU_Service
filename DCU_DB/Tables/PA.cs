@@ -13,13 +13,10 @@ namespace ASI.Wanda.DCU.DB.Tables.PA
     {
         public static void UpdateContent(string message_id, string content)
         {
-            var message =
-                 SelectWhere(string.Format("where message_id = '{0}'", message_id))
-                .SingleOrDefault();
             Update(
-                message,
+                message_id,
                 content
-                ); 
+                );
         }
         public static string SelectContent(string message_id)
         {
