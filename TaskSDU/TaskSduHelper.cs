@@ -38,14 +38,64 @@ namespace ASI.Wanda.DCU.TaskSDU
 
         private string _mProcName;
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial;
-        private const string Pattern = @"LG01_SDW_SDU-5"; // 定義要篩選的模式
-        public const string _mDU_ID = "LG01_SDW_SDU-5";
+        /// <summary>
+        /// 本 Task 負責的裝置類型（SDU，例如 LG08A_SDW_SDU-5）。只比對類型，不限站別與編號：
+        /// DMD Server target_du 裡凡是符合此類型的裝置都會處理。
+        /// </summary>
+        private static readonly Regex DeviceTypeRegex = new Regex(@"^[A-Z0-9]+_[A-Z]+_SDU-\d+$");
+
+        private static string _currentDuId;
+
+        /// <summary>
+        /// 目前處理中的裝置 ID，由 DMD target_du 動態決定。
+        /// 尚未收到任何 target_du 時（例如開機後先收到電源/排程訊息），改用本機 dulist 中第一台同類型裝置。
+        /// </summary>
+        public static string _mDU_ID
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_currentDuId)) return _currentDuId;
+                try
+                {
+                    _currentDuId = ASI.Wanda.DCU.DB.Tables.DCU.dulist.SelectAll()
+                        .Select(d => d.du_id == null ? null : d.du_id.Trim())
+                        .FirstOrDefault(id => !string.IsNullOrEmpty(id) && DeviceTypeRegex.IsMatch(id));
+                }
+                catch { }
+                return _currentDuId;
+            }
+        }
+
+        /// <summary>
+        /// 從 target_du（可能是 JSON 陣列字串或逗號分隔）挑出所有符合本 Task 類型的裝置。
+        /// </summary>
+        private static List<string> MatchDevices(IEnumerable<string> targets)
+        {
+            var list = new List<string>();
+            if (targets == null) return list;
+            foreach (var t in targets)
+            {
+                if (string.IsNullOrEmpty(t)) continue;
+                foreach (var part in t.Split(new[] { ',', '[', ']', '"', ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var id = part.Trim();
+                    if (DeviceTypeRegex.IsMatch(id) && !list.Contains(id)) list.Add(id);
+                }
+            }
+            return list;
+        }
+
         static string StationID = ConfigApp.Instance.GetConfigSetting("Station_ID");
         public bool is_back = true;
         private static DeviceInfo SplitStringToDeviceInfo(string deviceString)
         {
             // 正則表達式模式
             string pattern = @"([A-Z0-9]+)_([A-Z]+)_([A-Z]+-\d+)";
+            // target_du 裡沒有本 Task 負責的裝置時 deviceString 會是 null，
+            // 以前直接丟給 Regex 會出現「值不能為 null。參數名稱: input」這種看不懂的錯誤
+            if (string.IsNullOrWhiteSpace(deviceString))
+                throw new ArgumentException("target_du 中沒有本 Task 負責類型的裝置", nameof(deviceString));
+
             Match match = Regex.Match(deviceString, pattern);
 
             if (match.Success)
@@ -83,18 +133,20 @@ namespace ASI.Wanda.DCU.TaskSDU
         /// <param name="dataByte">封包資料輸出參數。</param>
         public void SendMessageToDisplay(string targetDu, string dbName1, string dbName2, out string result)
         {
-            var results = CreateAndSendMessage(targetDu, dbName1, dbName2);
+            var results = new List<DisplayMessageResult>();
+            var devices = MatchDevices(new[] { targetDu });
+            if (devices.Count == 0)
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "target_du 中沒有本 Task 負責類型的裝置，略過。");
+            foreach (var device in devices)
+            {
+                _currentDuId = device; // 之後的封包、面板查詢都用這台
+                ASI.Lib.Log.DebugLog.Log(_mProcName, "處理裝置 " + device);
+                results.AddRange(CreateAndSendMessage(device, dbName1, dbName2));
+            }
             var successCount = results.Count(r => r.Result == "成功傳送");
 
             result = successCount > 0 ? $"成功傳送 {successCount} 筆訊息" : "傳送失敗";
-
-            foreach (var displayResult in results)
-            {
-                if (displayResult.DataByte != null)
-                {
-                    _mSerial.Send(displayResult.DataByte);
-                }
-            }
+            // 每則訊息已在 CreateAndSendMessage 內透過 SerializeAndSendPacket 送出，此處不再重送。
         }
         /// <summary>
         /// 創建並傳送顯示訊息，並回傳傳送結果與封包內容。 
@@ -117,7 +169,7 @@ namespace ASI.Wanda.DCU.TaskSDU
                 foreach (var deviceString in deviceStrings)
                 {
                     string trimmedDevice = deviceString.Trim();
-                    if (Regex.IsMatch(trimmedDevice, Pattern))
+                    if (DeviceTypeRegex.IsMatch(trimmedDevice))
                     {
                         matchedDevice = trimmedDevice;
                         break;
@@ -291,7 +343,7 @@ namespace ASI.Wanda.DCU.TaskSDU
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DU_ID, true);
 
             var processor = new PacketProcessor();
-            return processor.CreatePacket(startCode, new List<byte> { Convert.ToByte(back), Convert.ToByte(front) }, new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
+            return processor.CreatePacket(startCode, ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(back, front), new PassengerInfoHandler().FunctionCode, new List<Display.Sequence> { sequence });
         }
 
         /// <summary>
@@ -357,7 +409,7 @@ namespace ASI.Wanda.DCU.TaskSDU
                 var sequence1 = CreateSequence(FireContentChinese, 1);
                 var packet1 = processor.CreatePacket(
                     startCode,
-                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                    ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back),
                     function.FunctionCode,
                     new List<Display.Sequence> { sequence1 }
                 );
@@ -367,7 +419,7 @@ namespace ASI.Wanda.DCU.TaskSDU
                 var sequence2 = CreateSequence(FireContentEnglish, 2);
                 var packet2 = processor.CreatePacket(
                     startCode,
-                    new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                    ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back),
                     function.FunctionCode,
                     new List<Display.Sequence> { sequence2 }
                 );
@@ -497,7 +549,7 @@ namespace ASI.Wanda.DCU.TaskSDU
             var Open = new byte[] { 0x3A, 0X00 };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
-            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Open);
+            var packetOpen = processor.CreatePacketOff(startCode, ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back), function.FunctionCode, Open);
             var serializedDataOpen = processor.SerializePacket(packetOpen);
             _mSerial.Send(serializedDataOpen);
             ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
@@ -513,7 +565,7 @@ namespace ASI.Wanda.DCU.TaskSDU
             var Off = new byte[] { 0x3A, 0X01 };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
-            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Off);
+            var packetOff = processor.CreatePacketOff(startCode, ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back), function.FunctionCode, Off);
             var serializedDataOff = processor.SerializePacket(packetOff);
             _mSerial.Send(serializedDataOff);
             ASI.Lib.Log.DebugLog.Log(_mProcName + " 解除緊急訊息", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));

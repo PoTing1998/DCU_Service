@@ -3,12 +3,11 @@ using ASI.Lib.DB;
 using ASI.Lib.Log;
 using ASI.Lib.Process;
 using ASI.Wanda.DMD.ProcMsg;
-using ASI.Wanda.DMD.TaskDMD;
+using ASI.Wanda.DMD.Service;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using TaskDMD.Handlers;
 
 namespace ASI.Wanda.DCU.TaskDMD
 {
@@ -101,7 +100,7 @@ namespace ASI.Wanda.DCU.TaskDMD
                 ASI.Lib.Log.DebugLog.Log(_mProcName, "嘗試啟動 ScheduledTask...");
                 ConnToDMDServer(); // 先確保連線，mDMD_API 才有效
                 var scheduledTaskFactory = new ScheduledTask(mDMD_API);
-                _powerScheduler = scheduledTaskFactory.StartPowerSettingScheduler("LG01");
+                _powerScheduler = scheduledTaskFactory.StartPowerSettingScheduler(ConfigApp.Instance.GetConfigSetting("Station_ID")); // 站別由 Config.xml 決定
                 ASI.Lib.Log.DebugLog.Log(_mProcName, "ScheduledTask 已啟動成功.");
 
                 // 2. 初始化資料庫連線
@@ -132,45 +131,25 @@ namespace ASI.Wanda.DCU.TaskDMD
         }
 
         /// <summary>
+        /// DMD 訊息分派邏輯（與 UITest「DMD 接收」畫面共用，位於 DMD_Service 類別庫）
+        /// </summary>
+        private readonly DMDMessageProcessor _processor = new DMDMessageProcessor();
+
+        /// <summary>
         /// 從DMDServer接收訊息
         /// </summary>
         /// <param name="DMDServerMessage"></param> 
         private void DMD_API_ReceivedEvent(ASI.Wanda.DMD.Message.Message DMDServerMessage)
         {
-            string sLog = "";
             try
             {
-                var sRcvTime = System.DateTime.Now.ToString("HH:mm:ss.fff");
-                var sByteArray = ASI.Lib.Text.Parsing.String.BytesToHexString(DMDServerMessage.CompleteContent, "");
-                var sJsonData = DMDServerMessage.JsonContent;
-                var sJsonObjectName = ASI.Lib.Text.Parsing.Json.GetValue(sJsonData, "JsonObjectName");
-
-                //建立DMDHelper並將 DMD_API的send 委派  
-                var DMDHelper = new TaskDMDHelper<ASI.Wanda.DMD.DMD_API>(mDMD_API, (api, message) => api.Send(message));
-                ////判斷車站  
-                int iMsgID = DMDServerMessage.MessageID;
-
-                if (DMDServerMessage.MessageType == ASI.Wanda.DMD.Message.Message.eMessageType.Ack)
+                LastHeartbeatTime = System.DateTime.Now;
+                var helper = DMDHelper.CreateReal(msg => mDMD_API.Send(msg));
+                var result = _processor.Process(DMDServerMessage, helper);
+                if (!result.Success)
                 {
-                    HandleAckMessage(DMDServerMessage, DMDHelper);
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, result.ErrorMessage);
                 }
-                else if (DMDServerMessage.MessageType == ASI.Wanda.DMD.Message.Message.eMessageType.Command)
-                {
-                    HandleCommandMessage(DMDServerMessage, DMDHelper, sByteArray, sJsonData, sJsonObjectName, iMsgID);
-                }
-                else if (DMDServerMessage.MessageType == DMD.Message.Message.eMessageType.Response)
-                {
-                    HandleUnexpectedResponse(DMDServerMessage);
-                }
-                else if (DMDServerMessage.MessageType == DMD.Message.Message.eMessageType.trainMessage) //判斷號誌資料
-                {
-                    HandletrainMessage(DMDServerMessage, DMDHelper, sByteArray, sJsonData, sJsonObjectName);
-                }
-                else
-                {
-                    sLog = string.Format("無此種訊息類別:[{0}]", DMDServerMessage.MessageType);
-                }
-
             }
             catch (System.Exception ex)
             {
@@ -333,90 +312,6 @@ namespace ASI.Wanda.DCU.TaskDMD
             }
         }
 
-        #region 訊息處理
-        private void HandleAckMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper)
-        {
-            string sLog = string.Format("Ack，訊息識別碼:[{0}]", DMDServerMessage.MessageID);
-            DMDHelper.HandleAckMessage(DMDServerMessage);
-        }
-
-        private readonly DMDMessageHandlerFactory _handlerFactory = new DMDMessageHandlerFactory();
-        private void HandleCommandMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, 
-            TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, string sByteArray, string sJsonData, string sJsonObjectName, int iMsgID)
-        {
-            string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；識別碼:{iMsgID}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
-            ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
-            var handler = _handlerFactory.GetHandler(sJsonObjectName);
-            if (handler != null)
-            {
-                handler.Handle(DMDServerMessage, DMDHelper);
-            }
-            else if (sJsonObjectName == ASI.Wanda.DMD.TaskDMD.Constants.ParameterSetting)
-            {
-                DMDHelper.HandleAckMessage(DMDServerMessage);
-            }
-            else
-            {
-                ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"未找到處理器: {sJsonObjectName}");
-            }
-        }
-
-
-        /// <summary>
-        /// 處理號誌訊號
-        /// </summary>
-        /// <param name="DMDServerMessage"></param>
-        private void HandletrainMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage, TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, string sByteArray, string sJsonData, string sJsonObjectName)
-        {
-
-            string sLog = $"從DMD Server收到:{sByteArray}；訊息類別碼:{DMDServerMessage.MessageType}；長度:{DMDServerMessage.MessageLength}；內容:{sJsonData}；JsonObjectName:{sJsonObjectName}";
-            ASI.Lib.Log.DebugLog.Log("FromDMD_server", $"{sLog}\r\n");
-
-             var oJsonObject = (ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMSG)ASI.Wanda.DMD.Message.Helper.GetJsonObject(DMDServerMessage.JsonContent);
-
-                var TrainMSG = new DMD.JsonObject.DCU.FromDMD.TrainMSG(ASI.Wanda.DMD.Enum.Station.OCC)
-                {
-                    Type = oJsonObject.Type,
-                    Command = oJsonObject.Command,
-                    Platform_id = oJsonObject.Platform_id,
-                    Arrive_time1 = oJsonObject.Arrive_time1,
-                    Depart_time1 = oJsonObject.Depart_time1,
-                    Destination1 = oJsonObject.Destination1,
-                    Depart_time2 = oJsonObject.Depart_time2,
-                    Arrive_time2 = oJsonObject.Arrive_time2,
-                    Destination2 = oJsonObject.Destination2
-                };
-                //更新資料庫 
-                ASI.Wanda.DCU.DB.Tables.Train.trainMessage.InsertTrain_MSG(TrainMSG);
-                SendToPlatform(DMDHelper, TrainMSG);
-         
-          
-        }
-
-        private void HandleUnexpectedResponse(ASI.Wanda.DMD.Message.Message DMDServerMessage) 
-        {
-            ASI.Lib.Log.ErrorLog.Log(_mProcName, $"從DMD Server來的訊息不應有Response，MessageType:{DMDServerMessage.MessageType}");
-        }
-
-        private void SendToPlatform<T>(TaskDMDHelper<ASI.Wanda.DMD.DMD_API> DMDHelper, T messageObject)
-        {
-            try
-            {
-                var serializedMessage = new ASI.Wanda.DCU.Message.Message(
-                    ASI.Wanda.DCU.Message.Message.eMessageType.Command,
-                    0,
-                    ASI.Lib.Text.Parsing.Json.SerializeObject(messageObject)
-                );
-
-                DMDHelper.SendToTaskPUP(2, 1, serializedMessage.JsonContent);
-                DMDHelper.SendToTaskPDN(2, 1, serializedMessage.JsonContent);
-            }
-            catch (System.Exception ex)
-            {
-                ASI.Lib.Log.ErrorLog.Log("SendToPlatform", $"序列化消息時發生錯誤: {ex.Message}");
-            }
-        }
-        #endregion
 
     }
 }

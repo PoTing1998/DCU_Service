@@ -18,7 +18,7 @@ namespace ASI.Wanda.DCU.TaskSDU
         static int mSEQ = 0; // 計算累進發送端的次數  
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
         static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
-        static string _mDU_ID = DU_ID.LG01_SDU_05.ToString();
+        static string _mDU_ID => TaskSDUHelper._mDU_ID; // 動態：最近一次 DMD target_du 的裝置
         /// <summary>
         /// 火災相關訊息
         /// </summary>

@@ -1,7 +1,7 @@
 using System;
 using System.Timers;
 using System.Collections.Generic;
-using ASI.Wanda.DMD.TaskDMD;
+using ASI.Wanda.DMD.Service;
 using ASI.Wanda.DMD;
 using Display;
 using Display.Function;
@@ -228,7 +228,7 @@ public class ScheduledTask : IDisposable
 
     private void SendToTaskCDU(string message)
     {
-        var helper = new TaskDMDHelper<ASI.Wanda.DMD.DMD_API>(mDMD_API, (api, msg) => api.Send(msg));
+        var helper = DMDHelper.CreateReal(msg => mDMD_API.Send(msg));
         helper.SendToTaskCDU(2, 1, message);
     }
 

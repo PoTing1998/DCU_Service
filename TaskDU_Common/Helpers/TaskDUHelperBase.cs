@@ -61,6 +61,11 @@ namespace TaskDU_Common.Helpers
         protected static DeviceInfo SplitStringToDeviceInfo(string deviceString)
         {
             string pattern = @"([A-Z0-9]+)_([A-Z]+)_([A-Z]+-\d+)";
+            // target_du 裡沒有本 Task 負責的裝置時 deviceString 會是 null，
+            // 以前直接丟給 Regex 會出現「值不能為 null。參數名稱: input」這種看不懂的錯誤
+            if (string.IsNullOrWhiteSpace(deviceString))
+                throw new ArgumentException("target_du 中沒有本 Task 負責類型的裝置", nameof(deviceString));
+
             Match match = Regex.Match(deviceString, pattern);
 
             if (match.Success)
@@ -162,7 +167,7 @@ namespace TaskDU_Common.Helpers
             var processor = new PacketProcessor();
             return processor.CreatePacket(
                 startCode,
-                new List<byte> { Convert.ToByte(front), Convert.ToByte(back) },
+                ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back),
                 new PassengerInfoHandler().FunctionCode,
                 new List<Display.Sequence> { sequence });
         }
@@ -192,7 +197,7 @@ namespace TaskDU_Common.Helpers
             var open = new byte[] { 0x3A, 0x00 };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DuId, false);
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DuId, true);
-            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, open);
+            var packetOpen = processor.CreatePacketOff(startCode, ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back), function.FunctionCode, open);
             var serializedDataOpen = processor.SerializePacket(packetOpen);
             _mSerial.Send(serializedDataOpen);
             ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面開啟", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));
@@ -210,7 +215,7 @@ namespace TaskDU_Common.Helpers
             var off = new byte[] { 0x3A, 0x01 };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DuId, false);
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(DuId, true);
-            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, off);
+            var packetOff = processor.CreatePacketOff(startCode, ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back), function.FunctionCode, off);
             var serializedDataOff = processor.SerializePacket(packetOff);
             _mSerial.Send(serializedDataOff);
             ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));

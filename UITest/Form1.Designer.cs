@@ -25,12 +25,15 @@ namespace UITest
             this.sysCtrlPanel = new UITest.Controls.SystemControlPanel();
             this.tabPA = new System.Windows.Forms.TabPage();
             this.paTestCtrl = new UITest.Controls.PATestControl();
+            this.tabDMD = new System.Windows.Forms.TabPage();
+            this.dmdReceiveCtrl = new UITest.Controls.DMDReceiveControl();
             this.pnlToolbar.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSerial.SuspendLayout();
             this.tabDisplayType.SuspendLayout();
             this.tabSysCtrl.SuspendLayout();
             this.tabPA.SuspendLayout();
+            this.tabDMD.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlToolbar
@@ -60,6 +63,7 @@ namespace UITest
             this.tabControl.Controls.Add(this.tabDisplayType);
             this.tabControl.Controls.Add(this.tabSysCtrl);
             this.tabControl.Controls.Add(this.tabPA);
+            this.tabControl.Controls.Add(this.tabDMD);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 32);
             this.tabControl.Name = "tabControl";
@@ -151,6 +155,24 @@ namespace UITest
             this.paTestCtrl.Size = new System.Drawing.Size(1182, 664);
             this.paTestCtrl.TabIndex = 0;
             //
+            // tabDMD
+            //
+            this.tabDMD.Controls.Add(this.dmdReceiveCtrl);
+            this.tabDMD.Location = new System.Drawing.Point(4, 22);
+            this.tabDMD.Name = "tabDMD";
+            this.tabDMD.Padding = new System.Windows.Forms.Padding(5);
+            this.tabDMD.Size = new System.Drawing.Size(1192, 674);
+            this.tabDMD.TabIndex = 4;
+            this.tabDMD.Text = "DMD接收";
+            //
+            // dmdReceiveCtrl
+            //
+            this.dmdReceiveCtrl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dmdReceiveCtrl.Location = new System.Drawing.Point(5, 5);
+            this.dmdReceiveCtrl.Name = "dmdReceiveCtrl";
+            this.dmdReceiveCtrl.Size = new System.Drawing.Size(1182, 664);
+            this.dmdReceiveCtrl.TabIndex = 0;
+            //
             // Form1
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -167,6 +189,7 @@ namespace UITest
             this.tabDisplayType.ResumeLayout(false);
             this.tabSysCtrl.ResumeLayout(false);
             this.tabPA.ResumeLayout(false);
+            this.tabDMD.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -178,9 +201,11 @@ namespace UITest
         private System.Windows.Forms.TabPage        tabDisplayType;
         private System.Windows.Forms.TabPage        tabSysCtrl;
         private System.Windows.Forms.TabPage        tabPA;
+        private System.Windows.Forms.TabPage        tabDMD;
         private SerialSettingControl                 serialSettingCtrl;
         private DisplayMessageControl                displayMessageCtrl;
         private SystemControlPanel                   sysCtrlPanel;
         private PATestControl                         paTestCtrl;
+        private DMDReceiveControl                     dmdReceiveCtrl;
     }
 }

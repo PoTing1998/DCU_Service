@@ -21,7 +21,7 @@ namespace ASI.Wanda.DCU.TaskPUP
         static int mSEQ = 0; // 計算累進發送端的次數  
         ASI.Lib.Comm.SerialPort.SerialPortLib _mSerial = null;
         static string Station_ID = ConfigApp.Instance.GetConfigSetting("Station_ID");
-        static string _mDU_ID = DU_ID.LG01_PDU_17.ToString();
+        static string _mDU_ID => TaskPUPHelper._mDU_ID; // 動態：最近一次 DMD target_du 的裝置
         static bool _mFront = true;
         static bool _mBack = false;
         #endregion
@@ -273,7 +273,7 @@ namespace ASI.Wanda.DCU.TaskPUP
             var Off = new byte[] { 0x3A, 0X01 };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, _mBack);
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, _mFront);
-            var packetOff = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Off);
+            var packetOff = processor.CreatePacketOff(startCode, ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back), function.FunctionCode, Off);
             var serializedDataOff = processor.SerializePacket(packetOff);
             _mSerial.Send(serializedDataOff);
             ASI.Lib.Log.DebugLog.Log(_mProcName + " 顯示畫面關閉", "Serialized display packet: " + BitConverter.ToString(serializedDataOff));
@@ -286,7 +286,7 @@ namespace ASI.Wanda.DCU.TaskPUP
             var Open = new byte[] { 0x3A, 0X00 };
             var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, _mBack);
             var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, _mFront);
-            var packetOpen = processor.CreatePacketOff(startCode, new List<byte> { Convert.ToByte(front), Convert.ToByte(back) }, function.FunctionCode, Open);
+            var packetOpen = processor.CreatePacketOff(startCode, ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back), function.FunctionCode, Open);
             var serializedDataOpen = processor.SerializePacket(packetOpen);
             _mSerial.Send(serializedDataOpen);
             ASI.Lib.Log.DebugLog.Log(_mProcName + "顯示畫面開啟", "Serialized display packet: " + BitConverter.ToString(serializedDataOpen));

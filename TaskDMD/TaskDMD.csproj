@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -34,7 +34,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\3rd\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Messaging" />
@@ -46,16 +50,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DMDHelper.cs" />
-    <Compile Include="Handlers\DMDMessageHandlerFactory.cs" />
-    <Compile Include="Handlers\GroupSettingHandler.cs" />
-    <Compile Include="Handlers\IDMDMessageHandler.cs" />
-    <Compile Include="Handlers\PowerTimeSettingHandler.cs" />
-    <Compile Include="Handlers\PreRecordMessageSettingHandler.cs" />
-    <Compile Include="Handlers\ScheduleSettingHandler.cs" />
-    <Compile Include="Handlers\SendInstantMessageHandler.cs" />
-    <Compile Include="Handlers\SendPreRecordMessageHandler.cs" />
-    <Compile Include="Handlers\TrainMessageSettingHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProTaskDMD.cs" />
@@ -86,6 +80,10 @@
     <ProjectReference Include="..\DMD_DB\DMD_DB.csproj">
       <Project>{26b445f9-2971-44b6-953a-8b9bf8205408}</Project>
       <Name>DMD_DB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DMD_Service\DMD_Service.csproj">
+      <Project>{f413cf11-8d74-46b9-baeb-c99cb9e0de46}</Project>
+      <Name>DMD_Service</Name>
     </ProjectReference>
     <ProjectReference Include="..\DMD_Frame\DMD_Frame.csproj">
       <Project>{a169f312-d665-4361-9a74-edd9d2e807f8}</Project>

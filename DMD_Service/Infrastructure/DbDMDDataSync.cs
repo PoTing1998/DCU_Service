@@ -1,114 +1,29 @@
-﻿using ASI.Lib.Process;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ASI.Wanda.DMD.TaskDMD
+namespace ASI.Wanda.DMD.Service
 {
-
     /// <summary>
-    /// 判別傳送過來的JsonName 
+    /// 真實資料庫同步（DMD DB → DCU DB），原 TaskDMDHelper 的資料庫操作搬移至此。
+    /// 使用前需先呼叫 ASI.Wanda.DMD.DB.Manager.Initializer 與 ASI.Wanda.DCU.DB.Manager.Initializer。
     /// </summary>
-    public static class Constants
+    public class DbDMDDataSync : IDMDDataSync
     {
-        public const string SendPreRecordMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendPreRecordMessage";
-        public const string SendInstantMsg = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.SendInstantMessage";
-        public const string ScheduleSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ScheduleSetting";
-        public const string PreRecordMessageSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PreRecordMessageSetting";
-        public const string TrainMessageSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMessageSetting";
-        public const string PowerTimeSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.PowerTimeSetting";
-        public const string GroupSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.GroupSetting";
-        public const string ParameterSetting = "ASI.Wanda.DMD.JsonObject.DCU.FromDMD.ParameterSetting";
-    }
+        #region IDMDDataSync
+        void IDMDDataSync.UpdateDCUPlayList()         => UpdateDCUPlayList();
+        void IDMDDataSync.UpdateDCUPreRecordMessage() => UpdataDCUPreRecordMessage();
+        void IDMDDataSync.UpdateDCUInstantMessage()   => UpdataDCUInstantMessage();
+        void IDMDDataSync.UpdateConfig()              => UpdataConfig();
+        void IDMDDataSync.UpdateSchedule()            => UpSchedule();
+        void IDMDDataSync.UpdateSchedulePlaylist()    => UpDMDSchedulePlaylist();
+        void IDMDDataSync.UpdatePowerSetting()        => UpDateDMDPowerSetting();
+        void IDMDDataSync.UpdateTrainMessage()        => UpDateDMDTrainMessage();
+        void IDMDDataSync.UpdateGroup()               => UpDateDMDGroup();
+        void IDMDDataSync.InsertTrainMessage(ASI.Wanda.DMD.JsonObject.DCU.FromDMD.TrainMSG trainMSG)
+            => ASI.Wanda.DCU.DB.Tables.Train.trainMessage.InsertTrain_MSG(trainMSG);
+        #endregion
 
-    public class TaskDMDHelper<T> where T : class
-    {
-        private Action<T, ASI.Wanda.DMD.Message.Message> sendAction;
-        private T API;
-
-        public TaskDMDHelper(T api, Action<T, ASI.Wanda.DMD.Message.Message> sendAction)
-        {
-            API = api;
-            this.sendAction = sendAction ?? throw new ArgumentNullException(nameof(sendAction));
-        }
-        public void HandleAckMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage)
-        {
-            var sLog = $"Ack，訊息識別碼:[{DMDServerMessage.MessageID}]";
-            var MSG = new ASI.Wanda.DMD.Message.Message(ASI.Wanda.DMD.Message.Message.eMessageType.Ack, DMDServerMessage.MessageID, null);
-            ASI.Lib.Log.DebugLog.Log("FromDMDService", sLog);
-            //利用委派的方式傳送
-            sendAction?.Invoke(API, MSG);
-        }
-
-        ///傳送到內部MSG 
-        public void SendToTaskPUP(int msgType, int msgID, string jsonData) 
-        {
-            try
-            {
-                var MSGFromTaskPUP = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskpup"));
-                //組相對應的封包  
-                MSGFromTaskPUP.MessageType = msgType;
-                MSGFromTaskPUP.MessageID = msgID;
-                MSGFromTaskPUP.JsonData = jsonData;
-                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPUP);
-            }
-            catch (System.Exception ex)
-            {
-                ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex);
-            }
-        }
-        public void SendToTaskCDU(int msgType, int msgID, string jsonData)
-        {
-            try
-            {
-                var MSGFromTaskCDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskcdu"));
-                //組相對應的封包 
-                MSGFromTaskCDU.MessageType = msgType;
-                MSGFromTaskCDU.MessageID = msgID;
-                MSGFromTaskCDU.JsonData = jsonData;
-                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskCDU);
-            }
-            catch (System.Exception ex)
-            {
-                ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex);
-            }
-        }
-        public void SendToTaskSDU(int msgType, int msgID, string jsonData)
-        {
-            try
-            {
-                var MSGFromTaskSDU = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertasksdu"));
-                //組相對應的封包 
-                MSGFromTaskSDU.MessageType = msgType;
-                MSGFromTaskSDU.MessageID = msgID;
-                MSGFromTaskSDU.JsonData = jsonData;
-                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskSDU);
-            }
-            catch (System.Exception ex)
-            {
-                ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex);
-            }
-        }
-        public void SendToTaskPDN(int msgType, int msgID, string jsonData)
-        {
-            try
-            {
-                var MSGFromTaskPDN = new ASI.Wanda.DCU.ProcMsg.MSGFromTaskDMD(new MSGFrameBase("TaskDMD", "dcuservertaskpdn"));
-                //組相對應的封包 
-                MSGFromTaskPDN.MessageType = msgType;
-                MSGFromTaskPDN.MessageID = msgID;
-                MSGFromTaskPDN.JsonData = jsonData; 
-                ASI.Lib.Process.ProcMsg.SendMessage(MSGFromTaskPDN);
-            }
-            catch (System.Exception ex)
-            {
-                ASI.Lib.Log.ErrorLog.Log("TaskDMD", ex);
-            }
-        }
-        
         #region 資料庫的操作
         /// <summary>
         /// 更新dmd_playlist的資料庫 
@@ -623,9 +538,4 @@ namespace ASI.Wanda.DMD.TaskDMD
         }
         #endregion
     }
-
 }
-
-
-
-

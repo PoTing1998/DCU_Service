@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <configuration>
-	<add Key ="Station_ID" value ="LG01"/>
+	<add key="Station_ID" value ="LG01"/>
 	<add key="Host_Name" value="DCUServer" />
 	<add key="DCU_DB_IP" value="127.0.0.1" />
 	<add key="DCU_DB_Port" value="5432" />

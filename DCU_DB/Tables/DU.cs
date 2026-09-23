@@ -37,7 +37,20 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
         public static int GetPanelIDByDuAndOrientation(string du_id, bool is_back)
         {
             var data = SelectWhere(string.Format("WHERE du_id = '{0}' and is_back = '{1}'", du_id, is_back)).SingleOrDefault();
-            return data.panel_id; 
+            // 單面顯示器（例如 SDU 只有 is_back = true）沒有另一面的資料，回傳 -1 而不是丟 NullReferenceException
+            return data == null ? -1 : data.panel_id;
+        }
+
+        /// <summary>
+        /// 把正/反面的 panel_id 組成封包用的面板清單，自動略過不存在的面（-1）。
+        /// 單面顯示器只會送一個面板；兩面都不存在時丟出明確的例外。
+        /// </summary>
+        public static List<byte> ToPanelList(params int[] panelIds)
+        {
+            var list = panelIds.Where(id => id >= 0).Select(id => System.Convert.ToByte(id)).ToList();
+            if (list.Count == 0)
+                throw new System.InvalidOperationException("du_list 中找不到此顯示器的任何面板（請確認 du_id 是否與 DMD 送來的 target_du 一致）");
+            return list;
         }
     }
 
