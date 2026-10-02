@@ -74,7 +74,6 @@ public class ScheduledTask : IDisposable
         // 節能模式未開啟，保持顯示
         if (stationData.eco_mode != "ON")
         {
-            ASI.Lib.Log.DebugLog.Log(_mProcName, "節能模式關閉，始終保持播放");
             if (!isDisplayCurrentlyOn)
             {
                 OpenDisplay();
@@ -109,7 +108,6 @@ public class ScheduledTask : IDisposable
 
         if (isNonEcoDay)
         {
-            ASI.Lib.Log.DebugLog.Log(_mProcName, "今天是非節能日，始終保持播放");
             if (!isDisplayCurrentlyOn)
             {
                 OpenDisplay();

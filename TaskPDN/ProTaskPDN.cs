@@ -281,12 +281,10 @@ namespace ASI.Wanda.DCU.TaskPDN
             var temp = _mSerial.Send(serializedData);
 
             // 記錄是否發送成功
-            ASI.Lib.Log.DebugLog.Log(" 是否傳送成功 " + _mProcName, temp.ToString());
         }
         private void ProcessByteAtIndex2(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
             byte dataByte2 = dataBytes[2];
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataByte2: ", dataByte2.ToString("X2"));
 
             switch (dataByte2)
             {
@@ -294,7 +292,6 @@ namespace ASI.Wanda.DCU.TaskPDN
                     HandleCase01(dataBytes, sRcvTime, sJsonData);
                     break;
                 case 0x06:
-                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} received a correct message from TaskPA", sJsonData);
                     break;
                 case 0x15:
                     HandleCase15(dataBytes, sRcvTime, sJsonData);
@@ -306,19 +303,16 @@ namespace ASI.Wanda.DCU.TaskPDN
         }
         private void HandleCase01(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} processing 0x01 case", sJsonData);
             dataBytes[2] = 0x06;
             Array.Resize(ref dataBytes, dataBytes.Length - 1);
             byte newLRC = ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC(dataBytes);
             Array.Resize(ref dataBytes, dataBytes.Length + 1);
             dataBytes[dataBytes.Length - 1] = newLRC;
             _mSerial.Send(dataBytes); // 回傳 ACK 給 PA 設備
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} replied to TaskPA message at {sRcvTime}", sJsonData);
         }
         
         private void HandleCase15(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} processing 0x15 case", sJsonData);
             string errorLog;
             switch (dataBytes[4])
             {
@@ -362,19 +356,20 @@ namespace ASI.Wanda.DCU.TaskPDN
                 return;
             }
 
-            if (dataBytes[4] == 0x00)
+            // 狀態 0x00 = 正常，不記錄；只有異常狀態才寫 ErrorLog
+            if (dataBytes[4] != 0x00)
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName, "顯示器的狀態收到的訊息" + sHexString);
+                string sStatus;
+                switch (dataBytes[4])
+                {
+                    case 0x01: sStatus = "曾經有通訊不良"; break;
+                    case 0x02: sStatus = "處於關機狀態"; break;
+                    case 0x04: sStatus = "通訊逾時"; break;
+                    case 0x07: sStatus = "1/2/4 多重組合"; break;
+                    default:   sStatus = $"未知狀態 0x{dataBytes[4]:X2}"; break;
+                }
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"顯示器狀態異常：{sStatus}，HEX: {sHexString}");
             }
-            else
-            {
-                if      (dataBytes[4] == 0x01) ASI.Lib.Log.ErrorLog.Log(_mProcName, "曾經有通訊不良");
-                else if (dataBytes[4] == 0x02) ASI.Lib.Log.ErrorLog.Log(_mProcName, "處於關機狀態");
-                else if (dataBytes[4] == 0x04) ASI.Lib.Log.ErrorLog.Log(_mProcName, "通訊逾時");
-                else if (dataBytes[4] == 0x07) ASI.Lib.Log.ErrorLog.Log(_mProcName, "1/2/4 多重組合");
-            }
-
-            ASI.Lib.Log.DebugLog.Log(_mProcName, "從顯示器收到的訊息" + sHexString);
         }
         void SerialPort_DisconnectedEvent(string source) //斷線處理  
         {

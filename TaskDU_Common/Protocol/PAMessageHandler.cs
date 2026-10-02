@@ -69,7 +69,6 @@ namespace TaskDU_Common.Protocol
         public void ProcessByteAtIndex2(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
             byte dataByte2 = dataBytes[2];
-            ASI.Lib.Log.DebugLog.Log($"{_procName} dataByte2: ", dataByte2.ToString("X2"));
 
             switch (dataByte2)
             {
@@ -77,7 +76,6 @@ namespace TaskDU_Common.Protocol
                     HandleCase01(dataBytes, sRcvTime, sJsonData);
                     break;
                 case 0x06:
-                    ASI.Lib.Log.DebugLog.Log($"{_procName} 收到來自 TaskPA 的正確消息", sJsonData);
                     break;
                 case 0x15:
                     HandleCase15(dataBytes, sRcvTime, sJsonData);
@@ -90,19 +88,16 @@ namespace TaskDU_Common.Protocol
 
         private void HandleCase01(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
-            ASI.Lib.Log.DebugLog.Log($"{_procName} processing 0x01 case", sJsonData);
             dataBytes[2] = 0x06;
             Array.Resize(ref dataBytes, dataBytes.Length - 1);
             byte newLRC = ASI.Lib.Msg.Parsing.ByteArray.CalculateLRC(dataBytes);
             Array.Resize(ref dataBytes, dataBytes.Length + 1);
             dataBytes[dataBytes.Length - 1] = newLRC;
             _serial.Send(dataBytes); // 回傳 ACK 給 PA 設備
-            ASI.Lib.Log.DebugLog.Log($"{_procName} replied to TaskPA message at {sRcvTime}", sJsonData);
         }
 
         private void HandleCase15(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
-            ASI.Lib.Log.DebugLog.Log($"{_procName} 處理 0x15 案例", sJsonData);
             string errorLog;
             switch (dataBytes[4])
             {

@@ -105,14 +105,12 @@ namespace TaskPUP.PAMessage
         public void ProcessByteAtIndex2(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
             byte dataByte2 = dataBytes[2];
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataByte2: ", dataByte2.ToString("X2"));
             switch (dataByte2)
             {
                 case 0x01:
                     HandleCase01(dataBytes, sRcvTime, sJsonData);
                     break;
                 case 0x06:
-                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} received a correct message from TaskPA", sJsonData);
                     break;
                 case 0x15:
                     HandleCase15(dataBytes, sRcvTime, sJsonData);
@@ -124,17 +122,14 @@ namespace TaskPUP.PAMessage
         }
         public void HandleCase01(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} processing 0x01 case", sJsonData);
             dataBytes[2] = 0x06;
             Array.Resize(ref dataBytes, dataBytes.Length - 1); // Remove the last byte
             byte newLRC = CalculateLRC(dataBytes);
             Array.Resize(ref dataBytes, dataBytes.Length + 1); // Add a byte back
             dataBytes[dataBytes.Length - 1] = newLRC;
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} replied to TaskPA message at {sRcvTime}", sJsonData);
         }
         public void HandleCase15(byte[] dataBytes, string sRcvTime, string sJsonData)
         {
-            ASI.Lib.Log.DebugLog.Log($"{_mProcName} processing 0x15 case", sJsonData);
             string errorLog;
             switch (dataBytes[4])
             {

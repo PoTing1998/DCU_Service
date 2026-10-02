@@ -15,7 +15,11 @@ namespace ASI.Wanda.DCU.TaskMain
             if (aevent.UnPack(pBody) > 0)
             {
                 string astr = "Rcving from " + aevent.Frame.Source + " : " + pLabel;
-                LogFile.Log(mComputerName, _mProcName, astr);
+                // 計時器 / 心跳訊息每 30~60 秒一次，只顯示在 console，不寫入 log 檔
+                if (pLabel != MSGTimer.Label && pLabel != MSGHealth.Label)
+                {
+                    LogFile.Log(mComputerName, _mProcName, astr);
+                }
                 LogFile.Display(astr);
 
                 return base.ProcEvent(pLabel, pBody); 

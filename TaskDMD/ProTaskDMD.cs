@@ -253,13 +253,11 @@ namespace ASI.Wanda.DCU.TaskDMD
         {
             if (_isConnected)
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName, "已經成功連接 DMD Server，不需要重複連接。");
                 return;
             }
 
             if (_isConnecting)
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName, "目前正在嘗試連接 DMD Server，請稍後再試。");
                 return;
             }
 

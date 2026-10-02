@@ -116,25 +116,20 @@ namespace ASI.Wanda.DCU.TaskPA
                 if (dataBytes.Length >= 3)
                 {
                     byte dataByte2 = dataBytes[2];
-                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataByte2: ", dataByte2.ToString("X2"));
 
                     if (dataByte2 == 0x01)
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} 處理 0x01 案例", sHexString);
                         dataBytes[2] = 0x06;
                         Array.Resize(ref dataBytes, dataBytes.Length - 1); // 移除最後一個位元組
                         byte newLRC = CalculateLRC(dataBytes);
                         Array.Resize(ref dataBytes, dataBytes.Length + 1); // 再添加一個位元組
                         dataBytes[dataBytes.Length - 1] = newLRC;
-                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} 回應 TaskPA 消息於 {sRcvTime}", sHexString);
                     }
                     else if (dataByte2 == 0x06)
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} 收到 TaskPA 正確消息", sHexString);
                     }
                     else if (dataByte2 == 0x15)
                     {
-                        ASI.Lib.Log.DebugLog.Log($"{_mProcName} 處理 0x15 案例", sHexString);
                         string slog = "";
                         if (dataBytes[4] == 0x01)
                         {
@@ -158,7 +153,6 @@ namespace ASI.Wanda.DCU.TaskPA
                 else
                 {
                     ASI.Lib.Log.DebugLog.Log($"{_mProcName} dataBytes 長度小於 3", sHexString);
-                    ASI.Lib.Log.DebugLog.Log($"{_mProcName} 回應 TaskPA 消息於 {sRcvTime}", sHexString); // 記錄回應消息
                 }
 
                 var msg = new ASI.Wanda.DMD.Message.Message(ASI.Wanda.DMD.Message.Message.eMessageType.Command, 01, ASI.Lib.Text.Parsing.Json.SerializeObject(sHexString));
@@ -168,9 +162,8 @@ namespace ASI.Wanda.DCU.TaskPA
                 if (arrPacketByte != null && arrPacketByte.Length > 0)
                 {
                     serial.Send(arrPacketByte);
-                    ASI.Lib.Log.DebugLog.Log("發送到 PA 的封包內容第一次", sHexString.ToString());
                     serial.Send(arrPacketByte);
-                    ASI.Lib.Log.DebugLog.Log("發送到 PA 的封包內容第二次", sHexString.ToString());
+                    ASI.Lib.Log.DebugLog.Log(_mProcName, $"發送到 PA 的封包內容（x2）：{sHexString}");
                 }
 
                 // 發送到各個看板 

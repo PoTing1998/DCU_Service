@@ -148,8 +148,6 @@ namespace ASI.Wanda.DCU.TaskPDN
             //}
             var results = new List<DisplayMessageResult>();
             var devices = MatchDevices(targetDuList);
-            if (devices.Count == 0)
-                ASI.Lib.Log.DebugLog.Log(_mProcName, "target_du 中沒有本 Task 負責類型的裝置，略過。");
             foreach (var device in devices)
             {
                 _currentDuId = device; // 之後的封包、面板查詢都用這台
@@ -684,9 +682,7 @@ namespace ASI.Wanda.DCU.TaskPDN
         {
             try
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName + "470", colorName);
                 var ConfigDate = ASI.Wanda.DCU.DB.Tables.System.sysConfig.SelectColor(colorName);
-                ASI.Lib.Log.DebugLog.Log(_mProcName, ConfigDate.config_value.ToString());
                 return DataConversion.FromHex(ConfigDate.config_value);
             }
             catch (Exception ex)

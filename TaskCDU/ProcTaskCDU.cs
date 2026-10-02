@@ -266,19 +266,20 @@ namespace ASI.Wanda.DCU.TaskCDU
                 return;
             }
 
-            if (dataBytes[4] == 0x00)
+            // 狀態 0x00 = 正常，不記錄；只有異常狀態才寫 ErrorLog
+            if (dataBytes[4] != 0x00)
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName, "顯示器的狀態收到的訊息" + sHexString);
+                string sStatus;
+                switch (dataBytes[4])
+                {
+                    case 0x01: sStatus = "曾經有通訊不良"; break;
+                    case 0x02: sStatus = "處於關機狀態"; break;
+                    case 0x04: sStatus = "通訊逾時"; break;
+                    case 0x07: sStatus = "1/2/4 多重組合"; break;
+                    default:   sStatus = $"未知狀態 0x{dataBytes[4]:X2}"; break;
+                }
+                ASI.Lib.Log.ErrorLog.Log(_mProcName, $"顯示器狀態異常：{sStatus}，HEX: {sHexString}");
             }
-            else
-            {
-                if      (dataBytes[4] == 0x01) ASI.Lib.Log.ErrorLog.Log(_mProcName, "曾經有通訊不良");
-                else if (dataBytes[4] == 0x02) ASI.Lib.Log.ErrorLog.Log(_mProcName, "處於關機狀態");
-                else if (dataBytes[4] == 0x04) ASI.Lib.Log.ErrorLog.Log(_mProcName, "通訊逾時");
-                else if (dataBytes[4] == 0x07) ASI.Lib.Log.ErrorLog.Log(_mProcName, "1/2/4 多重組合");
-            }
-
-            ASI.Lib.Log.DebugLog.Log(_mProcName, "從顯示器收到的訊息" + sHexString);
         }
 
 

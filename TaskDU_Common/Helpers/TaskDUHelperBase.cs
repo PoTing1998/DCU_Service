@@ -266,7 +266,6 @@ namespace TaskDU_Common.Helpers
 
             if (isNonEcoDay)
             {
-                ASI.Lib.Log.DebugLog.Log(_mProcName, "今天是非節能日，不執行節能排程");
                 return null;
             }
 

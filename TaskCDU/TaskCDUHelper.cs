@@ -110,8 +110,6 @@ namespace ASI.Wanda.DCU.TaskCDU
         {
             var results = new List<DisplayMessageResult>();
             var devices = MatchDevices(new[] { targetDu });
-            if (devices.Count == 0)
-                ASI.Lib.Log.DebugLog.Log(_mProcName, "target_du 中沒有本 Task 負責類型的裝置，略過。");
             foreach (var device in devices)
             {
                 _currentDuId = device; // 之後的封包、面板查詢都用這台

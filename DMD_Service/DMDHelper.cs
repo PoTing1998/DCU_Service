@@ -42,7 +42,6 @@ namespace ASI.Wanda.DMD.Service
         public void HandleAckMessage(ASI.Wanda.DMD.Message.Message DMDServerMessage)
         {
             var MSG = new ASI.Wanda.DMD.Message.Message(ASI.Wanda.DMD.Message.Message.eMessageType.Ack, DMDServerMessage.MessageID, null);
-            ASI.Lib.Log.DebugLog.Log("FromDMDService", $"Ack，訊息識別碼:[{DMDServerMessage.MessageID}]");
             Log($"[DMD] 回覆 Ack，識別碼:{DMDServerMessage.MessageID}");
             _outbound.SendToDMD(MSG);
         }
