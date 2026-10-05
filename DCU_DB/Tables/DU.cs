@@ -47,9 +47,27 @@ namespace ASI.Wanda.DCU.DB.Tables.DCU
         /// </summary>
         public static List<byte> ToPanelList(params int[] panelIds)
         {
-            var list = panelIds.Where(id => id >= 0).Select(id => System.Convert.ToByte(id)).ToList();
+            var list = panelIds.Where(id => id >= 0).Select(id => global::System.Convert.ToByte(id)).ToList();
             if (list.Count == 0)
-                throw new System.InvalidOperationException("du_list 中找不到此顯示器的任何面板（請確認 du_id 是否與 DMD 送來的 target_du 一致）");
+                throw new global::System.InvalidOperationException("du_list 中找不到此顯示器的任何面板（請確認 du_id 是否與 DMD 送來的 target_du 一致）");
+            return list;
+        }
+
+        /// <summary>
+        /// 取得某車站所有顯示器的面板 ID（du_id 以車站代碼開頭，例如 LG01_CCS_CDU-1）。
+        /// 供 TaskDMD 節能排程這類「整站」的開關顯示器使用。
+        /// </summary>
+        public static List<byte> GetPanelIDsByStation(string station_id)
+        {
+            var list = SelectWhere("WHERE du_id LIKE @pattern", param: new { pattern = station_id + "%" })
+                .Select(d => d.panel_id)
+                .Where(id => id >= 0)
+                .Distinct()
+                .OrderBy(id => id)
+                .Select(id => global::System.Convert.ToByte(id))
+                .ToList();
+            if (list.Count == 0)
+                throw new global::System.InvalidOperationException($"du_list 中找不到車站 {station_id} 的任何面板（請確認 du_id 是否以車站代碼開頭）");
             return list;
         }
     }

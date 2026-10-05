@@ -13,6 +13,7 @@ public class ScheduledTask : IDisposable
     public const string _mProcName = "ScheduledTask";
     private readonly ASI.Wanda.DMD.DMD_API mDMD_API;
     private bool isDisplayCurrentlyOn = false;
+    private string _stationID; // 由 PowerSetting 帶入；未設定時改讀 Config 的 Station_ID
 
     /// <summary>
     /// 供排程使用的建構子，需傳入有效的 DMD_API
@@ -62,6 +63,7 @@ public class ScheduledTask : IDisposable
     /// </summary>
     public void PowerSetting(string stationID)
     {
+        _stationID = stationID;
         var stationData = ASI.Wanda.DCU.DB.Tables.DMD.dmdPowerSetting.SelectPowerSetting(stationID);
         if (stationData == null)
         {
@@ -204,7 +206,10 @@ public class ScheduledTask : IDisposable
         var processor  = new PacketProcessor();
         var function   = new PowerControlHandler();
         var startCode  = new byte[] { 0x55, 0xAA };
-        var ids        = new List<byte> { 0x11, 0x12 };
+        var stationID  = string.IsNullOrEmpty(_stationID)
+            ? ASI.Lib.Config.ConfigApp.Instance.GetConfigSetting("Station_ID")
+            : _stationID;
+        var ids        = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDsByStation(stationID); // 從 du_list 查該站所有面板
         var payload    = new byte[] { 0x3A, isOn ? (byte)0x00 : (byte)0x01 };
 
         var packet = processor.CreatePacketOff(startCode, ids, function.FunctionCode, payload);

@@ -385,56 +385,66 @@ namespace ASI.Wanda.DCU.TaskSDU
         }
 
 
+        // 每收到一則火警訊息就 +1；解除後延遲關閉前會比對，避免 10 秒內又來新警報卻被關掉
+        private static int s_urgentGeneration = 0;
+
         /// <summary>
-        /// 緊急訊息  
-        /// </summary> 
+        /// 播放火警緊急訊息（內容來自 Config 的 FireAlarmMessages）。
+        /// 播放次數：Urgent.PlayCount = 0xFF（無限播放），直到收到解除訊息為止。
+        /// situation 81/82：警報，持續播放。
+        /// situation 83/84：解除，播放解除訊息 10 秒後送出關閉緊急訊息指令。
+        /// </summary>
         public Tuple<byte[], byte[], byte[]> SendMessageToUrgnt(string FireContentChinese, string FireContentEnglish, int situation)
         {
             byte[] serializedDataChinese = new byte[] { };
             byte[] serializedDataEnglish = new byte[] { };
-            byte[] serializedDataOff = new byte[] { }; // 新增存放關閉訊息的序列化數據
+            byte[] serializedDataOff = new byte[] { };
 
             try
             {
-                // 設定警示的固定內容
                 var processor = new PacketProcessor();
                 var startCode = new byte[] { 0x55, 0xAA };
                 var function = new EmergencyMessagePlaybackHandler();
                 var front = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, false);
                 var back = ASI.Wanda.DCU.DB.Tables.DCU.dulist.GetPanelIDByDuAndOrientation(_mDU_ID, true);
-
-                // 序列化中文訊息
-                var sequence1 = CreateSequence(FireContentChinese, 1);
-                var packet1 = processor.CreatePacket(
-                    startCode,
-                    ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back),
-                    function.FunctionCode,
-                    new List<Display.Sequence> { sequence1 }
-                );
+                var panelIds = ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back);
+                // 中文（上行）
+                var packet1 = processor.CreatePacket(startCode, panelIds, function.FunctionCode,
+                    new List<Display.Sequence> { CreateSequence(FireContentChinese, 1) });
                 serializedDataChinese = processor.SerializePacket(packet1);
 
-                // 序列化英文訊息
-                var sequence2 = CreateSequence(FireContentEnglish, 2);
-                var packet2 = processor.CreatePacket(
-                    startCode,
-                    ASI.Wanda.DCU.DB.Tables.DCU.dulist.ToPanelList(front, back),
-                    function.FunctionCode,
-                    new List<Display.Sequence> { sequence2 }
-                );
+                // 英文（下行）
+                var packet2 = processor.CreatePacket(startCode, panelIds, function.FunctionCode,
+                    new List<Display.Sequence> { CreateSequence(FireContentEnglish, 2) });
                 serializedDataEnglish = processor.SerializePacket(packet2);
 
-                // 如果情境為 84，執行延遲並關閉
-                if (situation == 84)
+                // 關閉緊急訊息指令（解除時使用）
+                serializedDataOff = processor.SerializePacket(
+                    processor.CreatePacketOff(startCode, panelIds, function.FunctionCode, new byte[] { 0x02 }));
+
+                int generation = System.Threading.Interlocked.Increment(ref s_urgentGeneration);
+
+                _mSerial.Send(serializedDataChinese);
+                _mSerial.Send(serializedDataEnglish);
+                ASI.Lib.Log.DebugLog.Log(_mProcName, $"火警緊急訊息播放（{situation}，無限次）：{FireContentChinese} / {FireContentEnglish}");
+
+                bool isClear = situation == 83 || situation == 84;
+                if (isClear)
                 {
-                    System.Threading.Thread.Sleep(10000); // 同步延遲十秒
-                    var OffMode = new byte[] { 0x02 };
-                    var packetOff = processor.CreatePacketOff(
-                        startCode,
-                        new List<byte> { 0x11, 0x12 },
-                        function.FunctionCode,
-                        OffMode
-                    );
-                    serializedDataOff = processor.SerializePacket(packetOff);
+                    var serial = _mSerial;
+                    var offBytes = serializedDataOff;
+                    var procName = _mProcName;
+                    System.Threading.Tasks.Task.Run(() =>
+                    {
+                        System.Threading.Thread.Sleep(10000);
+                        if (System.Threading.Volatile.Read(ref s_urgentGeneration) != generation)
+                        {
+                            ASI.Lib.Log.DebugLog.Log(procName, "解除後 10 秒內收到新的火警訊息，取消關閉");
+                            return;
+                        }
+                        serial.Send(offBytes);
+                        ASI.Lib.Log.DebugLog.Log(procName, $"火警解除（{situation}），已關閉緊急訊息");
+                    });
                 }
             }
             catch (Exception ex)
@@ -442,7 +452,6 @@ namespace ASI.Wanda.DCU.TaskSDU
                 ASI.Lib.Log.ErrorLog.Log("SendMessageToUrgnt", ex);
             }
 
-            // 返回中文、英文和關閉訊息的序列化數據
             return Tuple.Create(serializedDataChinese, serializedDataEnglish, serializedDataOff);
         }
 
@@ -464,6 +473,8 @@ namespace ASI.Wanda.DCU.TaskSDU
             };
             var urgentMessage = new Urgent // Display version  
             {
+                PlayCountCommand = 0x80, // 播放次數指令
+                PlayCount = 0xFF,        // 0xFF = 無限播放，直到收到解除（關閉）指令
                 UrgntMessageType = 0x79, // message
                 MessageType = 0x71,
                 MessageLevel = 0x01, // level
